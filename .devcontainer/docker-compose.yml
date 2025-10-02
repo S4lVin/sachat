@@ -2,7 +2,7 @@ services:
   devcontainer:
     image: mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm
     volumes:
-      - ../..:/workspace:cached
+      - ../..:/workspaces:cached
     network_mode: service:database
     command: sleep infinity
   database:
