@@ -1,11 +1,11 @@
 import express from 'express'
-import logger from './middlewares/logger.js'
-import chatsRouter from './routers/chats.router.js'
-import completionsRouter from './routers/completions.router.js'
+import { logger } from '#middlewares'
+import { chatsRouter, completionsRouter } from '#routers'
 
 const app = express()
 const port = 3000
 
+app.use(express.json())
 app.use(logger)
 
 app.get('/', (req, res) => {

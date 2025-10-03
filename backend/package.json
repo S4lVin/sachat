@@ -6,7 +6,15 @@
   "scripts": {
     "dev": "nodemon src/main.js"
   },
+  "imports": {
+    "#prisma": "./generated/prisma/index.js",
+    "#routers": "./src/routes/index.js",
+    "#controllers": "./src/controllers/index.js",
+    "#services": "./src/services/index.js",
+    "#middlewares": "./src/middlewares/index.js"
+  },
   "dependencies": {
+    "@prisma/client": "^6.16.3",
     "express": "^5.1.0",
     "nodemon": "^3.1.10"
   }

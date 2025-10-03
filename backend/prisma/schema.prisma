@@ -13,3 +13,26 @@ datasource db {
   provider = "postgresql"
   url      = "postgresql://user:password@database:5432/sachat"
 }
+
+model Chat {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  title     String 
+  messages  Message[]
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sender    Sender
+  content   String
+  chatId    Int
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+}
+
+enum Sender {
+  USER
+  AI
+}
