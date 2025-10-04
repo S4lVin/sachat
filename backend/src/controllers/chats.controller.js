@@ -1,26 +1,19 @@
 import { PrismaClient } from '#prisma'
-import { CustomError } from '#utils'
 
 const prisma = new PrismaClient()
 
 export const chatController = {
-  getAllChats: async (req, res) => {
+  getAll: async (req, res) => {
     const chats = await prisma.chat.findMany()
     res.json({ chats })
   },
 
-  createChat: async (req, res) => {
-    const { title } = req.body
-    const newChat = await prisma.chat.create({
-      data: { title },
-    })
-    res.status(201).json(newChat)
-  },
+  get: async (req, res, next) => {
+    const { chatId } = req.params
 
-  getChat: async (req, res, next) => {
-    const { id } = req.params
     const chat = await prisma.chat.findUnique({
-      where: { id: Number(id) },
+      where: { id: Number(chatId) },
+      include: { messages: true },
     })
 
     if (!chat) {
@@ -29,22 +22,53 @@ export const chatController = {
     res.json(chat)
   },
 
-  updateChatTitle: async (req, res) => {
-    const { id } = req.params
-    const { title } = req.body
+  create: async (req, res) => {
+    const { title, messages } = req.body
+
+    const newChat = await prisma.chat.create({
+      data: {
+        title,
+        messages: {
+          create:
+            messages?.map((message) => ({
+              sender: message.sender,
+              content: message.content,
+            })) || [],
+        },
+      },
+      include: { messages: true },
+    })
+    res.status(201).json(newChat)
+  },
+
+  update: async (req, res) => {
+    const { chatId } = req.params
+    const { title, messages } = req.body
 
     const updatedChat = await prisma.chat.update({
-      where: { id: Number(id) },
-      data: { title },
+      where: { id: Number(chatId) },
+      data: {
+        title,
+        messages: messages
+          ? {
+              deleteMany: {},
+              create: messages?.map((message) => ({
+                sender: message.sender,
+                content: message.content,
+              })),
+            }
+          : undefined,
+      },
+      include: { messages: true },
     })
     res.json(updatedChat)
   },
 
-  deleteChat: async (req, res) => {
-    const { id } = req.params
+  delete: async (req, res) => {
+    const { chatId } = req.params
 
     await prisma.chat.delete({
-      where: { id: Number(id) },
+      where: { id: Number(chatId) },
     })
     res.status(204).end()
   },

@@ -1,7 +1,6 @@
 import express from 'express'
+import { completionController } from '#controllers'
 
 export const router = express.Router()
 
-router.post('/', (req, res) => {
-  res.send('Create a new completion')
-})
+router.post('/', completionController.create)

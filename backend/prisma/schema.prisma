@@ -26,13 +26,8 @@ model Message {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  sender    Sender
+  sender    String
   content   String
   chatId    Int
   chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
-}
-
-enum Sender {
-  USER
-  AI
 }

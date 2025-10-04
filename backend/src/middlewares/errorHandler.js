@@ -51,9 +51,10 @@ export const errorHandler = (error, req, res, next) => {
     return
   }
 
+  console.error(error)
+
   // Caso 1: CustomError
   if (isCustomError(error)) {
-    console.error(error)
     return res.status(error.statusCode).json({
       error: { message: error.message },
     })
@@ -63,7 +64,6 @@ export const errorHandler = (error, req, res, next) => {
   if (isPrismaError(error)) {
     const statusCode = getPrismaStatusCode(error.code)
     const message = getReasonPhrase(statusCode) || 'Database error'
-    console.error(error)
     return res.status(statusCode).json({
       error: { message },
     })
@@ -73,7 +73,6 @@ export const errorHandler = (error, req, res, next) => {
   const statusCode = getValidStatusCode(error) || 500
   const message = getReasonPhrase(statusCode) || 'An error occurred'
 
-  console.error(error)
   res.status(statusCode).json({
     error: { message },
   })

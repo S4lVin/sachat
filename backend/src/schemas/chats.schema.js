@@ -1,15 +1,14 @@
 import Joi from 'joi'
+import { messageSchemas } from './messages.schema.js'
 
-const messageSchema = Joi.object({
-  sender: Joi.string().valid('user', 'ai').required(),
-  content: Joi.string().min(1).required(),
-})
+export const chatSchemas = {
+  create: Joi.object({
+    title: Joi.string().min(1).required(),
+    messages: Joi.array().items(messageSchemas.create).required(),
+  }),
 
-export const createChatSchema = Joi.object({
-  title: Joi.string().min(1).required(),
-  messages: Joi.array().items(messageSchema).required(),
-})
-
-export const updateChatTitleSchema = Joi.object({
-  title: Joi.string().min(1).required(),
-})
+  update: Joi.object({
+    title: Joi.string().min(1).optional(),
+    messages: Joi.array().items(messageSchemas.create).optional(),
+  }),
+}
