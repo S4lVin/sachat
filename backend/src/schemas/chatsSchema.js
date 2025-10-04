@@ -1,5 +1,5 @@
 import Joi from 'joi'
-import { messageSchemas } from './messages.schema.js'
+import { messageSchemas } from './messagesSchema.js'
 
 export const chatSchemas = {
   create: Joi.object({

@@ -1,3 +1,3 @@
-export { chatController } from './chats.controller.js'
-export { messageController } from './messages.controller.js'
-export { completionController } from './completions.controller.js'
+export { chatController } from './chatsController.js'
+export { messageController } from './messagesController.js'
+export { completionController } from './completionsController.js'

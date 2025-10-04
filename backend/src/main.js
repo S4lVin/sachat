@@ -1,6 +1,6 @@
 import express from 'express'
 import { logger, errorHandler } from '#middlewares'
-import { chatsRouter, completionsRouter } from '#routers'
+import { authRouter, chatsRouter, completionsRouter } from '#routers'
 
 const app = express()
 const port = process.env.PORT
@@ -12,6 +12,7 @@ app.listen(port, () => {
 app.use(express.json())
 app.use(logger)
 
+app.use('/auth', authRouter)
 app.use('/api/chats', chatsRouter)
 app.use('/api/completions', completionsRouter)
 

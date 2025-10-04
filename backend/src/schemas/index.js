@@ -1,2 +1,2 @@
-export { chatSchemas } from './chats.schema.js'
-export { messageSchemas } from './messages.schema.js'
+export { chatSchemas } from './chatsSchema.js'
+export { messageSchemas } from './messagesSchema.js'
