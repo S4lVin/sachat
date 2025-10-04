@@ -1,1 +1,1 @@
-export { chatController } from "./chats.controller.js";
+export { chatController } from './chats.controller.js'
