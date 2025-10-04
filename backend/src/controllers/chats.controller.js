@@ -24,18 +24,18 @@ export const chatController = {
     })
 
     if (!chat) {
-      return next(new CustomError('Chat not found', 404))
+      throw Object.assign(new Error(), { statusCode: 404 })
     }
     res.json(chat)
   },
 
-  updateChat: async (req, res) => {
+  updateChatTitle: async (req, res) => {
     const { id } = req.params
-    const { title, messages } = req.body
+    const { title } = req.body
 
     const updatedChat = await prisma.chat.update({
       where: { id: Number(id) },
-      data: { title, messages },
+      data: { title },
     })
     res.json(updatedChat)
   },

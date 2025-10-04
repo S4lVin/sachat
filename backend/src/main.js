@@ -1,13 +1,12 @@
 import express from 'express'
-import { config } from '#config'
-import { CustomError } from '#utils'
 import { logger, errorHandler } from '#middlewares'
 import { chatsRouter, completionsRouter } from '#routers'
 
 const app = express()
+const port = process.env.PORT
 
-app.listen(config.port, () => {
-  console.log(`SaChat backend operative\n\nPort ${config.port}\nEnvironment: ${config.env}`)
+app.listen(port, () => {
+  console.log(`SaChat backend operative\n\nPort ${port}\nEnvironment: ${process.env.NODE_ENV}`)
 })
 
 app.use(express.json())
@@ -16,9 +15,8 @@ app.use(logger)
 app.use('/api/chats', chatsRouter)
 app.use('/api/completions', completionsRouter)
 
-app.use((req, res, next) => {
-  const error = new CustomError('Endpoint not found', 404)
-  next(error)
+app.use(() => {
+  throw Object.assign(new Error(), { statusCode: 404 })
 })
 
 app.use(errorHandler)

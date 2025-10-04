@@ -8,16 +8,18 @@
   },
   "imports": {
     "#prisma": "./generated/prisma/index.js",
-    "#config": "./src/config.js",
     "#routers": "./src/routes/index.js",
     "#controllers": "./src/controllers/index.js",
     "#services": "./src/services/index.js",
+    "#schemas": "./src/schemas/index.js",
     "#middlewares": "./src/middlewares/index.js",
     "#utils": "./src/utils.js"
   },
   "dependencies": {
     "@prisma/client": "^6.16.3",
     "express": "^5.1.0",
+    "http-status-codes": "^2.3.0",
+    "joi": "^18.0.1",
     "nodemon": "^3.1.10"
   },
   "devDependencies": {

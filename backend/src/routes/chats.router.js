@@ -1,13 +1,15 @@
 import express from 'express'
+import { validator } from '#middlewares'
 import { chatController } from '#controllers'
+import { createChatSchema, updateChatTitleSchema } from '#schemas'
 
 export const router = express.Router()
 
 router.get('/', chatController.getAllChats)
-router.post('/', chatController.createChat)
+router.post('/', validator(createChatSchema), chatController.createChat)
 
 router
   .route('/:id')
   .get(chatController.getChat)
-  .put(chatController.updateChat)
+  .patch(validator(updateChatTitleSchema), chatController.updateChatTitle)
   .delete(chatController.deleteChat)
