@@ -1,6 +1,6 @@
 import express from 'express'
 import { CustomError } from '#utils'
-import { logger, errorHandler, authenticator } from '#middlewares'
+import { errorHandler, authenticator, requestLogger } from '#middlewares'
 import { authRouter, chatsRouter, completionsRouter } from '#routers'
 
 const app = express()
@@ -11,7 +11,7 @@ app.listen(port, () => {
 })
 
 app.use(express.json())
-app.use(logger)
+app.use(requestLogger)
 
 app.use('/auth', authRouter)
 app.use('/api/chats', authenticator, chatsRouter)
