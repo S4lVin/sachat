@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { PrismaClient } from '#prisma'
+import { CustomError } from '#utils'
 
 const prisma = new PrismaClient()
 
@@ -30,7 +31,7 @@ export const authController = {
 
     const validPassword = await bcrypt.compare(password, user.password)
     if (!validPassword) {
-      throw Object.assign(new Error(), { statusCode: 401 })
+      throw new CustomError(401)
     }
 
     const accessToken = jwt.sign(

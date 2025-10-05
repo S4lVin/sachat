@@ -1,4 +1,5 @@
 import { PrismaClient } from '#prisma'
+import { CustomError } from '#utils'
 
 const prisma = new PrismaClient()
 
@@ -28,7 +29,7 @@ export const messageController = {
     })
 
     if (!message) {
-      throw Object.assign(new Error(), { statusCode: 404 })
+      throw new CustomError(404)
     }
     res.json(message)
   },
@@ -46,7 +47,7 @@ export const messageController = {
     })
 
     if (!chat) {
-      throw Object.assign(new Error(), { statusCode: 404 })
+      throw new CustomError(404)
     }
 
     const message = await prisma.message.create({
