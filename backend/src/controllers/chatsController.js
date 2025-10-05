@@ -4,15 +4,17 @@ const prisma = new PrismaClient()
 
 export const chatController = {
   getAll: async (req, res) => {
-    const chats = await prisma.chat.findMany()
+    const chats = await prisma.chat.findMany({
+      where: { userId: req.user.id },
+    })
     res.json({ chats })
   },
 
-  get: async (req, res, next) => {
+  get: async (req, res) => {
     const { chatId } = req.params
 
     const chat = await prisma.chat.findUnique({
-      where: { id: Number(chatId) },
+      where: { id: Number(chatId), userId: req.user.id },
       include: { messages: true },
     })
 
@@ -27,6 +29,7 @@ export const chatController = {
 
     const newChat = await prisma.chat.create({
       data: {
+        userId: req.user.id,
         title,
         messages: {
           create:
@@ -46,7 +49,7 @@ export const chatController = {
     const { title, messages } = req.body
 
     const updatedChat = await prisma.chat.update({
-      where: { id: Number(chatId) },
+      where: { id: Number(chatId), userId: req.user.id },
       data: {
         title,
         messages: messages
@@ -68,7 +71,7 @@ export const chatController = {
     const { chatId } = req.params
 
     await prisma.chat.delete({
-      where: { id: Number(chatId) },
+      where: { id: Number(chatId), userId: req.user.id },
     })
     res.status(204).end()
   },

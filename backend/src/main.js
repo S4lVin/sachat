@@ -1,4 +1,5 @@
 import express from 'express'
+import { CustomError } from '#utils'
 import { logger, errorHandler, authenticator } from '#middlewares'
 import { authRouter, chatsRouter, completionsRouter } from '#routers'
 
@@ -17,7 +18,7 @@ app.use('/api/chats', authenticator, chatsRouter)
 app.use('/api/completions', authenticator, completionsRouter)
 
 app.use(() => {
-  throw Object.assign(new Error(), { statusCode: 404 })
+  throw new CustomError(404)
 })
 
 app.use(errorHandler)

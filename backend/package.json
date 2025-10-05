@@ -4,7 +4,8 @@
   "type": "module",
   "main": "src/main.js",
   "scripts": {
-    "dev": "nodemon src/main.js"
+    "dev": "nodemon src/main.js",
+    "seed": "node --env-file=.env prisma/seed.js"
   },
   "imports": {
     "#prisma": "./generated/prisma/index.js",

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '#prisma'
 import bcrypt from 'bcrypt'
 
 const prisma = new PrismaClient()
@@ -35,14 +35,14 @@ const CHAT_TITLES = [
   'Debugging session',
   'Brainstorming app',
   'Note casuali',
-  'Promemoria importante'
+  'Promemoria importante',
 ]
 
 const USER_MESSAGES = [
   'Ciao! Come stai?',
   'Ho bisogno di aiuto con questo codice',
   'Puoi spiegarmi come funziona?',
-  'Grazie mille per l\'aiuto!',
+  "Grazie mille per l'aiuto!",
   'Non ho capito questa parte',
   'Perfetto, ora è tutto chiaro',
   'Ho un errore strano nel terminale',
@@ -53,7 +53,7 @@ const USER_MESSAGES = [
   'Ok, provo subito!',
   'Funziona alla grande!',
   'Ci sono alternative?',
-  'Dove posso trovare più info su questo?'
+  'Dove posso trovare più info su questo?',
 ]
 
 const AI_MESSAGES = [
@@ -71,7 +71,7 @@ const AI_MESSAGES = [
   'Fammi sapere come va!',
   'Fantastico! Continua così.',
   'Sì, ci sono diverse alternative. Ecco le principali:',
-  'Ti consiglio la documentazione ufficiale, oppure...'
+  'Ti consiglio la documentazione ufficiale, oppure...',
 ]
 
 /**
@@ -79,18 +79,16 @@ const AI_MESSAGES = [
  */
 const generateMessages = (count) => {
   const messages = []
-  
+
   for (let i = 0; i < count; i++) {
     const isUser = i % 2 === 0 // Alterna user e AI
-    
+
     messages.push({
       sender: isUser ? 'user' : 'ai',
-      content: isUser 
-        ? randomElement(USER_MESSAGES)
-        : randomElement(AI_MESSAGES)
+      content: isUser ? randomElement(USER_MESSAGES) : randomElement(AI_MESSAGES),
     })
   }
-  
+
   return messages
 }
 
@@ -116,14 +114,14 @@ const seed = async () => {
     { name: 'Laura Bianchi', email: 'laura@example.com' },
     { name: 'Giuseppe Verdi', email: 'giuseppe@example.com' },
     { name: 'Anna Neri', email: 'anna@example.com' },
-    { name: 'Francesco Ferrari', email: 'francesco@example.com' }
+    { name: 'Francesco Ferrari', email: 'francesco@example.com' },
   ]
 
   console.log('👥 Creazione utenti...')
-  
+
   for (const userData of userNames) {
     const numChats = randomInt(2, 5) // Ogni utente avrà 2-5 chat
-    
+
     const user = await prisma.user.create({
       data: {
         name: userData.name,
@@ -132,23 +130,23 @@ const seed = async () => {
         chats: {
           create: Array.from({ length: numChats }, () => {
             const numMessages = randomInt(3, 10) // Ogni chat avrà 3-10 messaggi
-            
+
             return {
               title: randomElement(CHAT_TITLES),
               messages: {
-                create: generateMessages(numMessages)
-              }
+                create: generateMessages(numMessages),
+              },
             }
-          })
-        }
+          }),
+        },
       },
       include: {
         chats: {
           include: {
-            messages: true
-          }
-        }
-      }
+            messages: true,
+          },
+        },
+      },
     })
 
     console.log(`✅ ${user.name} creato con ${user.chats.length} chat`)

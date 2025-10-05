@@ -1,4 +1,5 @@
-import jwt from "jsonwebtoken"
+import jwt from 'jsonwebtoken'
+import { CustomError } from '#utils'
 
 const extractTokenFromHeader = (req) => {
   const auth = req.headers['authorization']
@@ -12,9 +13,15 @@ const extractTokenFromHeader = (req) => {
 
 export const authenticator = (req, res, next) => {
   const token = extractTokenFromHeader(req)
-  if (!token) {throw Object.assign(new Error(), { statusCode: 401 })}
+  if (!token) {
+    throw new CustomError(401)
+  }
 
-  const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-  req.user = { id: payload.userId, email: payload.email }
-  next()
+  try {
+    const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+    req.user = { id: payload.userId, email: payload.email }
+    next()
+  } catch (error) {
+    throw new CustomError(401, 'Token expired')
+  }
 }

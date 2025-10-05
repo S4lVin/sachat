@@ -9,7 +9,7 @@ export const completionController = {
       const response = await client.responses.create(req.body)
       res.json(response)
     } catch (error) {
-      throw new CustomError(error.error.message, error.status)
+      throw new CustomError(error.status, error.error.message)
     }
   },
 }
