@@ -1,5 +1,5 @@
 import express from 'express'
-import { logger, errorHandler } from '#middlewares'
+import { logger, errorHandler, authenticator } from '#middlewares'
 import { authRouter, chatsRouter, completionsRouter } from '#routers'
 
 const app = express()
@@ -13,8 +13,8 @@ app.use(express.json())
 app.use(logger)
 
 app.use('/auth', authRouter)
-app.use('/api/chats', chatsRouter)
-app.use('/api/completions', completionsRouter)
+app.use('/api/chats', authenticator, chatsRouter)
+app.use('/api/completions', authenticator, completionsRouter)
 
 app.use(() => {
   throw Object.assign(new Error(), { statusCode: 404 })

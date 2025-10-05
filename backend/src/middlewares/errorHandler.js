@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client'
 import { getReasonPhrase } from 'http-status-codes'
 import { CustomError, getValidStatusCode } from '#utils'
 
