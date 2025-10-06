@@ -7,9 +7,9 @@ const collapsed = ref(false)
 </script>
 
 <template>
-  <div :class="'relative bg-neutral-800 shadow-lg/25 ' + (collapsed ? 'w-16' : 'w-80')">
+  <div :class="'relative bg-neutral-800 shadow-lg/25 ' + (collapsed ? 'w-14' : 'w-64')">
     <div class="flex items-center justify-between border-b-2 border-neutral-700 p-4">
-      <div v-show="!collapsed" class="text-2xl font-bold">Storico Chat</div>
+      <div v-show="!collapsed" class="text-xl font-bold">Storico Chat</div>
       <button @click="collapsed = !collapsed" class="cursor-pointer hover:text-neutral-300">
         <feather-icons class="h-8 w-8" name="sidebar" />
       </button>
@@ -32,7 +32,7 @@ const collapsed = ref(false)
       <button
         class="w-full cursor-pointer rounded-lg bg-neutral-600 p-4 text-xl hover:bg-neutral-700"
       >
-        <span class="text-xl">Nuova Chat</span>
+        <span class="text-lg">Nuova Chat</span>
       </button>
     </div>
   </div>
