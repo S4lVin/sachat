@@ -42,7 +42,7 @@ export const errorHandler = (error, req, res, next) => {
   // 1. Errore custom
   if (isCustomError(error)) {
     statusCode = error.statusCode || 500;
-    message = error.message || getReasonPhrase(statusCode) || 'An error occurred';
+    message = getReasonPhrase(statusCode) + (error.message ? `: ${error.message}` : '') || 'An error occurred';
   }
   // 2. Errore Prisma
   else if (isPrismaError(error)) {

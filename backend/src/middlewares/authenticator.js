@@ -22,6 +22,6 @@ export const authenticator = (req, res, next) => {
     req.user = { id: payload.userId, email: payload.email }
     next()
   } catch (error) {
-    throw new CustomError(401, 'Token expired')
+    throw new CustomError(403)
   }
 }
