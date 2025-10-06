@@ -12,8 +12,6 @@ SaChat is a full-stack web application that provides a conversational interface 
 - [Prerequisites](#prerequisites)
 - [Setup and Installation](#setup-and-installation)
 - [Running the Project](#running-the-project)
-- [Environment Variables](#environment-variables)
-- [Contributing](#contributing)
 
 ## Key Features
 
