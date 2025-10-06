@@ -14,7 +14,7 @@ const extractTokenFromHeader = (req) => {
 export const authenticator = (req, res, next) => {
   const token = extractTokenFromHeader(req)
   if (!token) {
-    throw new CustomError(401)
+    throw new CustomError(401, 'Authentication token is required')
   }
 
   try {
@@ -22,6 +22,6 @@ export const authenticator = (req, res, next) => {
     req.user = { id: payload.userId, email: payload.email }
     next()
   } catch (error) {
-    throw new CustomError(403)
+    throw new CustomError(403, 'Invalid or expired authentication token')
   }
 }

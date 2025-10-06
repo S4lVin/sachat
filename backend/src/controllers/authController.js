@@ -4,7 +4,7 @@ import { PrismaClient } from '#prisma'
 import { CustomError } from '#utils'
 
 const prisma = new PrismaClient()
-// TODO: RENDERE ERRORI PIÙ ESPLICATIVI
+
 export const authController = {
   register: async (req, res) => {
     const { name, email, password } = req.body
@@ -28,13 +28,13 @@ export const authController = {
         email,
       },
     })
-    if (!user) { // TODO: CONTROLLARE SE NECESSARIO
+    if (!user) {
       throw new CustomError(401, 'Invalid credentials')
     }
 
     const validPassword = await bcrypt.compare(password, user.password)
     if (!validPassword) {
-      throw new CustomError(401)
+      throw new CustomError(401, 'Invalid credentials')
     }
 
     const accessToken = jwt.sign(
@@ -50,7 +50,7 @@ export const authController = {
 
     await prisma.user.update({
       where: { id: user.id },
-      data: { refreshToken }
+      data: { refreshToken },
     })
 
     res.json({ accessToken, refreshToken })
@@ -59,18 +59,18 @@ export const authController = {
   refresh: async (req, res) => {
     const { refreshToken } = req.body
     if (!refreshToken) {
-      throw new CustomError(401)
+      throw new CustomError(401, 'Refresh token is required')
     }
-    
+
     try {
       const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
 
       const user = await prisma.user.findUnique({
-        where: { id: payload.userId }
+        where: { id: payload.userId },
       })
 
       if (!user || user.refreshToken !== refreshToken) {
-        throw new CustomError(403)
+        throw new CustomError(403, 'Invalid refresh token')
       }
 
       const accessToken = jwt.sign(
@@ -80,10 +80,9 @@ export const authController = {
       )
 
       res.json({ accessToken })
+    } catch {
+      if (error instanceof CustomError) throw error
+      throw new CustomError(403, 'Invalid or expired refresh token')
     }
-    catch {
-      if (error instanceof CustomError) throw error;
-      throw new CustomError(403)
-    }
-  }
+  },
 }

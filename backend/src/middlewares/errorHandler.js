@@ -32,28 +32,29 @@ export const errorHandler = (error, req, res, next) => {
       ...(error.code && { code: error.code }),
     },
   }
-  
-  logger.error(logContext, 'Request processing failed');
 
+  logger.error(logContext, 'Request processing failed')
 
-  let statusCode;
-  let message;
+  let statusCode
+  let message
 
   // 1. Errore custom
   if (isCustomError(error)) {
-    statusCode = error.statusCode || 500;
-    message = getReasonPhrase(statusCode) + (error.message ? `: ${error.message}` : '') || 'An error occurred';
+    statusCode = error.statusCode || 500
+    message =
+      getReasonPhrase(statusCode) + (error.message ? `: ${error.message}` : '') ||
+      'An error occurred'
   }
   // 2. Errore Prisma
   else if (isPrismaError(error)) {
-    statusCode = getPrismaStatusCode(error.code) || 500;
-    message = getReasonPhrase(statusCode) || 'Database error';
+    statusCode = getPrismaStatusCode(error.code) || 500
+    message = getReasonPhrase(statusCode) || 'Database error'
   }
   // 3. Altri errori
   else {
-    statusCode = getValidStatusCode(error) || 500;
-    message = getReasonPhrase(statusCode) || 'An error occurred';
+    statusCode = getValidStatusCode(error) || 500
+    message = getReasonPhrase(statusCode) || 'An error occurred'
   }
 
-  return res.status(statusCode).json({ error: { message } });
+  return res.status(statusCode).json({ error: { message } })
 }

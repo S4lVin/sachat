@@ -7,3 +7,4 @@ export const router = express.Router()
 
 router.post('/register', validator(authSchemas.register), authController.register)
 router.post('/login', validator(authSchemas.login), authController.login)
+router.post('/refresh', validator(authSchemas.refresh), authController.refresh)
