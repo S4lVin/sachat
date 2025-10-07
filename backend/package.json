@@ -5,6 +5,7 @@
   "main": "src/main.js",
   "scripts": {
     "dev": "nodemon src/main.js",
+    "generate": "npx prisma generate",
     "seed": "node --env-file=.env prisma/seed.js"
   },
   "imports": {
