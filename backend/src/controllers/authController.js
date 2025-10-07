@@ -85,4 +85,26 @@ export const authController = {
       throw new CustomError(403, 'Invalid or expired refresh token')
     }
   },
+
+  logout: async (req, res) => {
+    const { refreshToken } = req.body
+    if (!refreshToken) {
+      throw new CustomError(401, 'Refresh token is required')
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { refreshToken },
+    })
+
+    if (!user) {
+      throw new CustomError(403, 'Invalid refresh token')
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken: null },
+    })
+
+    res.status(200).json({message: "Logged out"})
+  }
 }
