@@ -7,7 +7,7 @@ services:
     build:
       context: ./frontend
     ports:
-      - "5173:5173"
+      - 5173:5173
     env_file:
       - frontend/.env
     volumes:
@@ -41,7 +41,7 @@ services:
     build:
       context: ./database
     ports:
-      - "5432:5432"
+      - 5432:5432
     env_file:
       - database/.env
     volumes:
