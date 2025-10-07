@@ -14,24 +14,24 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "@tailwindcss/postcss": "^4.1.14",
-    "@tailwindcss/vite": "^4.1.14",
     "axios": "^1.12.2",
     "feather-icons": "^4.29.2",
     "pinia": "^3.0.3",
-    "prettier-plugin-tailwindcss": "^0.6.14",
-    "tailwindcss": "^4.1.14",
     "vue": "^3.5.22",
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
+    "@tailwindcss/postcss": "^4.1.14",
+    "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vue/eslint-config-prettier": "^10.2.0",
     "eslint": "^9.33.0",
     "eslint-plugin-vue": "~10.4.0",
     "globals": "^16.3.0",
     "prettier": "3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.14",
+    "tailwindcss": "^4.1.14",
     "vite": "^7.1.7",
     "vite-plugin-vue-devtools": "^8.0.2"
   }
