@@ -1,22 +1,18 @@
-# BUILDER
-FROM node:22-alpine AS builder
+FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
-# PRODUCTION
-FROM node:22-alpine AS production
+FROM node:22-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+FROM node:22-alpine
 ENV NODE_ENV=production
 WORKDIR /app
-COPY --from=builder /app/package*.json ./
-RUN npm ci --omit=dev
-COPY . .
+COPY --from=deps /app/package*.json ./
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app .
 EXPOSE 3000
-CMD sh -c "npx prisma migrate deploy && npx prisma generate && npm run start"
-
-# DEVELOPMENT
-FROM builder AS development
-ENV NODE_ENV=development
-COPY . .
-EXPOSE 3000
-CMD sh -c "npx prisma db push && npm run dev"
+CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma generate && npm start"]

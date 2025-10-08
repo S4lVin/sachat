@@ -1,7 +1,17 @@
 <script setup>
 import FeatherIcons from '@/components/FeatherIcon.vue'
 import ChatHistoryItem from '@/components/sidebar/ChatHistoryItem.vue'
-import { ref } from 'vue'
+import { useChatStore } from '@/stores/chatStore.js'
+import { storeToRefs } from 'pinia'
+import { ref, onMounted } from 'vue'
+
+onMounted(() => {
+  console.log("Fetching chats")
+  chatStore.fetchChats()
+})
+const chatStore = useChatStore()
+
+const { chats } = storeToRefs(chatStore)
 
 const collapsed = ref(false)
 </script>
@@ -16,16 +26,7 @@ const collapsed = ref(false)
     </div>
     <div v-show="!collapsed" class="h-full overflow-y-auto p-4">
       <div class="mb-20">
-        <ChatHistoryItem title="Chat con Marco" />
-        <ChatHistoryItem title="Progetto Vue" />
-        <ChatHistoryItem title="Domande su TypeScript" />
-        <ChatHistoryItem title="Consigli di viaggio" />
-        <ChatHistoryItem title="Chat con Marco" />
-        <ChatHistoryItem title="Progetto Vue" />
-        <ChatHistoryItem title="Domande su TypeScript" />
-        <ChatHistoryItem title="Consigli di viaggio" />
-        <ChatHistoryItem title="Chat con Marco" />
-        <ChatHistoryItem title="Progetto Vue" />
+        <ChatHistoryItem v-for="chat in chats" :title="chat.title"/>
       </div>
     </div>
     <div v-show="!collapsed" class="absolute bottom-0 w-full px-6 py-4">

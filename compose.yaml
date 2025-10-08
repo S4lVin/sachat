@@ -1,36 +1,7 @@
-# Comments are provided throughout this file to help you get started.
 # If you need more help, visit the Docker Compose reference guide at
 # https://docs.docker.com/go/compose-spec-reference/
 
 services:
-  frontend:
-    build:
-      context: ./frontend
-      target: production
-    ports:
-      - 80:80
-    env_file:
-      - frontend/.env
-    networks:
-      - sachat-network
-    depends_on:
-      - backend
-    restart: unless-stopped
-    
-  backend:
-    build:
-      context: ./backend
-      target: production
-    ports:
-      - 3000:3000
-    env_file:
-      - backend/.env
-    networks:
-      - sachat-network
-    depends_on:
-      - database
-    restart: unless-stopped
-    
   database:
     build:
       context: ./database
@@ -40,13 +11,6 @@ services:
       - database/.env
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    networks:
-      - sachat-network
-    restart: unless-stopped
-
-networks:
-  sachat-network:
-    driver: bridge
 
 volumes:
   postgres-data:
