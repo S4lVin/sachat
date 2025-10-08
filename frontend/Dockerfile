@@ -1,12 +1,18 @@
-FROM node:lts-alpine
-
+# DEVELOPMENT
+FROM node:22-alpine as development
 WORKDIR /app
-
-COPY ./package*.json ./
+COPY package*.json ./
 RUN npm ci
-
 COPY . .
-
 EXPOSE 5173
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 
-CMD sh -c "npm run dev"
+# BUILD FOR PRODUCTION
+FROM development as builder
+RUN npm run build
+
+# PRODUCTION
+FROM nginx:1.28-alpine as production
+COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
