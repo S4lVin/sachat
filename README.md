@@ -4,23 +4,6 @@ SaChat is a full-stack web application that provides a conversational interface 
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Table of Contents
-
-- [Key Features](#key-features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Setup and Installation](#setup-and-installation)
-- [Running the Project](#running-the-project)
-
-## Key Features
-
-- **Secure Authentication**: JWT-based login and registration system (Access Token + Refresh Token).
-- **Persistent Conversations**: Chats and messages are saved to a PostgreSQL database.
-- **OpenAI Integration**: Direct interaction with OpenAI APIs to generate intelligent responses.
-- **Reactive Interface**: A smooth and modern user experience built with Vue 3.
-- **Monorepo Structure**: Separate frontend and backend codebases managed within a single repository for better organization.
-
 ## Tech Stack
 
 **Backend:**
@@ -45,6 +28,7 @@ SaChat is a full-stack web application that provides a conversational interface 
 - **Linting:** ESLint
 - **Formatting:** Prettier
 - **Committing:** Commitizen
+- **Containerization:** Docker
 
 ## Project Structure
 
@@ -54,20 +38,18 @@ The project is a monorepo containing both the frontend and the backend.
 /
 ├── backend/        # Node.js REST API using Express and Prisma
 ├── frontend/       # Vue 3 Single Page Application using Vite
-├── .gitignore
-└── package.json    # Root-level dependencies (e.g., Commitizen)
+├── database/       # PostgreSQL Docker configuration
+└── compose.yaml    # Docker Compose for local database
 ```
-
-- **`/backend`**: Contains all server-side logic, API routes, database interactions, and authentication.
-- **`/frontend`**: Contains the client-side application. For specific details, please refer to the `frontend/README.md` file.
 
 ## Prerequisites
 
 Ensure you have the following software installed on your machine:
-- [Node.js](https://nodejs.org/) (v18.x or higher recommended)
-- [npm](https://www.npmjs.com/)
-- A running instance of [PostgreSQL](https://www.postgresql.org/)
-- An [OpenAI](https://platform.openai.com/) account and API key.
+
+-   [Node.js](https://nodejs.org/) (v20.19+ or v22.12+ recommended)
+-   [npm](https://www.npmjs.com/)
+-   [Docker](https://www.docker.com/) and Docker Compose
+-   An [OpenAI](https://platform.openai.com/) account and API key
 
 ## Setup and Installation
 
@@ -92,17 +74,32 @@ Follow these steps to set up the local development environment.
     ```
 
 3.  **Set up environment variables:**
-    - In `/backend`, create a `.env` file by copying the template from `.env.example` and fill it with your values.
-    - In `/frontend`, do the same, creating a `.env` from its `.env.example`.
+    ```bash
+    # Create backend .env file
+    cp backend/.env.example backend/.env
+    
+    # Create frontend .env file
+    cp frontend/.env.example frontend/.env
+    
+    # Create database .env file
+    cp database/.env.example database/.env
+    ```
+    - For each service, fill the .env with your values.
     - **Important:** The `.env` files contain sensitive data and are ignored by Git for security reasons. Never commit these files to the repository.
 
-4.  **Set up the database:**
+4.  **Start the PostgreSQL database:**
+    ```bash
+    docker compose up -d
+    ```
+    
+5.  **Set up the database:**
     Make sure your PostgreSQL server is running, then run the database migrations from the backend directory:
     ```bash
     cd backend
     npx prisma migrate dev
     ```
-5.  **(Optional) Seed the database:**
+    
+6.  **(Optional) Seed the database:**
     To populate the database with initial data, run the seed script:
     ```bash
     cd backend
