@@ -1,5 +1,5 @@
 # DEVELOPMENT
-FROM node:22-alpine as development
+FROM node:22-alpine AS development
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
@@ -8,11 +8,11 @@ EXPOSE 5173
 CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 
 # BUILD FOR PRODUCTION
-FROM development as builder
+FROM development AS builder
 RUN npm run build
 
 # PRODUCTION
-FROM nginx:1.28-alpine as production
+FROM nginx:1.28-alpine AS production
 COPY --from=builder /app/dist /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
