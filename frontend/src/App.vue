@@ -16,7 +16,7 @@ const sendMessage = async (input) => {
 </script>
 
 <template>
-  <div class="flex h-screen w-screen overflow-clip text-md text-neutral-200">
+  <div class="text-md flex h-screen w-screen overflow-clip text-neutral-200">
     <TheSidebar />
     <div class="relative flex flex-1">
       <!-- Central container -->

@@ -1,26 +1,26 @@
-import axios from "axios";
+import axios from 'axios'
 
 const baseURL = import.meta.env.VITE_BACKEND_URL
 if (!baseURL) {
-  throw new Error("VITE_BACKEND_URL undefined, check .env")
+  throw new Error('VITE_BACKEND_URL undefined, check .env')
 }
 
 export const api = axios.create({
   baseURL: `${baseURL}/api`,
-  timeout: 5000
+  timeout: 5000,
 })
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token')
 
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`
     }
 
-    return config;
+    return config
   },
   (error) => {
-    return Promise.reject(error);
-  }
-);
+    return Promise.reject(error)
+  },
+)

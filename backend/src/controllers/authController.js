@@ -105,6 +105,6 @@ export const authController = {
       data: { refreshToken: null },
     })
 
-    res.status(200).json({message: "Logged out"})
-  }
+    res.status(200).json({ message: 'Logged out' })
+  },
 }

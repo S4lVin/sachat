@@ -14,16 +14,17 @@ export const useChatStore = defineStore('chat', () => {
     chats.value = response.data.chats
   }
 
-  const fetchMessages = async(chatId) => {
+  const fetchMessages = async (chatId) => {
     const response = await api.get(`chats/${chatId}/messages`)
     console.log(response)
     messages.value = response.data.messages
   }
 
-  const getResponse = async(content) => { // Revisionare la nomenclatura (fetch usa l'API e imposta variabili, get usa l'API ma ritorna senza impostare?)
+  const getResponse = async (content) => {
+    // Revisionare la nomenclatura (fetch usa l'API e imposta variabili, get usa l'API ma ritorna senza impostare?)
     const response = await api.post(`completions`, {
-      model: "gpt-5",
-      input: content
+      model: 'gpt-5',
+      input: content,
     })
     return response.data
   }
@@ -34,12 +35,12 @@ export const useChatStore = defineStore('chat', () => {
 
     const response = await api.post(`chats/${chatId}/messages`, {
       sender,
-      content
+      content,
     })
     console.log(response)
 
     // Sostituisce il messaggio temporaneo con quello del database
-    const index = messages.value.findIndex(m => m.id === tempId)
+    const index = messages.value.findIndex((m) => m.id === tempId)
     if (index !== -1) messages.value[index] = response.data.message
   }
 
@@ -47,5 +48,15 @@ export const useChatStore = defineStore('chat', () => {
     // Chiama getResponse e poi chiama addMessage
   }
 
-  return { chats, messages, selectedChat, sending, fetchChats, fetchMessages, getResponse, addMessage, addAiMessage } // Ritornare getResponse è inutile
+  return {
+    chats,
+    messages,
+    selectedChat,
+    sending,
+    fetchChats,
+    fetchMessages,
+    getResponse,
+    addMessage,
+    addAiMessage,
+  } // Ritornare getResponse è inutile
 })

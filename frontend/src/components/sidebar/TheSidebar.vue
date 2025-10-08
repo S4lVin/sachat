@@ -25,7 +25,12 @@ onMounted(() => {
     </div>
     <div v-show="!collapsed" class="h-full overflow-y-auto p-4">
       <div class="mb-20">
-        <ChatHistoryItem @click="selectedChat = chat" v-for="chat in chats" :key="chat.id" :title="chat.title"/>
+        <ChatHistoryItem
+          @click="selectedChat = chat"
+          v-for="chat in chats"
+          :key="chat.id"
+          :title="chat.title"
+        />
       </div>
     </div>
     <div v-show="!collapsed" class="absolute bottom-0 w-full px-6 py-4">
