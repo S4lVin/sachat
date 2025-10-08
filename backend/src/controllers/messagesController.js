@@ -14,7 +14,7 @@ export const messageController = {
       },
       orderBy: { createdAt: 'asc' },
     })
-    res.json(messages)
+    res.json({ messages })
   },
 
   get: async (req, res) => {
@@ -31,7 +31,7 @@ export const messageController = {
     if (!message) {
       throw new CustomError(404)
     }
-    res.json(message)
+    res.json({ message })
   },
 
   create: async (req, res) => {
@@ -57,7 +57,7 @@ export const messageController = {
         chatId: Number(chatId),
       },
     })
-    res.status(201).json(message)
+    res.status(201).json({ message })
   },
 
   update: async (req, res) => {
@@ -68,7 +68,7 @@ export const messageController = {
       where: { id: Number(messageId), chatId: Number(chatId), chat: { userId: req.user.id } },
       data: { sender, content },
     })
-    res.json(message)
+    res.json({ message })
   },
 
   delete: async (req, res) => {

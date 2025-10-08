@@ -5,15 +5,14 @@ import { useChatStore } from '@/stores/chatStore.js'
 import { storeToRefs } from 'pinia'
 import { ref, onMounted } from 'vue'
 
-onMounted(() => {
-  console.log("Fetching chats")
-  chatStore.fetchChats()
-})
 const chatStore = useChatStore()
-
-const { chats } = storeToRefs(chatStore)
+const { selectedChat, chats } = storeToRefs(chatStore)
 
 const collapsed = ref(false)
+
+onMounted(() => {
+  chatStore.fetchChats()
+})
 </script>
 
 <template>
@@ -26,7 +25,7 @@ const collapsed = ref(false)
     </div>
     <div v-show="!collapsed" class="h-full overflow-y-auto p-4">
       <div class="mb-20">
-        <ChatHistoryItem v-for="chat in chats" :title="chat.title"/>
+        <ChatHistoryItem @click="selectedChat = chat" v-for="chat in chats" :key="chat.id" :title="chat.title"/>
       </div>
     </div>
     <div v-show="!collapsed" class="absolute bottom-0 w-full px-6 py-4">

@@ -1,7 +1,18 @@
 <script setup>
 import TheSidebar from '@/components/sidebar/TheSidebar.vue'
 import TheMessageArea from '@/components/chat/TheMessageArea.vue'
-import TheInputArea from '@/components/chat/TheInputArea.vue'
+import InputArea from '@/components/chat/InputArea.vue'
+import { useChatStore } from '@/stores/chatStore.js'
+import { storeToRefs } from 'pinia'
+
+const chatStore = useChatStore()
+
+const { selectedChat } = storeToRefs(chatStore)
+
+const sendMessage = async (input) => {
+  await chatStore.addMessage(selectedChat.value.id, 'user', input)
+  await chatStore.addAiMessage()
+}
 </script>
 
 <template>
@@ -11,7 +22,7 @@ import TheInputArea from '@/components/chat/TheInputArea.vue'
       <!-- Central container -->
       <TheMessageArea />
       <div class="absolute bottom-0 w-full px-8 py-4">
-        <TheInputArea class="mx-auto max-w-5xl" />
+        <InputArea @send="sendMessage" class="mx-auto max-w-5xl" />
       </div>
     </div>
   </div>

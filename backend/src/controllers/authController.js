@@ -17,7 +17,7 @@ export const authController = {
         name,
       },
     })
-    res.status(201).json(user)
+    res.status(201).json({ user })
   },
 
   login: async (req, res) => {

@@ -22,13 +22,13 @@ export const chatController = {
     if (!chat) {
       throw new CustomError(404)
     }
-    res.json(chat)
+    res.json({ chat })
   },
 
   create: async (req, res) => {
     const { title, messages } = req.body
 
-    const newChat = await prisma.chat.create({
+    const chat = await prisma.chat.create({
       data: {
         userId: req.user.id,
         title,
@@ -42,14 +42,14 @@ export const chatController = {
       },
       include: { messages: true },
     })
-    res.status(201).json(newChat)
+    res.status(201).json({ chat })
   },
 
   update: async (req, res) => {
     const { chatId } = req.params
     const { title, messages } = req.body
 
-    const updatedChat = await prisma.chat.update({
+    const chat = await prisma.chat.update({
       where: { id: Number(chatId), userId: req.user.id },
       data: {
         title,
@@ -65,7 +65,7 @@ export const chatController = {
       },
       include: { messages: true },
     })
-    res.json(updatedChat)
+    res.json({ chat })
   },
 
   delete: async (req, res) => {
