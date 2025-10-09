@@ -24,6 +24,7 @@ export const errorHandler = (error, req, res, next) => {
   const logContext = {
     route: `${req.method} ${req.originalUrl}`,
     user: req.user ? { id: req.user.id, email: req.user.email } : 'Guest',
+    body: req.body,
     error: {
       name: error.name,
       message: error.message,

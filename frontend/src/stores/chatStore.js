@@ -1,6 +1,7 @@
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { defineStore } from 'pinia'
-import { api } from '../helpers/axios'
+import { api } from '@/helpers/api'
+import { streamToJson } from '@/utils'
 
 export const useChatStore = defineStore('chat', () => {
   const chats = ref([])
@@ -9,43 +10,57 @@ export const useChatStore = defineStore('chat', () => {
   const sending = ref(false)
 
   const fetchChats = async () => {
-    const response = await api.get('chats')
-    console.log(response)
-    chats.value = response.data.chats
+    const data = await api.get('chats')
+    console.log(data)
+    chats.value = data.chats
   }
 
   const fetchMessages = async (chatId) => {
-    const response = await api.get(`chats/${chatId}/messages`)
-    console.log(response)
-    messages.value = response.data.messages
+    const data = await api.get(`chats/${chatId}/messages`)
+    console.log(data)
+    messages.value = data.messages
   }
 
-  const getResponse = async (content) => {
-    // Revisionare la nomenclatura (fetch usa l'API e imposta variabili, get usa l'API ma ritorna senza impostare?)
-    const response = await api.post(`completions`, {
-      model: 'gpt-5',
-      input: content,
+  const sendMessage = async (chatId, message) => {
+    const data = await api.post(`chats/${chatId}/messages`, {
+      sender: message.sender,
+      content: message.content,
     })
-    return response.data
+    
+    Object.assign(message, data.message)
   }
 
-  const addMessage = async (chatId, sender, content) => {
+  const addMessage = (sender, content) => {
     const tempId = 'temp-' + Date.now()
-    messages.value.push({ id: tempId, sender, content })
+    const message = reactive({ id: tempId, sender, content })
+    messages.value.push(message)
+    return message
+  }
 
-    const response = await api.post(`chats/${chatId}/messages`, {
-      sender,
-      content,
-    })
-    console.log(response)
-
-    // Sostituisce il messaggio temporaneo con quello del database
-    const index = messages.value.findIndex((m) => m.id === tempId)
-    if (index !== -1) messages.value[index] = response.data.message
+  const addUserMessage = async (content) => {
+    const message = addMessage('user', content)
+    await sendMessage(selectedChat.value.id, message)
   }
 
   const addAiMessage = async () => {
-    // Chiama getResponse e poi chiama addMessage
+    const filteredMessages = messages.value.map((msg) => {
+      return {role: msg.sender, content: msg.content}
+    })
+
+    const response = await api.stream(`completions`, {
+      model: "gpt-5-nano",
+      input: filteredMessages
+    })
+    const reader = response.body.getReader()
+    const message = addMessage('assistant', '')
+
+    await streamToJson(reader, (json) => {
+      if (json.type === 'response.output_text.delta' && json.delta) {
+        message.content += json.delta;
+      }
+    })
+
+    await sendMessage(selectedChat.value.id, message)
   }
 
   return {
@@ -55,8 +70,7 @@ export const useChatStore = defineStore('chat', () => {
     sending,
     fetchChats,
     fetchMessages,
-    getResponse,
-    addMessage,
+    addUserMessage,
     addAiMessage,
-  } // Ritornare getResponse è inutile
+  }
 })

@@ -16,6 +16,8 @@ export const requestLogger = (req, res, next) => {
       logger.error({ log: logDetails }, 'Request completed with server error')
     } else if (finalRes.statusCode >= 400) {
       logger.warn({ log: logDetails }, 'Request completed with client error')
+    } else if (finalRes.aborted) {
+      logger.warn({ log: logDetails }, 'Request aborted by client')
     } else {
       logger.info({ log: logDetails }, 'Request completed')
     }

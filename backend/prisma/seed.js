@@ -84,7 +84,7 @@ const generateMessages = (count) => {
     const isUser = i % 2 === 0 // Alterna user e AI
 
     messages.push({
-      sender: isUser ? 'user' : 'ai',
+      sender: isUser ? 'user' : 'assistant',
       content: isUser ? randomElement(USER_MESSAGES) : randomElement(AI_MESSAGES),
     })
   }
