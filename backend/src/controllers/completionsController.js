@@ -5,11 +5,11 @@ const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 const streamResponse = async (res, asyncIterator) => {
   res.setHeader('Content-Type', 'text/event-stream')
-  res.setHeader("Cache-Control", "no-cache")
-  res.setHeader("Connection", "keep-alive")
+  res.setHeader('Cache-Control', 'no-cache')
+  res.setHeader('Connection', 'keep-alive')
   res.flushHeaders()
 
-  const abortController = new AbortController();
+  const abortController = new AbortController()
   res.on('close', () => {
     res.aborted = true
     abortController.abort()
@@ -17,7 +17,7 @@ const streamResponse = async (res, asyncIterator) => {
 
   try {
     for await (const event of asyncIterator) {
-      if (abortController.signal.aborted) break;
+      if (abortController.signal.aborted) break
       res.write(`data: ${JSON.stringify(event)}\n\n`)
     }
   } catch (error) {

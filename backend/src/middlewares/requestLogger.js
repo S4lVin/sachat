@@ -7,7 +7,7 @@ export const requestLogger = (req, res, next) => {
   onFinished(res, (err, finalRes) => {
     const duration = Date.now() - start
     const logDetails = {
-      request: { method: req.method, url: req.originalUrl },
+      request: { method: req.method, url: req.originalUrl, body: req.body },
       response: { statusCode: finalRes.statusCode },
       duration_ms: duration,
     }

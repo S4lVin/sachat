@@ -26,7 +26,7 @@ export const useChatStore = defineStore('chat', () => {
       sender: message.sender,
       content: message.content,
     })
-    
+
     Object.assign(message, data.message)
   }
 
@@ -44,19 +44,19 @@ export const useChatStore = defineStore('chat', () => {
 
   const addAiMessage = async () => {
     const filteredMessages = messages.value.map((msg) => {
-      return {role: msg.sender, content: msg.content}
+      return { role: msg.sender, content: msg.content }
     })
 
     const response = await api.stream(`completions`, {
-      model: "gpt-5-nano",
-      input: filteredMessages
+      model: 'gpt-5-nano',
+      input: filteredMessages,
     })
     const reader = response.body.getReader()
     const message = addMessage('assistant', '')
 
     await streamToJson(reader, (json) => {
       if (json.type === 'response.output_text.delta' && json.delta) {
-        message.content += json.delta;
+        message.content += json.delta
       }
     })
 
