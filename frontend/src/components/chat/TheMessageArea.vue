@@ -1,18 +1,24 @@
 <script setup>
 import { useChatStore } from '@/stores/chatStore.js'
 import { storeToRefs } from 'pinia'
-import { watch } from 'vue'
+import { watch, ref, nextTick } from 'vue'
 import ChatMessage from '@/components/chat/ChatMessage.vue'
 
 const chatStore = useChatStore()
-
 const { selectedChat, messages } = storeToRefs(chatStore)
 
-watch(selectedChat, async (newChat) => {
-  if (newChat) {
-    messages.value = [] // Resetto messages per feedback visivo istantaneo
-    await chatStore.fetchMessages(newChat.id)
-  }
+const bottomRef = ref()
+
+watch(selectedChat, async (newChat) => { 
+  if (newChat) { 
+    messages.value = [] // Resetto messages per feedback visivo istantaneo 
+    await chatStore.fetchMessages(newChat.id) 
+  } 
+})
+
+watch(messages, async () => {
+  await nextTick()
+  bottomRef.value.scrollIntoView({ behavior: "smooth" })
 })
 </script>
 
@@ -26,5 +32,6 @@ watch(selectedChat, async (newChat) => {
         :message="message.content"
       />
     </div>
+    <div ref="bottomRef"></div>
   </div>
 </template>

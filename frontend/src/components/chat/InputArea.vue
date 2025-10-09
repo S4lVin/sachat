@@ -2,13 +2,20 @@
 import FeatherIcons from '@/components/FeatherIcon.vue'
 import { ref } from 'vue'
 
+const props = defineProps({
+  disabled: {
+    type: Boolean,
+    required: false
+  }
+})
+
 const emit = defineEmits(['send'])
 
 const input = ref('')
 
 const send = () => {
   const message = input.value.trim()
-  if (!message) return
+  if (!message || props.disabled) return
   emit('send', message)
   input.value = ''
 }
