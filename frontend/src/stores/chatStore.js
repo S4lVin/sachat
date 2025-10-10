@@ -1,35 +1,82 @@
 import { ref, reactive } from 'vue'
 import { defineStore } from 'pinia'
 import { api } from '@/helpers/api'
-import { streamToJson } from '@/utils'
+import { consumeSseJson } from '@/utils'
 
 export const useChatStore = defineStore('chat', () => {
+  // #region STATE
   const chats = ref([])
   const selectedChat = ref({})
   const messages = ref([])
-  const sending = ref(false)
+  const isGenerating = ref(false)
+  // #endregion
 
-  const fetchChats = async () => {
+  // #region ACTIONS
+  const loadChats = async () => {
     const data = await api.get('chats')
     chats.value = data.chats
   }
 
   const createChat = async (chat) => {
     const data = await api.post(`chats`, {
-      title: chat?.title ?? "Nuova chat",
-      messages: chat?.messages ?? []
+      title: chat?.title ?? 'Nuova chat',
+      messages: chat?.messages ?? [],
     })
-
     chats.value.unshift(data.chat)
     selectedChat.value = data.chat
   }
 
-  const fetchMessages = async (chatId) => {
+  const loadMessages = async (chatId) => {
     const data = await api.get(`chats/${chatId}/messages`)
     messages.value = data.messages
   }
 
-  const postMessage = async (chatId, message) => {
+  const sendUserMessage = async (content) => {
+    const temp = appendTemporaryMessage('user', content)
+    await persistMessage(selectedChat.value.id, temp)
+    return temp
+  }
+
+  const requestAssistantReply = async () => {
+    if (isGenerating.value) return
+
+    const input = buildModelInput()
+    const temp = appendTemporaryMessage('assistant', '')
+    isGenerating.value = true
+
+    try {
+      const ok = await streamCompletionIntoMessage(input, temp)
+
+      if (!ok) {
+        removeMessageById(temp.id)
+        return
+      }
+
+      await persistMessage(selectedChat.value.id, temp)
+    } finally {
+      isGenerating.value = false
+    }
+  }
+
+  const cancelAssistantReply = () => {
+    isGenerating.value = false
+  }
+  // #endregion
+
+  // #region HELPERS
+  const appendTemporaryMessage = (sender, content = '') => {
+    const id = 'temp-' + Date.now()
+    const message = reactive({ id, sender, content })
+    messages.value.push(message)
+    return message
+  }
+
+  const removeMessageById = (id) => {
+    const i = messages.value.findIndex(m => m.id === id)
+    if (i !== -1) messages.value.splice(i, 1)
+  }
+
+  const persistMessage = async (chatId, message) => {
     const data = await api.post(`chats/${chatId}/messages`, {
       sender: message.sender,
       content: message.content,
@@ -38,48 +85,50 @@ export const useChatStore = defineStore('chat', () => {
     Object.assign(message, data.message)
   }
 
-  const addTempMessage = (sender, content) => {
-    const id = 'temp-' + Date.now()
-    const message = reactive({ id, sender, content })
-    messages.value.push(message)
-    return message
+  const buildModelInput = () => {
+    return messages.value.map(msg => ({
+      role: msg.sender,
+      content: msg.content,
+    }))
   }
 
-  const createUserMessage = async (content) => {
-    const tempMessage = addTempMessage('user', content)
-    await postMessage(selectedChat.value.id, tempMessage)
-  }
-
-  const generateAiMessage = async () => {
-    const filteredMessages = messages.value.map((msg) => {
-      return { role: msg.sender, content: msg.content }
-    })
+  const streamCompletionIntoMessage = async (inputMessages, tempMessage) => {
+    let receivedText = false
 
     const response = await api.stream(`completions`, {
       model: 'gpt-5-nano',
-      input: filteredMessages,
+      input: inputMessages,
     })
     const reader = response.body.getReader()
-    const tempMessage = addTempMessage('assistant', '')
 
-    await streamToJson(reader, (json) => {
-      if (json.type === 'response.output_text.delta' && json.delta) {
-        tempMessage.content += json.delta
-      }
-    })
+    await consumeSseJson(
+      reader,
+      (json) => {
+        if (json.type === 'response.output_text.delta' && json.delta) {
+          tempMessage.content += json.delta
+          receivedText = true
+        }
+      },
+      () => !isGenerating.value // Interrompo se l'utente cancella
+    )
 
-    await postMessage(selectedChat.value.id, tempMessage)
+    return receivedText
   }
+  // #endregion
 
   return {
+    // STATE
     chats,
     messages,
     selectedChat,
-    sending,
-    fetchChats,
+    isGenerating,
+
+    // ACTIONS
+    loadChats,
     createChat,
-    fetchMessages,
-    createUserMessage,
-    generateAiMessage,
+    loadMessages,
+    sendUserMessage,
+    requestAssistantReply,
+    cancelAssistantReply,
   }
 })

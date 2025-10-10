@@ -12,18 +12,18 @@ const bottomRef = ref()
 watch(selectedChat, async (newChat) => { 
   if (newChat) { 
     messages.value = [] // Resetto messages per feedback visivo istantaneo 
-    await chatStore.fetchMessages(newChat.id) 
+    chatStore.loadMessages(newChat.id) 
   } 
 })
 
-watch(messages, async () => {
+watch(() => messages.value.map(msg => msg.content), async () => {
   await nextTick()
-  bottomRef.value.scrollIntoView({ behavior: "smooth" })
+  bottomRef.value.scrollIntoView()
 })
 </script>
 
 <template>
-  <div class="w-full overflow-y-auto p-4" style="scrollbar-gutter: stable both-edges">
+  <div class="w-full overflow-y-auto py-4 px-4 md:px-8" style="scrollbar-gutter: stable both-edges">
     <div class="mx-auto mb-24 max-w-5xl">
       <ChatMessage
         v-for="message in messages"

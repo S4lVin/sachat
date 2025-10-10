@@ -6,13 +6,11 @@ import { useChatStore } from '@/stores/chatStore.js'
 import { storeToRefs } from 'pinia'
 
 const chatStore = useChatStore()
-const { sending } = storeToRefs(chatStore)
+const { isGenerating } = storeToRefs(chatStore)
 
 const sendMessage = async (input) => {
-  sending.value = true
-  await chatStore.createUserMessage(input)
-  await chatStore.generateAiMessage()
-  sending.value = false
+  chatStore.sendUserMessage(input)
+  await chatStore.requestAssistantReply()
 }
 </script>
 
@@ -22,8 +20,8 @@ const sendMessage = async (input) => {
     <div class="relative flex flex-1">
       <!-- Central container -->
       <TheMessageArea />
-      <div class="absolute bottom-0 w-full px-8 py-4">
-        <InputArea :disabled="sending" @send="sendMessage" class="mx-auto max-w-5xl" />
+      <div class="absolute bottom-0 w-full px-4 md:px-8 py-4">
+        <InputArea :disabled="isGenerating" @stop="chatStore.cancelAssistantReply" @send="sendMessage" class="mx-auto max-w-5xl" />
       </div>
     </div>
   </div>

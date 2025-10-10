@@ -1,7 +1,8 @@
 <script setup>
 import FeatherIcons from '@/components/FeatherIcon.vue'
+import { computed } from 'vue'
 
-defineProps({
+const props = defineProps({
   sender: {
     type: String,
     required: true,
@@ -11,36 +12,42 @@ defineProps({
     required: true,
   },
 })
+
+const isUser = computed(() => props.sender === 'user')
+const isLoading = computed(() => !isUser.value && !props.message)
+const actions = computed(() =>
+  isUser.value
+    ? [{ name: 'copy' }, { name: 'edit' }]
+    : [{ name: 'copy' }, { name: 'repeat' }, { name: 'edit' }]
+)
+
+function onAction(name) {
+  // TODO: Gestire le azioni
+}
 </script>
 
 <template>
-  <div v-if="sender == 'user'" class="group pb-10 mb-2 flex justify-end">
+  <div class="group pb-10" :class="{ 'flex justify-end': isUser }">
     <div class="relative">
-      <div class="rounded-xl bg-neutral-800 px-6 py-4 text-end">{{ message }}</div>
-      <div class="absolute right-0 mt-2 hidden gap-x-2 text-neutral-500 group-hover:flex">
-        <button class="cursor-pointer">
-          <feather-icons size="20" class="hover:text-neutral-600" name="copy" />
-        </button>
-        <button class="cursor-pointer">
-          <feather-icons size="20" class="hover:text-neutral-600" name="edit" />
+      <div v-if="!isUser" class="mb-1 font-bold uppercase">{{ sender }}</div>
+      <div :class="{ 'rounded-xl bg-neutral-800 px-6 py-4 text-end': isUser }">
+        <feather-icons v-if="isLoading" class="animate-spin" name="loader" />
+        {{ message }}
+      </div>
+      <div
+        class="absolute mt-2 hidden gap-x-2 text-neutral-500 group-hover:flex"
+        :class="isUser ? 'right-0' : 'left-0'"
+      >
+        <button
+          v-for="(action, i) in actions"
+          :key="i"
+          class="cursor-pointer"
+          @click="onAction(action.name)"
+        >
+          <feather-icons :size="20" class="hover:text-neutral-600" :name="action.name" />
         </button>
       </div>
     </div>
-    
-  </div>
-  <div v-else class="pb-10 mb-2 group relative">
-    <div class="mb-1 font-bold uppercase">{{ sender }}</div>
-    {{ message }}
-    <div class="absolute left-0 mt-2 hidden gap-x-2 text-neutral-500 group-hover:flex">
-      <button class="cursor-pointer">
-        <feather-icons size="20" class="hover:text-neutral-600" name="copy" />
-      </button>
-      <button class="cursor-pointer">
-        <feather-icons size="20" class="hover:text-neutral-600" name="repeat" />
-      </button>
-      <button class="cursor-pointer">
-        <feather-icons size="20" class="hover:text-neutral-600" name="edit" />
-      </button>
-    </div>
   </div>
 </template>
+

@@ -15,6 +15,10 @@ const props = defineProps({
     type: Number,
     default: 2,
   },
+  class: {
+    type: String,
+    default: ''
+  }
 })
 
 const icon = computed(() => {
@@ -23,6 +27,7 @@ const icon = computed(() => {
       width: props.size,
       height: props.size,
       'stroke-width': props.strokeWidth,
+      class: props.class
     }) || ''
   )
 })

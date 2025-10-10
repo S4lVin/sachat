@@ -11,7 +11,7 @@ const { selectedChat, chats } = storeToRefs(chatStore)
 const collapsed = ref(false)
 
 onMounted(() => {
-  chatStore.fetchChats()
+  chatStore.loadChats()
 })
 </script>
 
@@ -35,7 +35,7 @@ onMounted(() => {
     </div>
     <div v-show="!collapsed" class="absolute bottom-0 w-full px-6 py-4">
       <button
-        @click="chatStore.createChat()"
+        @click="chatStore.createChat"
         class="w-full cursor-pointer rounded-lg bg-neutral-600 p-4 text-xl hover:bg-neutral-700"
       >
         <span class="text-lg">Nuova Chat</span>

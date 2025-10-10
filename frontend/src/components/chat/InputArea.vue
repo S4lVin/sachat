@@ -2,14 +2,13 @@
 import FeatherIcons from '@/components/FeatherIcon.vue'
 import { ref } from 'vue'
 
+const emit = defineEmits(['send', 'stop'])
 const props = defineProps({
   disabled: {
     type: Boolean,
     required: false
   }
 })
-
-const emit = defineEmits(['send'])
 
 const input = ref('')
 
@@ -19,6 +18,7 @@ const send = () => {
   emit('send', message)
   input.value = ''
 }
+const stop = () => emit('stop')
 </script>
 
 <template>
@@ -31,10 +31,10 @@ const send = () => {
       class="w-full rounded-xl bg-neutral-700 px-6 py-4 shadow-lg/25 focus:outline-none"
     />
     <button
-      @click="send"
+      @click="props.disabled ? stop() : send()"
       class="cursor-pointer rounded-xl bg-indigo-800 p-3 shadow-lg/25 hover:bg-indigo-900"
     >
-      <feather-icons class="h-8 w-8" name="send" />
+      <feather-icons :size="32" :name="disabled ? 'stop-circle' : 'arrow-up'" />
     </button>
   </div>
 </template>

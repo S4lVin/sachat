@@ -1,8 +1,17 @@
-export const streamToJson = async (reader, onEvent) => {
+export const consumeSseJson = async (reader, onJson, shouldBreak) => {
   const decoder = new TextDecoder()
   let buffer = ''
 
   while (true) {
+    if (shouldBreak && shouldBreak()) {
+      try {
+        await reader.cancel()
+      } catch {
+        // ignoriamo eventuali errori di cancel
+      }
+      break
+    }
+
     const { value, done } = await reader.read()
     if (done) break
 
@@ -11,13 +20,13 @@ export const streamToJson = async (reader, onEvent) => {
     buffer = lines.pop() || ''
 
     for (const line of lines) {
-      if (line.startsWith('data: ')) {
-        try {
-          const json = JSON.parse(line.slice(6))
-          onEvent(json)
-        } catch (err) {
-          console.error('Invalid JSON from SSE:', line, err)
-        }
+      if (!line.startsWith('data: ')) continue
+      const payload = line.slice(6)
+      try {
+        const json = JSON.parse(payload)
+        onJson(json)
+      } catch (err) {
+        console.error('Invalid JSON from SSE:', line, err)
       }
     }
   }
