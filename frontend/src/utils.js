@@ -1,4 +1,4 @@
-export const consumeSseJson = async (reader, onJson, shouldBreak) => {
+export const consumeSseJson = async (reader, onJson, shouldBreak) => { // TODO: Move this somewhere else and delete utils
   const decoder = new TextDecoder()
   let buffer = ''
 

@@ -32,8 +32,9 @@ const handleErrorResponse = async (response, path, options) => {
 
     const success = await authStore.refreshAccessToken()
     if (success) return request(path, { ...options, hasRetried: true })
-      
-    return router.push('/login')
+
+    authStore.clearTokens()
+    return router.push('/')
   }
 
   return null
@@ -61,21 +62,21 @@ export const api = {
     request(path, {
       ...options,
       method: 'POST',
-      body: JSON.stringify(body),
+      body
     }),
 
   put: (path, body, options = {}) =>
     request(path, {
       ...options,
       method: 'PUT',
-      body: JSON.stringify(body),
+      body
     }),
 
   patch: (path, body, options = {}) =>
     request(path, {
       ...options,
       method: 'PATCH',
-      body: JSON.stringify(body),
+      body
     }),
 
   delete: (path, options = {}) =>

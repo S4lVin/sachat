@@ -6,8 +6,8 @@ import AuthView from './views/AuthView.vue'
 
 const routes = [
   { path: '/:pathMatch(.*)*', redirect: '/' },
-  { path: '/', component: ChatView },
-  { path: '/login', component: AuthView }
+  { path: '/app', component: ChatView },
+  { path: '/', component: AuthView }
 ]
 
 export const router = createRouter({
