@@ -7,7 +7,7 @@ export const chatController = {
   getAll: async (req, res) => {
     const chats = await prisma.chat.findMany({
       where: { userId: req.user.id },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     })
     res.json({ chats })
   },

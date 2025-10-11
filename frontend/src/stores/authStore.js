@@ -8,7 +8,7 @@ export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref(localStorage.getItem('accessToken'))
   const refreshToken = ref(localStorage.getItem('refreshToken'))
   // #endregion
-  
+
   // #region ACTIONS
   const hasValidTokenLocal = () => {
     if (!accessToken.value) return false
@@ -26,10 +26,14 @@ export const useAuthStore = defineStore('auth', () => {
 
   const refreshAccessToken = async () => {
     if (!refreshToken.value) return false
-  
-    const data = await api.post('auth/refresh', {
-      refreshToken: refreshToken.value
-    }, { hasRetried: true })
+
+    const data = await api.post(
+      'auth/refresh',
+      {
+        refreshToken: refreshToken.value,
+      },
+      { hasRetried: true },
+    )
 
     if (!data?.accessToken) return false
     setAccessToken(data.accessToken)
@@ -75,6 +79,6 @@ export const useAuthStore = defineStore('auth', () => {
     // ACTIONS
     hasValidTokenLocal,
     refreshAccessToken,
-    clearTokens
+    clearTokens,
   }
 })

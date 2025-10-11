@@ -18,7 +18,7 @@ const isLoading = computed(() => !isUser.value && !props.content)
 const actions = computed(() =>
   isUser.value
     ? [{ name: 'copy' }, { name: 'edit' }]
-    : [{ name: 'copy' }, { name: 'repeat' }, { name: 'edit' }]
+    : [{ name: 'copy' }, { name: 'repeat' }, { name: 'edit' }],
 )
 
 function onAction(name) {
@@ -55,4 +55,3 @@ function onAction(name) {
     </div>
   </div>
 </template>
-

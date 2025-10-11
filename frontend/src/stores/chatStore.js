@@ -71,7 +71,7 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   const removeMessageById = (id) => {
-    const i = messages.value.findIndex(m => m.id === id)
+    const i = messages.value.findIndex((m) => m.id === id)
     if (i !== -1) messages.value.splice(i, 1)
   }
 
@@ -85,7 +85,7 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   const buildModelInput = () => {
-    return messages.value.map(msg => ({
+    return messages.value.map((msg) => ({
       role: msg.sender,
       content: msg.content,
     }))
@@ -94,10 +94,14 @@ export const useChatStore = defineStore('chat', () => {
   const streamCompletionIntoMessage = async (inputMessages, tempMessage) => {
     let receivedText = false
 
-    const response = await api.post(`completions`, {
-      model: 'gpt-5-nano',
-      input: inputMessages,
-    }, {raw: true})
+    const response = await api.post(
+      `completions`,
+      {
+        model: 'gpt-5-nano',
+        input: inputMessages,
+      },
+      { raw: true },
+    )
     const reader = response.body.getReader()
 
     await consumeSseJson(
@@ -108,7 +112,7 @@ export const useChatStore = defineStore('chat', () => {
           receivedText = true
         }
       },
-      () => !isGenerating.value // Interrompo se l'utente cancella
+      () => !isGenerating.value, // Interrompo se l'utente cancella
     )
 
     return receivedText

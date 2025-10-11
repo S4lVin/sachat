@@ -2,7 +2,7 @@
 
 SaChat is a full-stack web application that provides a conversational interface to interact with OpenAI's language models. Unlike a simple UI, SaChat features a robust backend for user authentication, chat management, and message persistence, allowing users to have private, saved conversations over time.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: All Rights Reserved](https://img.shields.io/badge/License-All%20Rights%20Reserved-red.svg)](#)
 
 ## Tech Stack
 
