@@ -21,7 +21,7 @@ const send = () => {
 <template>
   <div class="flex w-full gap-x-4">
     <input
-      @keydown.enter="send"
+      @keydown.enter.prevent="send"
       v-model="input"
       type="text"
       placeholder="Scrivi un messaggio..."

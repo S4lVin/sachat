@@ -11,7 +11,7 @@ const bottomRef = ref()
 
 watch(selectedChat, async (newChat) => {
   if (newChat) {
-    messages.value = [] // Resetto messages per feedback visivo istantaneo
+    messages.value = []
     chatStore.loadMessages(newChat.id)
   }
 })

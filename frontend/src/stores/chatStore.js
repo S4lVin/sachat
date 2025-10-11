@@ -6,7 +6,7 @@ import { consumeSseJson } from '@/utils'
 export const useChatStore = defineStore('chat', () => {
   // #region STATE
   const chats = ref([])
-  const selectedChat = ref({})
+  const selectedChat = ref()
   const messages = ref([])
   const isGenerating = ref(false)
   // #endregion
@@ -18,7 +18,7 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   const createChat = async (chat) => {
-    const data = await api.post(`chats`, {
+    const data = await api.post('chats', {
       title: chat?.title ?? 'Nuova chat',
       messages: chat?.messages ?? [],
     })
@@ -95,7 +95,7 @@ export const useChatStore = defineStore('chat', () => {
     let receivedText = false
 
     const response = await api.post(
-      `completions`,
+      `response`,
       {
         model: 'gpt-5-nano',
         input: inputMessages,

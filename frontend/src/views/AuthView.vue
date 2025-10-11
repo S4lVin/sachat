@@ -1,21 +1,24 @@
 <script setup>
-import { router } from '@/router'
-import { useAuthStore } from '@/stores/authStore'
-import { onMounted } from 'vue'
+import TheAuthForm from '@/components/auth/TheAuthForm.vue'
+import { reactive } from 'vue'
 
-const authStore = useAuthStore()
-
-onMounted(() => {
-  if (authStore.hasValidTokenLocal()) {
-    router.push('/app')
-  }
+const authForm = reactive({
+  isOpen: false,
+  type: 'login',
 })
+
+const openForm = (type) => {
+  authForm.isOpen = true
+  authForm.type = type
+}
+const closeForm = () => (authForm.isOpen = false)
 </script>
 
 <template>
   <div
-    class="mx-auto flex h-screen w-screen max-w-5xl flex-col justify-between overflow-clip px-4 py-4 text-neutral-200 md:px-8"
+    class="relative mx-auto flex h-screen w-screen max-w-5xl flex-col justify-between overflow-clip px-4 py-4 text-neutral-200 md:px-8"
   >
+    <TheAuthForm @close="closeForm" v-if="authForm.isOpen" :type="authForm.type" />
     <div class="flex h-full w-full flex-col justify-center">
       <div class="mb-4 text-4xl font-bold">Benvenuto su SaChat</div>
       <div class="mb-8 leading-8 text-neutral-300">
@@ -24,11 +27,13 @@ onMounted(() => {
       </div>
       <div class="flex gap-4 font-medium">
         <button
+          @click="openForm('login')"
           class="w-32 cursor-pointer rounded-lg bg-indigo-800 p-4 transition-colors hover:bg-indigo-900"
         >
           Accedi
         </button>
         <button
+          @click="openForm('register')"
           class="w-32 cursor-pointer rounded-lg bg-neutral-700 p-4 transition-colors hover:bg-neutral-800"
         >
           Registrati

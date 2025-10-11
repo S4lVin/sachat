@@ -24,6 +24,32 @@ export const useAuthStore = defineStore('auth', () => {
     return true
   }
 
+  const login = async (user) => {
+    const data = await api.post('auth/login', {
+      email: user.email,
+      password: user.password,
+    })
+
+    if (!data.accessToken || !data.refreshToken) return false
+
+    setAccessToken(data.accessToken)
+    setRefreshToken(data.refreshToken)
+    return true
+  }
+
+  const register = async (user) => {
+    const data = await api.post('auth/register', {
+      email: user.email,
+      password: user.password,
+      name: user.name,
+    })
+
+    if (!data.user) return false
+
+    await login(user)
+    return true
+  }
+
   const refreshAccessToken = async () => {
     if (!refreshToken.value) return false
 
@@ -77,6 +103,8 @@ export const useAuthStore = defineStore('auth', () => {
     // STATE
     accessToken,
     // ACTIONS
+    login,
+    register,
     hasValidTokenLocal,
     refreshAccessToken,
     clearTokens,
