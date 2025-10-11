@@ -58,9 +58,6 @@ export const authController = {
 
   refresh: async (req, res) => {
     const { refreshToken } = req.body
-    if (!refreshToken) {
-      throw new CustomError(401, 'Refresh token is required')
-    }
 
     try {
       const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
@@ -70,7 +67,7 @@ export const authController = {
       })
 
       if (!user || user.refreshToken !== refreshToken) {
-        throw new CustomError(403, 'Invalid refresh token')
+        throw new CustomError(401, 'Invalid refresh token')
       }
 
       const accessToken = jwt.sign(
@@ -80,9 +77,9 @@ export const authController = {
       )
 
       res.json({ accessToken })
-    } catch {
+    } catch (error) {
       if (error instanceof CustomError) throw error
-      throw new CustomError(403, 'Invalid or expired refresh token')
+      throw new CustomError(401, 'Invalid or expired refresh token')
     }
   },
 
@@ -97,7 +94,7 @@ export const authController = {
     })
 
     if (!user) {
-      throw new CustomError(403, 'Invalid refresh token')
+      throw new CustomError(401, 'Invalid refresh token')
     }
 
     await prisma.user.update({

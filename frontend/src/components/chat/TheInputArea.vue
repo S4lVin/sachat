@@ -1,24 +1,21 @@
 <script setup>
 import FeatherIcons from '@/components/FeatherIcon.vue'
+import { useChatStore } from '@/stores/chatStore'
+import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 
-const emit = defineEmits(['send', 'stop'])
-const props = defineProps({
-  disabled: {
-    type: Boolean,
-    required: false
-  }
-})
+const chatStore = useChatStore()
+const { isGenerating } = storeToRefs(chatStore)
 
 const input = ref('')
 
 const send = () => {
   const message = input.value.trim()
-  if (!message || props.disabled) return
-  emit('send', message)
+  if (!message || isGenerating.value) return
+  chatStore.sendUserMessage(input.value)
+  chatStore.requestAssistantReply()
   input.value = ''
 }
-const stop = () => emit('stop')
 </script>
 
 <template>
@@ -31,10 +28,10 @@ const stop = () => emit('stop')
       class="w-full rounded-xl bg-neutral-700 px-6 py-4 shadow-lg/25 focus:outline-none"
     />
     <button
-      @click="props.disabled ? stop() : send()"
+      @click="isGenerating ? chatStore.cancelAssistantReply() : send()"
       class="cursor-pointer rounded-xl bg-indigo-800 p-3 shadow-lg/25 hover:bg-indigo-900"
     >
-      <feather-icons :size="32" :name="disabled ? 'stop-circle' : 'arrow-up'" />
+      <feather-icons :size="32" :name="isGenerating ? 'stop-circle' : 'arrow-up'" />
     </button>
   </div>
 </template>

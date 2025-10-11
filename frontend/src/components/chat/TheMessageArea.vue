@@ -29,7 +29,7 @@ watch(() => messages.value.map(msg => msg.content), async () => {
         v-for="message in messages"
         :key="message.id"
         :sender="message.sender"
-        :message="message.content"
+        :content="message.content"
       />
     </div>
     <div ref="bottomRef"></div>

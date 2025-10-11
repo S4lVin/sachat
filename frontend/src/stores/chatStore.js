@@ -32,27 +32,26 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   const sendUserMessage = async (content) => {
-    const temp = appendTemporaryMessage('user', content)
-    await persistMessage(selectedChat.value.id, temp)
-    return temp
+    const tempMessage = appendTemporaryMessage('user', content)
+    await persistMessage(selectedChat.value.id, tempMessage)
   }
 
   const requestAssistantReply = async () => {
     if (isGenerating.value) return
 
     const input = buildModelInput()
-    const temp = appendTemporaryMessage('assistant', '')
+    const tempMessage = appendTemporaryMessage('assistant', '')
     isGenerating.value = true
 
     try {
-      const ok = await streamCompletionIntoMessage(input, temp)
+      const ok = await streamCompletionIntoMessage(input, tempMessage)
 
       if (!ok) {
-        removeMessageById(temp.id)
+        removeMessageById(tempMessage.id)
         return
       }
 
-      await persistMessage(selectedChat.value.id, temp)
+      await persistMessage(selectedChat.value.id, tempMessage)
     } finally {
       isGenerating.value = false
     }
@@ -65,7 +64,7 @@ export const useChatStore = defineStore('chat', () => {
 
   // #region HELPERS
   const appendTemporaryMessage = (sender, content = '') => {
-    const id = 'temp-' + Date.now()
+    const id = 'tempMessage-' + Date.now()
     const message = reactive({ id, sender, content })
     messages.value.push(message)
     return message
@@ -95,10 +94,10 @@ export const useChatStore = defineStore('chat', () => {
   const streamCompletionIntoMessage = async (inputMessages, tempMessage) => {
     let receivedText = false
 
-    const response = await api.stream(`completions`, {
+    const response = await api.post(`completions`, {
       model: 'gpt-5-nano',
       input: inputMessages,
-    })
+    }, {raw: true})
     const reader = response.body.getReader()
 
     await consumeSseJson(

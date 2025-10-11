@@ -7,14 +7,14 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  message: {
+  content: {
     type: String,
     required: true,
   },
 })
 
 const isUser = computed(() => props.sender === 'user')
-const isLoading = computed(() => !isUser.value && !props.message)
+const isLoading = computed(() => !isUser.value && !props.content)
 const actions = computed(() =>
   isUser.value
     ? [{ name: 'copy' }, { name: 'edit' }]
@@ -22,7 +22,11 @@ const actions = computed(() =>
 )
 
 function onAction(name) {
-  // TODO: Gestire le azioni
+  switch (name) {
+    case 'copy':
+      navigator.clipboard.writeText(props.content)
+      break
+  }
 }
 </script>
 
@@ -32,9 +36,10 @@ function onAction(name) {
       <div v-if="!isUser" class="mb-1 font-bold uppercase">{{ sender }}</div>
       <div :class="{ 'rounded-xl bg-neutral-800 px-6 py-4 text-end': isUser }">
         <feather-icons v-if="isLoading" class="animate-spin" name="loader" />
-        {{ message }}
+        {{ content }}
       </div>
       <div
+        v-if="!isLoading"
         class="absolute mt-2 hidden gap-x-2 text-neutral-500 group-hover:flex"
         :class="isUser ? 'right-0' : 'left-0'"
       >

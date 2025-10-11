@@ -7,7 +7,7 @@ export const consumeSseJson = async (reader, onJson, shouldBreak) => {
       try {
         await reader.cancel()
       } catch {
-        // ignoriamo eventuali errori di cancel
+        // Ignoro eventuali errori di cancel
       }
       break
     }

@@ -27,7 +27,7 @@ const streamResponse = async (res, asyncIterator) => {
   }
 }
 
-export const completionController = {
+export const responseController = {
   create: async (req, res) => {
     try {
       const stream = await client.responses.create({ ...req.body, stream: true })
