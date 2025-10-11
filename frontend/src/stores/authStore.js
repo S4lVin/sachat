@@ -13,13 +13,9 @@ export const useAuthStore = defineStore('auth', () => {
   const hasValidTokenLocal = () => {
     if (!accessToken.value) return false
 
-    const isAccessTokenExpired = checkTokenExpired(accessToken.value)
-
-    if (isAccessTokenExpired) {
+    if (isTokenExpired(accessToken.value)) {
       if (!refreshToken.value) return false
-
-      const isRefreshTokenExpired = checkTokenExpired(refreshToken.value)
-      if (isRefreshTokenExpired) return false
+      if (isTokenExpired(refreshToken.value)) return false
     }
     return true
   }
@@ -29,8 +25,6 @@ export const useAuthStore = defineStore('auth', () => {
       email: user.email,
       password: user.password,
     })
-
-    if (!data.accessToken || !data.refreshToken) return false
 
     setAccessToken(data.accessToken)
     setRefreshToken(data.refreshToken)
@@ -44,55 +38,50 @@ export const useAuthStore = defineStore('auth', () => {
       name: user.name,
     })
 
-    if (!data.user) return false
-
-    await login(user)
-    return true
+    return await login(data.user)
   }
 
   const refreshAccessToken = async () => {
-    if (!refreshToken.value) return false
+    try {
+      const data = await api.post(
+        'auth/refresh',
+        { refreshToken: refreshToken.value },
+        { hasRetried: true },
+      )
 
-    const data = await api.post(
-      'auth/refresh',
-      {
-        refreshToken: refreshToken.value,
-      },
-      { hasRetried: true },
-    )
-
-    if (!data?.accessToken) return false
-    setAccessToken(data.accessToken)
-    return true
+      setAccessToken(data.accessToken)
+      return data.accessToken
+    } catch (error) {
+      clearTokens()
+      throw error
+    }
   }
 
   const clearTokens = () => {
-    accessToken.value = null
-    refreshToken.value = null
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
+    setAccessToken(null)
+    setRefreshToken(null)
   }
   // #endregion
 
   // #region HELPERS
   const setAccessToken = (token) => {
     accessToken.value = token
-    localStorage.setItem('accessToken', token)
+    if (token) localStorage.setItem('accessToken', token)
+    else localStorage.removeItem('accessToken')
   }
 
   const setRefreshToken = (token) => {
     refreshToken.value = token
-    localStorage.setItem('refreshToken', token)
+    if (token) localStorage.setItem('refreshToken', token)
+    else localStorage.removeItem('refreshToken')
   }
 
-  const checkTokenExpired = (token) => {
+  const isTokenExpired = (token) => {
+    if (!token) return true
     try {
       const decoded = jwtDecode(token)
-
       const now = Math.floor(Date.now() / 1000)
-      if (decoded.exp && decoded.exp < now) return true
-
-      return false
+      return !!decoded.exp && decoded.exp < now
     } catch {
       return true
     }

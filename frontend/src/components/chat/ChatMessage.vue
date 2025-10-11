@@ -16,9 +16,7 @@ const props = defineProps({
 const isUser = computed(() => props.sender === 'user')
 const isLoading = computed(() => !isUser.value && !props.content)
 const actions = computed(() =>
-  isUser.value
-    ? [{ name: 'copy' }, { name: 'edit' }]
-    : [{ name: 'copy' }, { name: 'repeat' }, { name: 'edit' }],
+  isUser.value ? [{ name: 'copy' }, { name: 'edit' }] : [{ name: 'copy' }, { name: 'repeat' }],
 )
 
 function onAction(name) {
@@ -35,7 +33,7 @@ function onAction(name) {
     <div class="relative">
       <div v-if="!isUser" class="mb-1 font-bold uppercase">{{ sender }}</div>
       <div :class="{ 'rounded-xl bg-neutral-800 px-6 py-4 text-end': isUser }">
-        <feather-icons v-if="isLoading" class="animate-spin" name="loader" />
+        <feather-icons v-if="isLoading" :spin="true" name="loader" />
         {{ content }}
       </div>
       <div

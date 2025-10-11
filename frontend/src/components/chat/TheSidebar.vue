@@ -1,6 +1,6 @@
 <script setup>
 import FeatherIcons from '@/components/FeatherIcon.vue'
-import ChatHistoryItem from '@/components/chat/sidebar/ChatHistoryItem.vue'
+import ChatHistoryItem from '@/components/chat/ChatHistoryItem.vue'
 import { router } from '@/router'
 import { useChatStore } from '@/stores/chatStore.js'
 import { storeToRefs } from 'pinia'
@@ -13,6 +13,11 @@ const collapsed = ref(false)
 
 const selectChat = (chatId) => {
   router.push({ name: 'Chat', params: { chatId } })
+}
+
+const createAndSelect = async () => {
+  const chat = await chatStore.createChat()
+  selectChat(chat.id)
 }
 </script>
 
@@ -37,7 +42,7 @@ const selectChat = (chatId) => {
     </div>
     <div v-show="!collapsed" class="absolute bottom-0 w-full px-6 py-4">
       <button
-        @click="chatStore.createChat"
+        @click="createAndSelect"
         class="w-full cursor-pointer rounded-lg bg-neutral-600 p-4 text-xl hover:bg-neutral-700"
       >
         <span class="text-lg">Nuova Chat</span>

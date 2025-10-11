@@ -10,7 +10,7 @@ const { selectedChat, messages } = storeToRefs(chatStore)
 const bottomRef = ref()
 
 watch(selectedChat, async (newChat) => {
-  if (newChat) {
+  if (newChat?.id) {
     messages.value = []
     chatStore.loadMessages(newChat.id)
   }
@@ -20,7 +20,7 @@ watch(
   () => messages.value.map((msg) => msg.content),
   async () => {
     await nextTick()
-    bottomRef.value.scrollIntoView()
+    bottomRef.value.scrollIntoView({ block: 'end' })
   },
 )
 </script>

@@ -1,5 +1,5 @@
 <script setup>
-import TheSidebar from '@/components/chat/sidebar/TheSidebar.vue'
+import TheSidebar from '@/components/chat/TheSidebar.vue'
 import TheMessageArea from '@/components/chat/TheMessageArea.vue'
 import InputArea from '@/components/chat/TheInputArea.vue'
 import { watch } from 'vue'

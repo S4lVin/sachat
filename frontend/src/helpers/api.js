@@ -1,56 +1,64 @@
-import { router } from '@/router'
 import { useAuthStore } from '@/stores/authStore'
 import { storeToRefs } from 'pinia'
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL
 
-const getHeaders = (accessToken) => {
-  return {
+export class ApiError extends Error {
+  constructor(message, status, payload) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+    this.payload = payload
+  }
+}
+
+const getHeaders = (accessToken, extraHeaders) => {
+  const headers = {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${accessToken}`,
+    ...(extraHeaders || {}),
   }
+  if (accessToken) headers.Authorization = `Bearer ${accessToken}`
+  return headers
 }
 
-const buildFetchOptions = (accessToken, options) => ({
-  headers: getHeaders(accessToken),
-  ...options,
-  body: options.body ? JSON.stringify(options.body) : undefined,
-})
-
-const parseResponse = async (response, options) => {
-  if (options.raw) return response
-  if (response.status === 204) return null
-  return response.json()
-}
-
-const handleErrorResponse = async (response, path, options) => {
-  const data = await response.json()
-  console.error(`(${response.status}) ${data.error.message}`)
-
-  if (response.status === 401 && !options.hasRetried) {
-    const authStore = useAuthStore()
-
-    const success = await authStore.refreshAccessToken()
-    if (success) return request(path, { ...options, hasRetried: true })
-
-    authStore.clearTokens()
-    return router.push('/')
+const buildFetchOptions = (accessToken, options = {}) => {
+  const { method = 'GET', body, signal, headers } = options
+  return {
+    method,
+    signal,
+    headers: getHeaders(accessToken, headers),
+    body: body !== undefined ? JSON.stringify(body) : undefined,
   }
-
-  return null
 }
 
 export const request = async (path, options = {}) => {
   const authStore = useAuthStore()
   const { accessToken } = storeToRefs(authStore)
 
-  const response = await fetch(
-    `${backendUrl}/api/${path}`,
-    buildFetchOptions(accessToken.value, options),
-  )
-  if (!response.ok) return handleErrorResponse(response, path, options)
+  const url = `${backendUrl}/api/${path}`.replace(/([^:]\/)\/+/g, '$1')
+  const response = await fetch(url, buildFetchOptions(accessToken.value, options))
 
-  return parseResponse(response, options)
+  // 401 -> tenta 1 refresh automatico
+  if (response.status === 401 && !options.hasRetried) {
+    const accessToken = await authStore.refreshAccessToken()
+    if (accessToken) {
+      return request(path, { ...options, hasRetried: true })
+    }
+  }
+
+  if (!response.ok) {
+    let payload = null
+    try {
+      payload = await response.json()
+    } catch {
+      // Ignora
+    }
+    throw new ApiError(payload?.error?.message, response.status, payload)
+  }
+
+  if (options.raw) return response
+  if (response.status === 204) return null
+  return response.json()
 }
 
 export const api = {

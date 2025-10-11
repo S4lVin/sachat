@@ -15,9 +15,9 @@ const props = defineProps({
     type: Number,
     default: 2,
   },
-  class: {
-    type: String,
-    default: '',
+  spin: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -27,7 +27,7 @@ const icon = computed(() => {
       width: props.size,
       height: props.size,
       'stroke-width': props.strokeWidth,
-      class: props.class,
+      class: props.spin ? 'animate-spin' : '',
     }) || ''
   )
 })

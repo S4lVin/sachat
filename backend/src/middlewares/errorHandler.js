@@ -42,7 +42,7 @@ export const errorHandler = (error, req, res, next) => {
   if (isCustomError(error)) {
     statusCode = error.statusCode || 500
     message =
-      getReasonPhrase(statusCode) + (error.message ? `: ${error.message}` : '') ||
+      error.message ? `${error.message}` : '' ||
       'An error occurred'
   }
   // 2. Errore Prisma

@@ -1,7 +1,7 @@
 import { ref, reactive } from 'vue'
 import { defineStore } from 'pinia'
 import { api } from '@/helpers/api'
-import { consumeSseJson } from '@/utils'
+import { consumeSseJson } from '@/helpers/sse'
 
 export const useChatStore = defineStore('chat', () => {
   // #region STATE
@@ -9,6 +9,7 @@ export const useChatStore = defineStore('chat', () => {
   const selectedChat = ref()
   const messages = ref([])
   const isGenerating = ref(false)
+  const sseController = ref(null)
   // #endregion
 
   // #region ACTIONS
@@ -24,6 +25,7 @@ export const useChatStore = defineStore('chat', () => {
     })
     chats.value.unshift(data.chat)
     selectedChat.value = data.chat
+    return data.chat
   }
 
   const loadMessages = async (chatId) => {
@@ -37,23 +39,25 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   const requestAssistantReply = async () => {
-    if (isGenerating.value) return
+    if (isGenerating.value || !selectedChat.value?.id) return
 
     const input = buildModelInput()
     const tempMessage = appendTemporaryMessage('assistant', '')
     isGenerating.value = true
 
-    try {
-      const ok = await streamCompletionIntoMessage(input, tempMessage)
+    const controller = new AbortController()
+    sseController.value = controller
 
+    try {
+      const ok = await streamCompletionIntoMessage(input, tempMessage, controller.signal)
       if (!ok) {
         removeMessageById(tempMessage.id)
         return
       }
-
       await persistMessage(selectedChat.value.id, tempMessage)
     } finally {
       isGenerating.value = false
+      sseController.value = null
     }
   }
 
@@ -91,29 +95,29 @@ export const useChatStore = defineStore('chat', () => {
     }))
   }
 
-  const streamCompletionIntoMessage = async (inputMessages, tempMessage) => {
+  const streamCompletionIntoMessage = async (inputMessages, tempMessage, signal) => {
     let receivedText = false
 
     const response = await api.post(
-      `response`,
+      'response',
       {
         model: 'gpt-5-nano',
         input: inputMessages,
       },
-      { raw: true },
+      { raw: true, signal },
     )
+
     const reader = response.body.getReader()
 
-    await consumeSseJson(
-      reader,
-      (json) => {
+    await consumeSseJson(reader, {
+      onJson: (json) => {
         if (json.type === 'response.output_text.delta' && json.delta) {
           tempMessage.content += json.delta
           receivedText = true
         }
       },
-      () => !isGenerating.value, // Interrompo se l'utente cancella
-    )
+      shouldBreak: () => !isGenerating.value,
+    })
 
     return receivedText
   }

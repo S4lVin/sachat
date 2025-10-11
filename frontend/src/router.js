@@ -4,8 +4,20 @@ import AuthView from './views/AuthView.vue'
 import { useAuthStore } from './stores/authStore'
 
 const routes = [
-  { path: '/chat/:chatId', name: 'Chat', component: ChatView },
   { path: '/', name: 'Auth', component: AuthView },
+  {
+    path: '/chat/new',
+    name: 'ChatNew',
+    component: ChatView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/chat/:chatId(\\d+)',
+    name: 'Chat',
+    component: ChatView,
+    meta: { requiresAuth: true },
+  },
+  { path: '/:pathMatch(.*)*', redirect: '/' },
 ]
 
 export const router = createRouter({
@@ -17,10 +29,15 @@ router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   const isAuthenticated = authStore.hasValidTokenLocal()
 
-  const requiresAuth = to.path.startsWith('/chat')
+  const requiresAuth = to.matched.some((route) => route.meta?.requiresAuth)
 
-  if (requiresAuth && !isAuthenticated) return next('/')
-  if (to.path === '/' && isAuthenticated) return next('/chat/new')
+  if (requiresAuth && !isAuthenticated) {
+    return next({ name: 'Auth' })
+  }
+
+  if (to.name === 'Auth' && isAuthenticated) {
+    return next({ name: 'ChatNew' })
+  }
 
   return next()
 })

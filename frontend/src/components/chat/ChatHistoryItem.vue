@@ -1,6 +1,7 @@
 <script setup>
 import FeatherIcons from '@/components/FeatherIcon.vue'
 
+defineEmits(['select'])
 defineProps({
   title: {
     type: String,
