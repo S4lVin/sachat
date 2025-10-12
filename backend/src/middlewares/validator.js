@@ -1,9 +1,17 @@
-import { CustomError } from '#utils'
+import { BadRequestError } from '#utils'
 
 export const validator = (schema) => (req, res, next) => {
-  const result = schema.validate(req.body)
-  if (result.error || req.body === undefined) {
-    throw new CustomError(400, result.error.message)
+  if (!req.body) throw new BadRequestError('Corpo mancante', 'BODY_MISSING')
+
+  const result = schema.validate(req.body, { abortEarly: false })
+
+  if (result.error) {
+    const errors = result.error.details.map((detail) => ({
+      field: detail.context?.key,
+      message: detail.message,
+    }))
+
+    throw new BadRequestError('Richiesta non valida', 'INVALID_REQUEST', errors)
   }
 
   req.validatedBody = result.value

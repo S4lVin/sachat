@@ -1,29 +1,23 @@
 import express from 'express'
 import cors from 'cors'
-import { CustomError } from '#utils'
-import { errorHandler, authenticator, requestLogger } from '#middlewares'
+import { NotFoundError, logger, httpLogger } from '#utils'
+import { rateLimiter, corsHandler, errorHandler, authenticator } from '#middlewares'
 import { authRouter, chatsRouter, responseRouter } from '#routers'
 
 const app = express()
 const port = process.env.PORT
 
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true,
-  }),
-)
+app.use(rateLimiter)
+app.use(corsHandler)
 
 app.use(express.json())
-app.use(requestLogger)
+app.use(httpLogger)
 
 app.use('/api/auth', authRouter)
 app.use('/api/chats', authenticator, chatsRouter)
 app.use('/api/response', authenticator, responseRouter)
-
 app.use(() => {
-  throw new CustomError(404)
+  throw new NotFoundError('Endpoint non trovato', 'ENDPOINT_NOT_FOUND')
 })
 
 app.use(errorHandler)

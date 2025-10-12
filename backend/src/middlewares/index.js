@@ -1,4 +1,5 @@
-export { requestLogger } from './requestLogger.js'
+export { rateLimiter } from './rateLimiter.js'
+export { corsHandler } from './corsHandler.js'
 export { errorHandler } from './errorHandler.js'
 export { validator } from './validator.js'
 export { authenticator } from './authenticator.js'

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { CustomError } from '#utils'
+import { NotFoundError } from '#utils'
 
 const prisma = new PrismaClient()
 
@@ -14,6 +14,7 @@ export const messageController = {
       },
       orderBy: { createdAt: 'asc' },
     })
+
     res.json({ messages })
   },
 
@@ -28,9 +29,8 @@ export const messageController = {
       },
     })
 
-    if (!message) {
-      throw new CustomError(404)
-    }
+    if (!message) throw new NotFoundError('Messaggio non trovato', 'MESSAGE_NOT_FOUND')
+
     res.json({ message })
   },
 
@@ -46,9 +46,7 @@ export const messageController = {
       },
     })
 
-    if (!chat) {
-      throw new CustomError(404)
-    }
+    if (!chat) throw new NotFoundError('Chat non trovata', 'CHAT_NOT_FOUND')
 
     const message = await prisma.message.create({
       data: {
@@ -57,6 +55,7 @@ export const messageController = {
         chatId: Number(chatId),
       },
     })
+
     res.status(201).json({ message })
   },
 
@@ -64,19 +63,33 @@ export const messageController = {
     const { chatId, messageId } = req.params
     const { sender, content } = req.body
 
-    const message = await prisma.message.update({
-      where: { id: Number(messageId), chatId: Number(chatId), chat: { userId: req.user.id } },
-      data: { sender, content },
-    })
+    try {
+      const message = await prisma.message.update({
+        where: { id: Number(messageId), chatId: Number(chatId), chat: { userId: req.user.id } },
+        data: { sender, content },
+      })
+    } catch (error) {
+      if (error.code === 'P2025')
+        throw new NotFoundError('Messaggio non trovato', 'MESSAGE_NOT_FOUND')
+      throw error
+    }
+
     res.json({ message })
   },
 
   delete: async (req, res) => {
     const { chatId, messageId } = req.params
 
-    await prisma.message.delete({
-      where: { id: Number(messageId), chatId: Number(chatId), chat: { userId: req.user.id } },
-    })
+    try {
+      await prisma.message.delete({
+        where: { id: Number(messageId), chatId: Number(chatId), chat: { userId: req.user.id } },
+      })
+    } catch (error) {
+      if (error.code === 'P2025')
+        throw new NotFoundError('Messaggio non trovato', 'MESSAGE_NOT_FOUND')
+      throw error
+    }
+
     res.status(204).end()
   },
 }

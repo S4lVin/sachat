@@ -1,5 +1,5 @@
 import OpenAI from 'openai'
-import { CustomError } from '#utils'
+import { AppError } from '#utils'
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
@@ -21,7 +21,11 @@ const streamResponse = async (res, asyncIterator) => {
       res.write(`data: ${JSON.stringify(event)}\n\n`)
     }
   } catch (error) {
-    throw new CustomError(error.status, error.error.message)
+    throw new AppError({
+      message: error.error.message,
+      statusCode: error.status,
+      errorCode: 'OPENAI_ERROR',
+    })
   } finally {
     res.end()
   }
@@ -29,11 +33,7 @@ const streamResponse = async (res, asyncIterator) => {
 
 export const responseController = {
   create: async (req, res) => {
-    try {
-      const stream = await client.responses.create({ ...req.body, stream: true })
-      await streamResponse(res, stream)
-    } catch (error) {
-      throw new CustomError(error.status, error.error.message)
-    }
+    const stream = await client.responses.create({ ...req.body, stream: true })
+    await streamResponse(res, stream)
   },
 }

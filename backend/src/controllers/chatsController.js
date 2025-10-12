@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { CustomError } from '#utils'
+import { NotFoundError } from '#utils'
 
 const prisma = new PrismaClient()
 
@@ -9,6 +9,7 @@ export const chatController = {
       where: { userId: req.user.id },
       orderBy: { createdAt: 'desc' },
     })
+
     res.json({ chats })
   },
 
@@ -19,10 +20,8 @@ export const chatController = {
       where: { id: Number(chatId), userId: req.user.id },
       include: { messages: true },
     })
+    if (!chat) throw new NotFoundError('Chat non trovata', 'CHAT_NOT_FOUND')
 
-    if (!chat) {
-      throw new CustomError(404)
-    }
     res.json({ chat })
   },
 
@@ -43,6 +42,7 @@ export const chatController = {
       },
       include: { messages: true },
     })
+
     res.status(201).json({ chat })
   },
 
@@ -50,31 +50,43 @@ export const chatController = {
     const { chatId } = req.params
     const { title, messages } = req.body
 
-    const chat = await prisma.chat.update({
-      where: { id: Number(chatId), userId: req.user.id },
-      data: {
-        title,
-        messages: messages
-          ? {
-              deleteMany: {},
-              create: messages?.map((message) => ({
-                sender: message.sender,
-                content: message.content,
-              })),
-            }
-          : undefined,
-      },
-      include: { messages: true },
-    })
+    try {
+      const chat = await prisma.chat.update({
+        where: { id: Number(chatId), userId: req.user.id },
+        data: {
+          title,
+          messages: messages
+            ? {
+                deleteMany: {},
+                create: messages?.map((message) => ({
+                  sender: message.sender,
+                  content: message.content,
+                })),
+              }
+            : undefined,
+        },
+        include: { messages: true },
+      })
+    } catch (error) {
+      if (error.code === 'P2025') throw new NotFoundError('Chat non trovata', 'CHAT_NOT_FOUND')
+      throw error
+    }
+
     res.json({ chat })
   },
 
   delete: async (req, res) => {
     const { chatId } = req.params
 
-    await prisma.chat.delete({
-      where: { id: Number(chatId), userId: req.user.id },
-    })
+    try {
+      await prisma.chat.delete({
+        where: { id: Number(chatId), userId: req.user.id },
+      })
+    } catch (error) {
+      if (error.code === 'P2025') throw new NotFoundError('Chat non trovata', 'CHAT_NOT_FOUND')
+      throw error
+    }
+
     res.status(204).end()
   },
 }
