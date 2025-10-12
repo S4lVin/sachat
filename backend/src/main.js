@@ -1,5 +1,5 @@
+import 'dotenv/config'
 import express from 'express'
-import cors from 'cors'
 import { NotFoundError, logger, httpLogger } from '#utils'
 import { rateLimiter, corsHandler, errorHandler, authenticator } from '#middlewares'
 import { authRouter, chatsRouter, responseRouter } from '#routers'
@@ -23,5 +23,5 @@ app.use(() => {
 app.use(errorHandler)
 
 app.listen(port, () => {
-  console.log(`SaChat backend operative\n\nPort ${port}\nEnvironment: ${process.env.NODE_ENV}`)
+  console.log(`SaChat backend operative\n\nPort ${port}\nEnvironment: ${process.env.NODE_ENV}\n`)
 })
