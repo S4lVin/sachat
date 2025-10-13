@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import express from 'express'
-import { NotFoundError, logger, httpLogger } from '#utils'
+import { NotFoundError } from '#errors'
+import { logger, httpLogger } from '#utils'
 import { rateLimiter, corsHandler, errorHandler, authenticator } from '#middlewares'
 import { authRouter, chatsRouter, responseRouter } from '#routers'
 

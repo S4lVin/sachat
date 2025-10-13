@@ -1,7 +1,9 @@
 import { PrismaClient } from '@prisma/client'
-import { NotFoundError } from '#utils'
+import { NotFoundError } from '#errors'
 
 const prisma = new PrismaClient()
+
+const MessageNotFound = () => new NotFoundError('Messaggio non trovato', 'MESSAGE_NOT_FOUND')
 
 export const messageController = {
   getAll: async (req, res) => {
@@ -28,8 +30,7 @@ export const messageController = {
         chat: { userId: req.user.id },
       },
     })
-
-    if (!message) throw new NotFoundError('Messaggio non trovato', 'MESSAGE_NOT_FOUND')
+    if (!message) throw MessageNotFound()
 
     res.json({ message })
   },
@@ -45,8 +46,7 @@ export const messageController = {
         userId: req.user.id,
       },
     })
-
-    if (!chat) throw new NotFoundError('Chat non trovata', 'CHAT_NOT_FOUND')
+    if (!chat) throw MessageNotFound()
 
     const message = await prisma.message.create({
       data: {
@@ -69,8 +69,7 @@ export const messageController = {
         data: { sender, content },
       })
     } catch (error) {
-      if (error.code === 'P2025')
-        throw new NotFoundError('Messaggio non trovato', 'MESSAGE_NOT_FOUND')
+      if (error.code === 'P2025') throw MessageNotFound()
       throw error
     }
 
@@ -85,8 +84,7 @@ export const messageController = {
         where: { id: Number(messageId), chatId: Number(chatId), chat: { userId: req.user.id } },
       })
     } catch (error) {
-      if (error.code === 'P2025')
-        throw new NotFoundError('Messaggio non trovato', 'MESSAGE_NOT_FOUND')
+      if (error.code === 'P2025') throw MessageNotFound()
       throw error
     }
 

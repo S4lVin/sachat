@@ -1,7 +1,9 @@
 import { PrismaClient } from '@prisma/client'
-import { NotFoundError } from '#utils'
+import { NotFoundError } from '#errors'
 
 const prisma = new PrismaClient()
+
+const ChatNotFound = () => new NotFoundError('Chat non trovata', 'CHAT_NOT_FOUND')
 
 export const chatController = {
   getAll: async (req, res) => {
@@ -20,7 +22,7 @@ export const chatController = {
       where: { id: Number(chatId), userId: req.user.id },
       include: { messages: true },
     })
-    if (!chat) throw new NotFoundError('Chat non trovata', 'CHAT_NOT_FOUND')
+    if (!chat) throw ChatNotFound()
 
     res.json({ chat })
   },
@@ -68,7 +70,7 @@ export const chatController = {
         include: { messages: true },
       })
     } catch (error) {
-      if (error.code === 'P2025') throw new NotFoundError('Chat non trovata', 'CHAT_NOT_FOUND')
+      if (error.code === 'P2025') throw ChatNotFound()
       throw error
     }
 
@@ -83,7 +85,7 @@ export const chatController = {
         where: { id: Number(chatId), userId: req.user.id },
       })
     } catch (error) {
-      if (error.code === 'P2025') throw new NotFoundError('Chat non trovata', 'CHAT_NOT_FOUND')
+      if (error.code === 'P2025') throw ChatNotFound()
       throw error
     }
 

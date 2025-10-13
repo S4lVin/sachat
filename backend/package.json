@@ -14,7 +14,7 @@
     "#services": "./src/services/index.js",
     "#schemas": "./src/schemas/index.js",
     "#middlewares": "./src/middlewares/index.js",
-    "#helpers": "./src/helpers/index.js",
+    "#errors": "./src/errors/index.js",
     "#utils": "./src/utils/index.js"
   },
   "dependencies": {

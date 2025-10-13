@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { UnauthorizedError } from '#utils'
+import { MissingAccessToken, InvalidAccessToken } from '#errors'
 
 const extractTokenFromHeader = (req) => {
   const auth = req.headers['authorization']
@@ -16,13 +16,13 @@ const extractTokenFromHeader = (req) => {
 
 export const authenticator = (req, res, next) => {
   const token = extractTokenFromHeader(req)
-  if (!token) throw new UnauthorizedError('Access token mancante', 'MISSING_ACCESS_TOKEN')
+  if (!token) throw MissingAccessToken()
 
   try {
     const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
     req.user = { id: payload.userId, email: payload.email }
     next()
   } catch (error) {
-    throw new UnauthorizedError('Access token non valido', 'INVALID_ACCESS_TOKEN')
+    throw InvalidAccessToken()
   }
 }

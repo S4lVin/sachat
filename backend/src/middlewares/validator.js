@@ -1,7 +1,7 @@
-import { BadRequestError } from '#utils'
+import { BadRequestError } from '#errors'
 
 export const validator = (schema) => (req, res, next) => {
-  if (!req.body) throw new BadRequestError('Corpo mancante', 'BODY_MISSING')
+  if (!req.body) throw new BadRequestError('Corpo della richiesta mancante', 'MISSING_REQUEST_BODY')
 
   const result = schema.validate(req.body, { abortEarly: false })
 

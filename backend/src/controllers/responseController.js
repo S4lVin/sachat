@@ -1,5 +1,5 @@
 import OpenAI from 'openai'
-import { AppError } from '#utils'
+import { AppError } from '#errors'
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 

@@ -1,9 +1,17 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { PrismaClient } from '@prisma/client'
-import { ConflictError, UnauthorizedError } from '#utils'
+import { EmailTaken, AuthFailed, InvalidRefreshToken } from '#errors'
 
 const prisma = new PrismaClient()
+
+const safeJWTVerify = (token, secret) => {
+  try {
+    return jwt.verify(token, secret)
+  } catch {
+    return null
+  }
+}
 
 export const authController = {
   register: async (req, res) => {
@@ -19,8 +27,7 @@ export const authController = {
         },
       })
     } catch (error) {
-      if (error.code === 'P2002')
-        throw new ConflictError('Indirizzo email già in uso', 'EMAIL_TAKEN')
+      if (error.code === 'P2002') throw EmailTaken()
       throw error
     }
 
@@ -35,11 +42,10 @@ export const authController = {
         email,
       },
     })
-    if (!user) throw new UnauthorizedError('Email o password non valida', 'AUTHENTICATION_FAILED')
+    if (!user) throw AuthFailed()
 
     const validPassword = await bcrypt.compare(password, user.password)
-    if (!validPassword)
-      throw new UnauthorizedError('Email o password non valida', 'AUTHENTICATION_FAILED')
+    if (!validPassword) throw AuthFailed()
 
     const accessToken = jwt.sign(
       { userId: user.id, email: user.email },
@@ -63,17 +69,13 @@ export const authController = {
   refresh: async (req, res) => {
     const { refreshToken } = req.body
 
-    try {
-      const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
-    } catch {
-      throw new UnauthorizedError('Refresh token non valido', 'INVALID_REFRESH_TOKEN')
-    }
+    const payload = safeJWTVerify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
+    if (!payload) throw InvalidRefreshToken()
 
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
     })
-    if (!user || user.refreshToken !== refreshToken)
-      throw new UnauthorizedError('Refresh token non valido', 'INVALID_REFRESH_TOKEN')
+    if (!user || user.refreshToken !== refreshToken) throw InvalidRefreshToken()
 
     const accessToken = jwt.sign(
       { userId: payload.userId, email: payload.email },
@@ -90,7 +92,7 @@ export const authController = {
     const user = await prisma.user.findUnique({
       where: { refreshToken },
     })
-    if (!user) throw new UnauthorizedError('Refresh token non valido', 'INVALID_REFRESH_TOKEN')
+    if (!user) throw InvalidRefreshToken()
 
     await prisma.user.update({
       where: { id: user.id },
