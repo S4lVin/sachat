@@ -26,8 +26,8 @@ export const authSchemas = {
   }),
 
   login: Joi.object({
-    email: Joi.string().email().max(100).required().messages(emailMessages),
-    password: Joi.string().min(8).max(50).required().messages(passwordMessages),
+    email: Joi.string().email().required().messages(emailMessages),
+    password: Joi.string().required().messages(passwordMessages),
   }),
 
   refresh: Joi.object({
