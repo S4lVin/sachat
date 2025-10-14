@@ -7,7 +7,7 @@ const routes = [
   { path: '/', name: 'Auth', component: AuthView },
   {
     path: '/chat/new',
-    name: 'ChatNew',
+    name: 'NewChat',
     component: ChatView,
     meta: { requiresAuth: true },
   },
@@ -36,7 +36,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.name === 'Auth' && isAuthenticated) {
-    return next({ name: 'ChatNew' })
+    return next({ name: 'NewChat' })
   }
 
   return next()

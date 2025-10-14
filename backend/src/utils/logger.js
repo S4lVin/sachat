@@ -24,7 +24,7 @@ export const httpLogger = pinoHttp({
       method: req.method,
       url: req.url,
       id: req.id,
-      userId: req.user?.id,
+      userId: req?.user?.id,
       ip: req.ip,
     }),
     res: (res) => ({

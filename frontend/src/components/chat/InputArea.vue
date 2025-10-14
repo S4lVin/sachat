@@ -35,7 +35,7 @@ const send = async () => {
   autoResize()
 
   chatStore.sendUserMessage(message)
-  await chatStore.requestAssistantReply()
+  chatStore.requestAssistantReply()
 }
 
 const handleAction = () => {

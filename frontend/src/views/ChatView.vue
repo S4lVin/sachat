@@ -9,7 +9,7 @@ import { storeToRefs } from 'pinia'
 
 const route = useRoute()
 const chatStore = useChatStore()
-const { chats, selectedChat, messages } = storeToRefs(chatStore)
+const { chats, selectedChat, messages, keepLocalOnNextSelection } = storeToRefs(chatStore)
 
 // State
 const scrollerRef = ref(null)
@@ -36,25 +36,35 @@ const scrollToBottomIfNeeded = async (smooth = false) => {
 
 // Watchers
 watch(
-  () => route.params.chatId,
-  async (chatId) => {
-    if (!chats.value.length) await chatStore.loadChats()
-    const chat = chats.value.find((chat) => chat.id === Number(chatId))
-    selectedChat.value = chat
+  () => [route.name, route.params.chatId],
+  async ([routeName, chatId]) => {
+    if (!chats.value) await chatStore.loadChats()
+
+    if (routeName === 'NewChat') {
+      selectedChat.value = 'new'
+    }
+    else if (routeName === 'Chat' && chatId) {
+      const chat = chats.value.find((chat) => chat.id === Number(chatId))
+      chat ? selectedChat.value = chat : chatStore.selectNewChat()
+    }
   },
   { immediate: true },
 )
 
 watch(selectedChat, async (newChat) => {
-  if (newChat?.id) {
-    messages.value = []
-    isUserAtBottom.value = true
-    chatStore.loadMessages(newChat.id)
+  // Se stiamo selezionando la chat appena creata, NON resettare i messaggi locali
+  if (keepLocalOnNextSelection.value) {
+    keepLocalOnNextSelection.value = false
+    return
   }
+
+  messages.value = null
+  isUserAtBottom.value = true
+  newChat !== 'new' ? chatStore.loadMessages(newChat.id) : messages.value = []
 })
 
 watch(
-  () => messages.value.map((msg) => msg.content),
+  () => messages.value?.map((msg) => msg.content),
   async () => {
     await scrollToBottomIfNeeded(true)
   },
@@ -81,6 +91,11 @@ watch(
             :sender="message.sender"
             :content="message.content"
           />
+
+          <!-- Empty State -->
+          <div v-if="messages?.length === 0" class="mt-8 text-center text-neutral-400">
+            <p class="text-sm">Nessun messaggio presesnte</p>
+          </div>
         </div>
       </div>
 

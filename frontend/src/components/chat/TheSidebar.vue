@@ -1,7 +1,6 @@
 <script setup>
 import FeatherIcons from '@/components/FeatherIcon.vue'
 import ChatHistoryItem from '@/components/chat/ChatHistoryItem.vue'
-import { router } from '@/router'
 import { useChatStore } from '@/stores/chatStore.js'
 import { storeToRefs } from 'pinia'
 import { ref, computed } from 'vue'
@@ -20,11 +19,6 @@ const toggleIcon = computed(() => (collapsed.value ? 'chevron-right' : 'sidebar'
 // Actions
 const isChatSelected = (chatId) => chatId === selectedChat.value?.id
 const toggleSidebar = () => (collapsed.value = !collapsed.value)
-const selectChat = (chatId) => router.push({ name: 'Chat', params: { chatId } })
-const createAndSelectChat = async () => {
-  const chat = await chatStore.createChat()
-  if (chat?.id) selectChat(chat.id)
-}
 </script>
 
 <template>
@@ -56,11 +50,11 @@ const createAndSelectChat = async () => {
           :key="chat.id"
           :title="chat.title"
           :selected="isChatSelected(chat.id)"
-          @select="selectChat(chat.id)"
+          @select="chatStore.selectChat(chat.id)"
         />
 
         <!-- Empty State -->
-        <div v-if="chats.length === 0" class="mt-8 text-center text-neutral-400">
+        <div v-if="chats?.length === 0" class="mt-8 text-center text-neutral-400">
           <p class="text-sm">Nessuna chat presente</p>
         </div>
       </div>
@@ -69,7 +63,7 @@ const createAndSelectChat = async () => {
     <!-- New Chat Button DA MIGLIORARE -->
     <footer v-show="!collapsed" class="absolute bottom-0 w-full px-6 py-4">
       <button
-        @click="createAndSelectChat"
+        @click="chatStore.selectNewChat()"
         class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-neutral-700 p-3 transition-colors hover:bg-neutral-600"
         aria-label="Crea nuova chat"
       >

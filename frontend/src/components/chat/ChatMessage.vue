@@ -38,7 +38,7 @@ const onAction = async (name) => {
     <!-- Message -->
     <div
       class="whitespace-pre-wrap"
-      :class="{ 'max-w-[80%] rounded-xl bg-neutral-800 p-3 text-end': isUser }"
+      :class="{ 'max-w-[80%] rounded-xl bg-neutral-800 p-3': isUser }"
     >
       <feather-icons v-if="isLoading" :spin="true" name="loader" />
       {{ content }}

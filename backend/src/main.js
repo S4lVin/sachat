@@ -14,6 +14,10 @@ app.use(corsHandler)
 app.use(express.json())
 app.use(httpLogger)
 
+app.use('/api', async (req, res, next) => {
+    await new Promise(r => setTimeout(r, 1500))
+    next()
+})
 app.use('/api/auth', authRouter)
 app.use('/api/chats', authenticator, chatsRouter)
 app.use('/api/response', authenticator, responseRouter)
