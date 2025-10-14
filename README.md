@@ -20,8 +20,8 @@ SaChat is a full-stack web application that provides a conversational interface 
 - **Framework:** Vue 3 (Composition API)
 - **Build Tool:** Vite
 - **State Management:** Pinia
+- **Routing**: Vue Router
 - **Styling:** Tailwind CSS
-- **HTTP Requests:** Axios
 - **Icons:** Feather Icons
 
 **Development & Tooling:**
