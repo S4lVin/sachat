@@ -17,16 +17,18 @@ defineProps({
 <template>
   <div class="group mb-2 flex items-center justify-between gap-x-2">
     <!-- Chat Title -->
-    <div
+    <button
       @click="$emit('select')"
-      class="w-full cursor-pointer truncate rounded-xl p-2 hover:bg-neutral-600"
+      class="w-full cursor-pointer truncate rounded-xl p-2 text-left hover:bg-neutral-600"
       :class="{ 'bg-neutral-700': selected }"
     >
       {{ title }}
-    </div>
+    </button>
 
     <!-- More Options -->
-    <button class="hidden cursor-pointer group-hover:inline hover:text-neutral-300">
+    <button
+      class="hidden cursor-pointer transition-colors group-hover:inline hover:text-neutral-300"
+    >
       <feather-icons name="more-vertical" />
     </button>
   </div>

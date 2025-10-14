@@ -29,7 +29,10 @@ const createAndSelectChat = async () => {
 
 <template>
   <aside
-    :class="['relative flex flex-col bg-neutral-800 shadow-lg/25', sidebarWidth]"
+    :class="[
+      'relative flex flex-col border-r border-neutral-700 bg-neutral-800 shadow-lg/25',
+      sidebarWidth,
+    ]"
     :aria-label="collapsed ? 'Sidebar compressa' : 'Sidebar chat'"
   >
     <!-- Header -->
@@ -63,14 +66,11 @@ const createAndSelectChat = async () => {
       </div>
     </div>
 
-    <!-- New Chat Button -->
-    <footer
-      v-show="!collapsed"
-      class="absolute bottom-0 w-full px-6 py-4"
-    >
+    <!-- New Chat Button DA MIGLIORARE -->
+    <footer v-show="!collapsed" class="absolute bottom-0 w-full px-6 py-4">
       <button
         @click="createAndSelectChat"
-        class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-neutral-600 p-3 hover:bg-neutral-700"
+        class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-neutral-700 p-3 transition-colors hover:bg-neutral-600"
         aria-label="Crea nuova chat"
       >
         <feather-icons name="plus" :size="20" />

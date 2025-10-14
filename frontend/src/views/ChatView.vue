@@ -12,7 +12,27 @@ const chatStore = useChatStore()
 const { chats, selectedChat, messages } = storeToRefs(chatStore)
 
 // State
-const bottomRef = ref()
+const scrollerRef = ref(null)
+const isUserAtBottom = ref(true)
+const BOTTOM_THRESHOLD = 80 // Quanto vicino al fondo consideriamo "in fondo" (in px)
+
+// Helpers
+const updateIsAtBottom = () => {
+  const el = scrollerRef.value
+  if (!el) return
+  isUserAtBottom.value = el.scrollTop + el.clientHeight >= el.scrollHeight - BOTTOM_THRESHOLD
+}
+
+const scrollToBottomIfNeeded = async (smooth = false) => {
+  await nextTick()
+  if (!isUserAtBottom.value) return
+  const el = scrollerRef.value
+  if (!el) return
+  el.scrollTo({
+    top: el.scrollHeight,
+    behavior: smooth ? 'smooth' : 'auto',
+  })
+}
 
 // Watchers
 watch(
@@ -24,17 +44,19 @@ watch(
   },
   { immediate: true },
 )
+
 watch(selectedChat, async (newChat) => {
   if (newChat?.id) {
     messages.value = []
+    isUserAtBottom.value = true
     chatStore.loadMessages(newChat.id)
   }
 })
+
 watch(
   () => messages.value.map((msg) => msg.content),
   async () => {
-    await nextTick()
-    bottomRef.value.scrollIntoView({ block: 'end' })
+    await scrollToBottomIfNeeded(true)
   },
 )
 </script>
@@ -43,9 +65,15 @@ watch(
   <div class="flex h-screen w-screen text-neutral-200">
     <!-- Sidebar -->
     <TheSidebar />
+
     <div class="relative flex flex-1">
       <!-- Message Area -->
-      <div class="w-full overflow-y-auto px-4 py-4 md:px-8" style="scrollbar-gutter: stable both-edges">
+      <div
+        ref="scrollerRef"
+        class="w-full overflow-y-auto px-4 py-4 md:px-8"
+        style="scrollbar-gutter: stable both-edges"
+        @scroll="updateIsAtBottom"
+      >
         <div class="mx-auto mb-36 max-w-5xl">
           <ChatMessage
             v-for="message in messages"
@@ -54,9 +82,8 @@ watch(
             :content="message.content"
           />
         </div>
-        <div ref="bottomRef"></div>
       </div>
-      
+
       <!-- Input Area -->
       <div class="absolute bottom-0 w-full px-4 py-4 md:px-8">
         <InputArea class="mx-auto max-w-5xl" />

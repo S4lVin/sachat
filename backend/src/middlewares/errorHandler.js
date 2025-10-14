@@ -5,9 +5,14 @@ export const errorHandler = (err, req, res, next) => {
   const isAppError = err instanceof AppError
   const level = isAppError ? 'warn' : 'error'
   const logMessage = isAppError ? 'app error handled' : 'unexpected error occurred'
-  logger[level]({
-    err, userId: req.user?.id, requestId: req.id 
-  }, logMessage)
+  logger[level](
+    {
+      err,
+      userId: req.user?.id,
+      requestId: req.id,
+    },
+    logMessage,
+  )
 
   let message = 'Errore interno del server'
   let statusCode = 500

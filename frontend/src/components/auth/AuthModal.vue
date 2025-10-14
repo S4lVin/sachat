@@ -29,73 +29,66 @@ const isRegister = computed(() => props.type === 'register')
 const title = computed(() => (isRegister.value ? 'Registrati' : 'Accedi'))
 const fields = computed(() => [
   ...(isRegister.value
-    ? [
-        {
-          key: 'name',
-          type: 'text',
-          placeholder: 'Nome',
-          autocomplete: 'name',
-        },
-      ]
+    ? [{ key: 'name', type: 'text', placeholder: 'Nome', autocomplete: 'name' }]
     : []),
-  {
-    key: 'email',
-    type: 'email',
-    placeholder: 'Email',
-    autocomplete: 'email',
-  },
-  {
-    key: 'password',
-    type: 'password',
-    placeholder: 'Password',
-    autocomplete: 'current-password',
-  },
+  { key: 'email', type: 'email', placeholder: 'Email', autocomplete: 'email' },
+  { key: 'password', type: 'password', placeholder: 'Password', autocomplete: 'current-password' },
 ])
+
+// Helpers
+const fieldKeys = computed(() => fields.value.map((f) => f.key))
+
+const resetFieldErrors = () => {
+  errorMessage.value = ''
+  fieldKeys.value.forEach((key) => {
+    if (formData.value[key]) formData.value[key].error = ''
+  })
+}
+
+const buildPayload = () => {
+  // Solo i campi visibili, trim sulle stringhe
+  return fieldKeys.value.reduce((acc, key) => {
+    const v = formData.value[key]?.value
+    acc[key] = typeof v === 'string' ? v.trim() : v
+    return acc
+  }, {})
+}
+
+const applyApiErrors = (err) => {
+  if (err?.details && Array.isArray(err.details)) {
+    err.details.forEach((detail) => {
+      if (detail.field && formData.value[detail.field]) {
+        formData.value[detail.field].error = detail.message
+      }
+    })
+  } else {
+    errorMessage.value = err?.message || 'Si è verificato un errore. Riprova.'
+  }
+}
 
 // Actions
 const submit = async () => {
-  // Resetta errori
-  errorMessage.value = ''
-  Object.keys(formData.value).forEach((key) => {
-    formData.value[key].error = ''
-  })
+  resetFieldErrors()
+  const authMethod = isRegister.value ? 'register' : 'login'
 
   try {
-    const authMethod = isRegister.value ? 'register' : 'login'
-
-    // Prepariamo i dati per l'API (solo i valori)
-    const userData = Object.entries(formData.value).reduce((acc, [key, field]) => {
-      acc[key] = field.value
-      return acc
-    }, {})
-
-    const success = await authStore[authMethod](userData)
-
+    const success = await authStore[authMethod](buildPayload())
     if (success) {
       emit('close')
       router.push('/chat/new')
     }
-  } catch (error) {
-    // Se l'errore ha details con errori specifici per campo
-    if (error.details && Array.isArray(error.details)) {
-      error.details.forEach((detail) => {
-        if (detail.field && formData.value[detail.field]) {
-          formData.value[detail.field].error = detail.message
-        }
-      })
-    } else {
-      // Altrimenti mostra l'errore generale
-      errorMessage.value = error.message
-    }
+  } catch (err) {
+    applyApiErrors(err)
   }
 }
+
 const closeModal = () => emit('close')
 </script>
 
 <template>
   <div @click="closeModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm"></div>
   <div
-    class="absolute top-1/2 left-1/2 w-112 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-neutral-800 p-8"
+    class="absolute top-1/2 left-1/2 w-112 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-neutral-800 p-8"
   >
     <!-- Header -->
     <div class="mb-8 flex items-center justify-between">
@@ -120,7 +113,7 @@ const closeModal = () => emit('close')
           :placeholder="field.placeholder"
           :autocomplete="field.autocomplete"
           :class="[
-            'w-full rounded-lg bg-neutral-700 p-2',
+            'w-full rounded-xl bg-neutral-700 p-2',
             formData[field.key].error && 'border border-red-500',
           ]"
           required
@@ -129,7 +122,7 @@ const closeModal = () => emit('close')
 
       <button
         type="submit"
-        class="w-full cursor-pointer rounded-lg bg-indigo-800 p-2 transition-colors hover:bg-indigo-900"
+        class="w-full cursor-pointer rounded-xl bg-indigo-800 p-2 transition-colors hover:bg-indigo-900"
       >
         Continua
       </button>

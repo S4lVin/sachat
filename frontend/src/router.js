@@ -1,7 +1,7 @@
-import { createWebHistory, createRouter } from 'vue-router'
-import ChatView from './views/ChatView.vue'
-import AuthView from './views/AuthView.vue'
+import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from './stores/authStore'
+import AuthView from './views/AuthView.vue'
+import ChatView from './views/ChatView.vue'
 
 const routes = [
   { path: '/', name: 'Auth', component: AuthView },

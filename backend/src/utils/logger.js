@@ -28,7 +28,7 @@ export const httpLogger = pinoHttp({
       ip: req.ip,
     }),
     res: (res) => ({
-      statusCode: res.statusCode
+      statusCode: res.statusCode,
     }),
   },
   redact: [

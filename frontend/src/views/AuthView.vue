@@ -2,14 +2,16 @@
 import AuthModal from '@/components/auth/AuthModal.vue'
 import { ref } from 'vue'
 
+// State
 const isModalOpen = ref(false)
 const authType = ref('login')
 
-function openForm(type) {
+// Actions
+const openForm = (type) => {
   authType.value = type
   isModalOpen.value = true
 }
-function closeForm() {
+const closeForm = () => {
   isModalOpen.value = false
 }
 </script>
@@ -33,14 +35,14 @@ function closeForm() {
         <div class="flex gap-4 font-medium">
           <button
             @click="openForm('login')"
-            class="w-32 cursor-pointer rounded-xl bg-indigo-800 p-4 transition-colors hover:bg-indigo-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+            class="w-32 cursor-pointer rounded-xl bg-indigo-800 p-4 transition-colors hover:bg-indigo-900 focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:outline-none"
             type="button"
           >
             Accedi
           </button>
           <button
             @click="openForm('register')"
-            class="w-32 cursor-pointer rounded-xl bg-neutral-700 p-4 transition-colors hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+            class="w-32 cursor-pointer rounded-xl bg-neutral-700 p-4 transition-colors hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:outline-none"
             type="button"
           >
             Registrati

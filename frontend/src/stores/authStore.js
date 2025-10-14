@@ -1,7 +1,7 @@
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
 import { api } from '@/helpers/api'
 import { jwtDecode } from 'jwt-decode'
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
 
 export const useAuthStore = defineStore('auth', () => {
   // #region STATE

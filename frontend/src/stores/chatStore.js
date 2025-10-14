@@ -1,7 +1,7 @@
-import { ref, reactive } from 'vue'
-import { defineStore } from 'pinia'
 import { api } from '@/helpers/api'
 import { consumeSseJson } from '@/helpers/sse'
+import { defineStore } from 'pinia'
+import { reactive, ref } from 'vue'
 
 export const useChatStore = defineStore('chat', () => {
   // #region STATE

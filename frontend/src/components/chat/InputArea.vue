@@ -4,11 +4,10 @@ import { useChatStore } from '@/stores/chatStore'
 import { storeToRefs } from 'pinia'
 import { ref, nextTick, computed } from 'vue'
 
-const MAX_HEIGHT = 512
-
 // Stores
 const chatStore = useChatStore()
 const { isGenerating } = storeToRefs(chatStore)
+const MAX_HEIGHT = 512 // Altezza massima della textarea (px)
 
 // State
 const input = ref('')
@@ -49,7 +48,9 @@ const handleAction = () => {
 </script>
 
 <template>
-  <div class="flex w-full flex-col rounded-xl bg-neutral-700 p-2 shadow-lg/25">
+  <div
+    class="flex w-full flex-col rounded-xl border border-neutral-700 bg-neutral-800 p-2 shadow-lg/25"
+  >
     <!-- Text Area -->
     <textarea
       ref="textArea"
@@ -59,14 +60,14 @@ const handleAction = () => {
       rows="1"
       type="text"
       placeholder="Scrivi un messaggio..."
-      class="mb-4 w-full resize-none p-1 focus:outline-none"
+      class="mb-4 w-full resize-none p-2 focus:outline-none"
       :disabled="isGenerating"
     />
 
     <!-- Actions -->
     <div class="flex items-center justify-between">
       <button
-        class="cursor-pointer rounded-xl p-2 text-neutral-500 hover:text-neutral-400"
+        class="cursor-pointer rounded-xl p-2 text-neutral-500 transition-colors hover:text-neutral-400"
         type="button"
         aria-label="Cerca"
       >
@@ -80,7 +81,7 @@ const handleAction = () => {
           'cursor-pointer rounded-xl p-2 transition-colors',
           canSend || isGenerating
             ? 'bg-indigo-800 hover:bg-indigo-900'
-            : 'cursor-not-allowed bg-neutral-600',
+            : 'cursor-not-allowed bg-neutral-700',
         ]"
         type="button"
         :aria-label="isGenerating ? 'Ferma generazione' : 'Invia messaggio'"
