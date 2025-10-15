@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken'
 import { MissingAccessToken, InvalidAccessToken } from '#errors'
 
+// Helpers
 const extractTokenFromHeader = (req) => {
   const auth = req.headers['authorization']
   if (!auth) return null

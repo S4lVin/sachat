@@ -1,39 +1,40 @@
-import OpenAI from 'openai'
-import { AppError } from '#errors'
+import { responseService, messageService } from '#services'
+import { InternalServerError } from '#errors'
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+// Errors
+const ResponseNotGenerated = () =>
+  new InternalServerError('Nessuna risposta generata dal modello', 'NO_RESPONSE_GENERATED')
 
-const streamResponse = async (res, asyncIterator) => {
-  res.setHeader('Content-Type', 'text/event-stream')
-  res.setHeader('Cache-Control', 'no-cache')
-  res.setHeader('Connection', 'keep-alive')
-  res.flushHeaders()
-
-  const abortController = new AbortController()
-  res.on('close', () => {
-    res.aborted = true
-    abortController.abort()
-  })
-
-  try {
-    for await (const event of asyncIterator) {
-      if (abortController.signal.aborted) break
-      res.write(`data: ${JSON.stringify(event)}\n\n`)
-    }
-  } catch (error) {
-    throw new AppError({
-      message: error.error.message,
-      statusCode: error.status,
-      errorCode: 'OPENAI_ERROR',
-    })
-  } finally {
-    res.end()
-  }
-}
-
+// Controllers
 export const responseController = {
   create: async (req, res) => {
-    const stream = await client.responses.create({ ...req.body, stream: true })
-    await streamResponse(res, stream)
+    const { chatId, model } = req.body
+
+    const stream = await responseService.initializeStream(chatId, req.user.id, model)
+
+    res.setHeader('Content-Type', 'application/json')
+    res.setHeader('Cache-Control', 'no-cache')
+    res.setHeader('Connection', 'keep-alive')
+    res.flushHeaders()
+
+    let responseText = ''
+
+    for await (const event of stream) {
+      if (event.type === 'response.output_text.delta') {
+        const textChunk = event.delta || ''
+
+        responseText += textChunk
+        res.write(JSON.stringify({ text: textChunk }) + '\n')
+      }
+    }
+
+    if (!responseText) throw ResponseNotGenerated()
+
+    await messageService.create(chatId, req.user.id, {
+      sender: 'assistant',
+      content: responseText,
+    })
+
+    res.end()
   },
 }
