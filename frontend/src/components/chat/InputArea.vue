@@ -6,7 +6,7 @@ import { ref, nextTick, computed } from 'vue'
 
 // Stores
 const chatStore = useChatStore()
-const { isGenerating } = storeToRefs(chatStore)
+const { isGenerating, selectedChat } = storeToRefs(chatStore)
 const MAX_HEIGHT = 512 // Altezza massima della textarea (px)
 
 // State
@@ -34,8 +34,7 @@ const send = async () => {
   input.value = ''
   autoResize()
 
-  chatStore.sendUserMessage(message)
-  chatStore.requestAssistantReply()
+  await chatStore.sendMessage(message, selectedChat.value.id)
 }
 
 const handleAction = () => {

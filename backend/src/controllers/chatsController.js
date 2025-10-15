@@ -44,7 +44,13 @@ export const chatsController = {
     res.setHeader('Connection', 'keep-alive')
     res.flushHeaders()
 
-    for await (const event of generationService.askAndStream(chatId, req.user.id, content, options)) {
+    for await (const event of generationService.askAndStream(
+      chatId,
+      req.user.id,
+      content,
+      options,
+    )) {
+      //? Cosa succede quando il client chiude la connessione?
       res.write(JSON.stringify(event) + '\n')
     }
 

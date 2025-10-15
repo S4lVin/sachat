@@ -10,6 +10,4 @@ messagesRouter
   .patch(validator(messageSchemas.updateContent), messagesController.updateContent)
   .delete(messagesController.delete)
 
-messagesRouter
-  .route('/')
-  .get(messagesController.getAll)
+messagesRouter.route('/').get(messagesController.getAll)

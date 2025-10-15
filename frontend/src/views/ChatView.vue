@@ -11,10 +11,12 @@ const route = useRoute()
 const chatStore = useChatStore()
 const { chats, selectedChat, messages, keepLocalOnNextSelection } = storeToRefs(chatStore)
 
+// Constants
+const BOTTOM_THRESHOLD = 80 // Quanto vicino al fondo consideriamo "in fondo" (in px)
+
 // State
 const scrollerRef = ref(null)
 const isUserAtBottom = ref(true)
-const BOTTOM_THRESHOLD = 80 // Quanto vicino al fondo consideriamo "in fondo" (in px)
 
 // Helpers
 const updateIsAtBottom = () => {
@@ -42,10 +44,9 @@ watch(
 
     if (routeName === 'NewChat') {
       selectedChat.value = 'new'
-    }
-    else if (routeName === 'Chat' && chatId) {
+    } else if (routeName === 'Chat' && chatId) {
       const chat = chats.value.find((chat) => chat.id === Number(chatId))
-      chat ? selectedChat.value = chat : chatStore.selectNewChat()
+      chat ? (selectedChat.value = chat) : chatStore.selectNewChat()
     }
   },
   { immediate: true },
@@ -60,7 +61,7 @@ watch(selectedChat, async (newChat) => {
 
   messages.value = null
   isUserAtBottom.value = true
-  newChat !== 'new' ? chatStore.loadMessages(newChat.id) : messages.value = []
+  newChat !== 'new' ? chatStore.loadMessages(newChat.id) : (messages.value = [])
 })
 
 watch(

@@ -9,10 +9,11 @@ export const messagesController = {
   },
 
   updateContent: async (req, res) => {
+    //? Dovrebbe essere cambiato
     const { chatId, messageId } = req.params
     const { content } = req.body
 
-    const message = await messageService.update(messageId, chatId, req.user.id, { content }) //? Dovrebbe essere cambiato
+    const message = await messageService.update(messageId, chatId, req.user.id, { content })
     res.json({ message })
   },
 

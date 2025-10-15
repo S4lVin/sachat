@@ -13,5 +13,5 @@ export const chatSchemas = {
   ask: Joi.object({
     content: Joi.string().min(1).required(),
     options: Joi.object().optional(),
-  })
+  }),
 }

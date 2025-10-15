@@ -5,7 +5,8 @@ import { InternalServerError, AppError } from '#errors'
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 // Errors
-const ResponseNotGenerated = () => new InternalServerError('Nessuna risposta generata dal modello', 'NO_RESPONSE_GENERATED')
+const ResponseNotGenerated = () =>
+  new InternalServerError('Nessuna risposta generata dal modello', 'NO_RESPONSE_GENERATED')
 
 // Helpers
 const formatMessagesForApi = (messages) => {
@@ -54,7 +55,10 @@ export const generationService = {
       }
     }
 
-    const assistantMessage = await messageService.create(chatId, userId, { sender: 'assistant', content: assistantMessageContent })
+    const assistantMessage = await messageService.create(chatId, userId, {
+      sender: 'assistant',
+      content: assistantMessageContent,
+    })
     yield { type: 'done', data: { userMessage, assistantMessage } }
-  }
+  },
 }

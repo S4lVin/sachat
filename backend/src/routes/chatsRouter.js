@@ -8,9 +8,7 @@ export const chatsRouter = express.Router()
 
 chatsRouter.use('/:chatId/messages', messagesRouter)
 
-chatsRouter
-  .route('/:chatId/ask')
-  .post(validator(chatSchemas.ask), chatsController.ask)
+chatsRouter.route('/:chatId/ask').post(validator(chatSchemas.ask), chatsController.ask)
 
 chatsRouter
   .route('/:chatId')
