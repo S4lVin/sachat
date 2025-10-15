@@ -3,7 +3,7 @@ import express from 'express'
 import { NotFoundError } from '#errors'
 import { logger, httpLogger } from '#utils'
 import { rateLimiter, corsHandler, errorHandler, authenticator } from '#middlewares'
-import { authRouter, chatsRouter, responseRouter } from '#routers'
+import { authRouter, chatsRouter } from '#routers'
 
 const app = express()
 const port = process.env.PORT
@@ -20,7 +20,6 @@ app.use('/api', async (req, res, next) => {
 })
 app.use('/api/auth', authRouter)
 app.use('/api/chats', authenticator, chatsRouter)
-app.use('/api/response', authenticator, responseRouter)
 app.use(() => {
   throw new NotFoundError('Endpoint non trovato', 'ENDPOINT_NOT_FOUND')
 })

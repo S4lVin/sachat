@@ -29,5 +29,10 @@ export const errorHandler = (err, req, res, next) => {
   const errorResponse = { message, errorCode }
   if (details) errorResponse.details = details
 
-  res.status(statusCode).json({ error: errorResponse })
+  const contentType = res.get('Content-Type') || '';
+  if (contentType.startsWith('application/x-ndjson')) {
+    res.write(JSON.stringify({ type: 'error', data: { error: errorResponse } }) + '\n')
+    return res.end()
+  }
+  return res.status(statusCode).json({ error: errorResponse })
 }

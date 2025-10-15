@@ -6,8 +6,7 @@ export const messageSchemas = {
     content: Joi.string().min(1).required(),
   }),
 
-  update: Joi.object({
-    sender: Joi.string().valid('user', 'assistant').optional(),
+  updateContent: Joi.object({
     content: Joi.string().min(1).optional(),
   }),
 }

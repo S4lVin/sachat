@@ -1,28 +1,24 @@
 import express from 'express'
+import { messagesRouter } from './messagesRouter.js'
 import { validator } from '#middlewares'
-import { chatController, messageController } from '#controllers'
-import { chatSchemas, messageSchemas } from '#schemas'
+import { chatsController } from '#controllers'
+import { chatSchemas } from '#schemas'
 
 export const chatsRouter = express.Router()
 
-chatsRouter
-  .route('/:chatId/messages/:messageId/')
-  .get(messageController.get)
-  .patch(validator(messageSchemas.update), messageController.update)
-  .delete(messageController.delete)
+chatsRouter.use('/:chatId/messages', messagesRouter)
 
 chatsRouter
-  .route('/:chatId/messages')
-  .get(messageController.getAll)
-  .post(validator(messageSchemas.create), messageController.create)
+  .route('/:chatId/ask')
+  .post(validator(chatSchemas.ask), chatsController.ask)
 
 chatsRouter
   .route('/:chatId')
-  .get(chatController.get)
-  .patch(validator(chatSchemas.update), chatController.update)
-  .delete(chatController.delete)
+  .get(chatsController.get)
+  .patch(validator(chatSchemas.updateTitle), chatsController.updateTitle)
+  .delete(chatsController.delete)
 
 chatsRouter
   .route('/')
-  .get(chatController.getAll)
-  .post(validator(chatSchemas.create), chatController.create)
+  .get(chatsController.getAll)
+  .post(validator(chatSchemas.createEmpty), chatsController.createEmpty)
