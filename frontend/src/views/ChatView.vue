@@ -3,13 +3,11 @@ import TheSidebar from '@/components/chat/TheSidebar.vue'
 import InputArea from '@/components/chat/InputArea.vue'
 import ChatMessage from '@/components/chat/ChatMessage.vue'
 import { watch, ref, nextTick } from 'vue'
-import { useRoute } from 'vue-router'
 import { useChatStore } from '@/stores/chatStore'
 import { storeToRefs } from 'pinia'
 
-const route = useRoute()
 const chatStore = useChatStore()
-const { chats, selectedChat, messages, keepLocalOnNextSelection } = storeToRefs(chatStore)
+const { chats, messages, currentChatId, keepLocalOnNextSelection } = storeToRefs(chatStore)
 
 // Constants
 const BOTTOM_THRESHOLD = 80 // Quanto vicino al fondo consideriamo "in fondo" (in px)
@@ -38,31 +36,31 @@ const scrollToBottomIfNeeded = async (smooth = false) => {
 
 // Watchers
 watch(
-  () => [route.name, route.params.chatId],
-  async ([routeName, chatId]) => {
+  () => currentChatId.value,
+  async (chatId) => {
     if (!chats.value) await chatStore.loadChats()
 
-    if (routeName === 'NewChat') {
-      selectedChat.value = 'new'
-    } else if (routeName === 'Chat' && chatId) {
-      const chat = chats.value.find((chat) => chat.id === Number(chatId))
-      chat ? (selectedChat.value = chat) : chatStore.selectNewChat()
+    if (keepLocalOnNextSelection.value) {
+      keepLocalOnNextSelection.value = false
+      return
     }
+    if (chatId === 'new') {
+      messages.value = []
+      isUserAtBottom.value = true
+      return
+    }
+    if (!chatStore.findChat(chatId)) {
+      // Redirect a /new se chat non esiste
+      chatStore.selectChat('new')
+      return
+    }
+
+    messages.value = null
+    await chatStore.loadMessages(chatId)
+    isUserAtBottom.value = true
   },
   { immediate: true },
 )
-
-watch(selectedChat, async (newChat) => {
-  // Se stiamo selezionando la chat appena creata, NON resettare i messaggi locali
-  if (keepLocalOnNextSelection.value) {
-    keepLocalOnNextSelection.value = false
-    return
-  }
-
-  messages.value = null
-  isUserAtBottom.value = true
-  newChat !== 'new' ? chatStore.loadMessages(newChat.id) : (messages.value = [])
-})
 
 watch(
   () => messages.value?.map((msg) => msg.content),
@@ -88,9 +86,11 @@ watch(
         <div class="mx-auto mb-36 max-w-5xl">
           <ChatMessage
             v-for="message in messages"
+            @retry="chatStore.retryReply(currentChatId)"
             :key="message.id"
             :sender="message.sender"
             :content="message.content"
+            :status="message.status"
           />
 
           <!-- Empty State -->

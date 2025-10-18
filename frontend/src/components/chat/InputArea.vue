@@ -1,12 +1,12 @@
 <script setup>
-import FeatherIcons from '@/components/FeatherIcon.vue'
+import FeatherIcons from '@/components/ui/FeatherIcon.vue'
 import { useChatStore } from '@/stores/chatStore'
 import { storeToRefs } from 'pinia'
 import { ref, nextTick, computed } from 'vue'
 
 // Stores
 const chatStore = useChatStore()
-const { isGenerating, selectedChat } = storeToRefs(chatStore)
+const { currentChatStatus, currentChatId } = storeToRefs(chatStore)
 const MAX_HEIGHT = 512 // Altezza massima della textarea (px)
 
 // State
@@ -14,6 +14,7 @@ const input = ref('')
 const textArea = ref(null)
 
 // Computed
+const isGenerating = computed(() => currentChatStatus.value === 'generating')
 const canSend = computed(() => input.value.trim() && !isGenerating.value)
 const buttonIcon = computed(() => (isGenerating.value ? 'stop-circle' : 'arrow-up'))
 
@@ -34,12 +35,12 @@ const send = async () => {
   input.value = ''
   autoResize()
 
-  await chatStore.sendMessage(message, selectedChat.value.id)
+  await chatStore.sendMessage(message, currentChatId.value)
 }
 
 const handleAction = () => {
   if (isGenerating.value) {
-    chatStore.cancelAssistantReply()
+    chatStore.cancelReply(currentChatId.value)
   } else {
     send()
   }

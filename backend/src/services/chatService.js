@@ -34,6 +34,7 @@ export const chatService = {
     return await prisma.chat.create({
       data: {
         userId,
+        status: chat.status,
         title: chat.title,
         messages: {
           create:
@@ -52,6 +53,7 @@ export const chatService = {
       return await prisma.chat.update({
         where: { id: Number(chatId), userId },
         data: {
+          status: chat.status,
           title: chat.title,
           messages: chat.messages
             ? {

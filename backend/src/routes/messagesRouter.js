@@ -6,8 +6,6 @@ import { messageSchemas } from '#schemas'
 export const messagesRouter = express.Router({ mergeParams: true })
 
 messagesRouter
-  .route('/:messageId')
-  .patch(validator(messageSchemas.updateContent), messagesController.updateContent)
-  .delete(messagesController.delete)
-
-messagesRouter.route('/').get(messagesController.getAll)
+  .route('/')
+  .get(messagesController.getAll)
+  .post(validator(messageSchemas.create), messagesController.create)

@@ -7,25 +7,39 @@ import { authRouter, chatsRouter } from '#routers'
 
 const app = express()
 const port = process.env.PORT
+const env = process.env.NODE_ENV
 
+// Middlewares
 app.use(rateLimiter)
 app.use(corsHandler)
-
 app.use(express.json())
 app.use(httpLogger)
 
-app.use('/api', async (req, res, next) => {
-  await new Promise((r) => setTimeout(r, 1500))
-  next()
-})
+// Aggiunge un ritardo ad ogni richiesta all'API (development only)
+const delay = Number(process.env.FAKE_DELAY_MS)
+if (env === 'development' && delay !== 0) {
+  app.use('/api', async (req, res, next) => {
+    await new Promise((r) => setTimeout(r, delay))
+    next()
+  })
+}
+
+// Api
 app.use('/api/auth', authRouter)
 app.use('/api/chats', authenticator, chatsRouter)
 app.use(() => {
   throw new NotFoundError('Endpoint non trovato', 'ENDPOINT_NOT_FOUND')
 })
 
+// Error Handler
 app.use(errorHandler)
 
 app.listen(port, () => {
-  console.log(`SaChat backend operative\n\nPort ${port}\nEnvironment: ${process.env.NODE_ENV}\n`)
+  logger.info(
+    {
+      port,
+      env,
+    },
+    'server listening',
+  )
 })

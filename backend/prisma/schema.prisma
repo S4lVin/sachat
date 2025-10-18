@@ -28,6 +28,7 @@ model Chat {
   id           Int       @id @default(autoincrement())
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  status       String?
   title        String 
   messages     Message[]
   userId       Int

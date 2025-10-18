@@ -1,18 +1,21 @@
 import { api } from '@/helpers/api'
-import { consumeStream } from '@/helpers/sse'
 import { defineStore } from 'pinia'
 import { router } from '@/router'
-import { reactive, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { reactive, ref, computed } from 'vue'
 
 export const useChatStore = defineStore('chat', () => {
-  // #region STATE
+  // State
+  const route = useRoute()
   const chats = ref()
-  const selectedChat = ref()
   const messages = ref()
-  const isGenerating = ref(false)
   const keepLocalOnNextSelection = ref(false)
 
-  // #region ACTIONS
+  // Computed
+  const currentChatId = computed(() => Number(route.params.chatId) || route.params.chatId)
+  const currentChatStatus = computed(() => findChat(currentChatId.value)?.status)
+
+  // Actions (Chat)
   const loadChats = async () => {
     const data = await api.get('chats')
     chats.value = data.chats || []
@@ -25,14 +28,29 @@ export const useChatStore = defineStore('chat', () => {
     return data.chat
   }
 
+  const renameChat = async (chatId, title) => {
+    const chat = findChat(chatId)
+    chat.title = title
+
+    await api.patch(`chats/${chatId}`, { title })
+  }
+
+  const deleteChat = async (chatId) => {
+    chats.value = chats.value.filter((chat) => chat.id !== chatId)
+    if (currentChatId.value === chatId) selectChat('new')
+
+    await api.delete(`chats/${chatId}`)
+  }
+
   const selectChat = (chatId) => {
     router.push({ name: 'Chat', params: { chatId } })
   }
 
-  const selectNewChat = () => {
-    router.push({ name: 'NewChat' })
+  const findChat = (chatId) => {
+    return chats.value?.find((chat) => chat.id === chatId)
   }
 
+  // Actions (Messages)
   const loadMessages = async (chatId) => {
     const data = await api.get(`chats/${chatId}/messages`)
     messages.value = data.messages || []
@@ -40,96 +58,96 @@ export const useChatStore = defineStore('chat', () => {
 
   const sendMessage = async (content, chatId) => {
     const tempUserMessage = addTempMessage('user', content)
-    const tempAssistantMessage = addTempMessage('assistant')
+    chatId = await ensureChat(chatId)
 
-    // Se la chat è nuova (quindi non esiste ancora), la creiamo
-    if (selectedChat.value === 'new') {
-      const newChat = await createChat()
-      keepLocalOnNextSelection.value = true
-      selectChat(newChat.id)
-    }
-
-    const response = await api.post(`chats/${chatId}/ask`, {
+    const data = await api.post(`chats/${chatId}/messages`, {
+      sender: 'user',
       content,
+    })
+    Object.assign(tempUserMessage, data.message)
+
+    await createReply(chatId)
+  }
+
+  const createReply = async (chatId) => {
+    setChatStatus(chatId, 'generating')
+
+    const tempAssistantMessage = addTempMessage('assistant', '')
+
+    const stream = await api.post(`chats/${chatId}/reply`, {
       options: {
-        model: 'gpt-5-mini',
+        model: 'gpt-5-nano',
       },
     })
 
-    consumeStream(response, (event) => {
+    for await (const event of stream) {
       if (event.type === 'delta') {
         tempAssistantMessage.content += event.data.text
       }
       if (event.type === 'done') {
-        Object.assign(tempUserMessage, event.data.userMessage)
         Object.assign(tempAssistantMessage, event.data.assistantMessage)
       }
-      // * Aggiungere error handling
-    })
-  }
-  // #endregion
+      if (event.type === 'error') {
+        tempAssistantMessage.status = 'error'
+        tempAssistantMessage.content = event.data.error.message
+      }
+    }
 
-  // #region HELPERS
-  const addTempMessage = (sender, content = '') => {
+    setChatStatus(chatId, null)
+  }
+
+  const retryReply = async (chatId) => {
+    const lastMessage = messages.value.at(-1)
+    if (lastMessage.sender !== 'user') messages.value.pop()
+    await createReply(chatId)
+  }
+
+  const cancelReply = async (chatId) => {
+    await api.post(`chats/${chatId}/cancel-reply`)
+    setChatStatus(chatId, null)
+  }
+
+  // Helpers
+  const ensureChat = async (chatId) => {
+    if (chats.value.find((chat) => chat.id === chatId)) return chatId
+
+    const newChat = await createChat()
+    keepLocalOnNextSelection.value = true
+    selectChat(newChat.id)
+    return newChat.id
+  }
+
+  const addTempMessage = (sender, content = '', status) => {
     const tempId = 'temp-' + Date.now()
-    const message = reactive({ tempId, sender, content })
+    const message = reactive({ tempId, sender, content, status })
     messages.value.push(message)
     return message
   }
 
-  const consumeStream = async (response, onEvent) => {
-    //* Migliorare (scomporre, semplificare...)
-    const reader = response.body.getReader()
-    const decoder = new TextDecoder()
-    let buffer = ''
-
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-
-      buffer += decoder.decode(value, { stream: true })
-
-      const lines = buffer.split('\n')
-      buffer = lines.pop() // ultima linea potrebbe essere incompleta
-
-      for (const line of lines) {
-        if (!line.trim()) continue
-
-        try {
-          const event = JSON.parse(line)
-          onEvent(event)
-        } catch (err) {
-          console.error('Failed to parse NDJSON line:', line, err)
-        }
-      }
-    }
-
-    // Processa eventuale linea rimanente
-    if (buffer.trim()) {
-      try {
-        const event = JSON.parse(buffer)
-        onEvent(event)
-      } catch (err) {
-        console.error('Failed to parse final NDJSON line:', buffer, err)
-      }
-    }
+  const setChatStatus = (chatId, status) => {
+    const chat = findChat(chatId)
+    chat.status = status
   }
-  // #endregion
 
   return {
-    // STATE
+    // State
     chats,
     messages,
-    selectedChat,
-    isGenerating,
+    currentChatId,
+    currentChatStatus,
     keepLocalOnNextSelection,
 
-    // ACTIONS
+    // Actions
     loadChats,
     createChat,
+    renameChat,
+    deleteChat,
     selectChat,
-    selectNewChat,
+    findChat,
     loadMessages,
     sendMessage,
+    createReply,
+    retryReply,
+    cancelReply,
   }
 })

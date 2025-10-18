@@ -1,6 +1,7 @@
 import { router } from '@/router'
 import { useAuthStore } from '@/stores/authStore'
 import { storeToRefs } from 'pinia'
+import { toNdjsonAsyncIterable } from './ndjson'
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL
 
@@ -58,12 +59,13 @@ export const request = async (path, options = {}) => {
     throw new ApiError({ message, statusCode, errorCode, details })
   }
 
-  const contentType = response.headers.get('content-type')
-  const isJson = contentType?.includes('application/json')
-  const payload = isJson ? await safeJSON(response) : response
-
   if (response.status === 204) return null
-  return payload
+
+  const contentType = response.headers.get('content-type')
+  if (contentType.startsWith('application/x-ndjson')) return toNdjsonAsyncIterable(response)
+  if (contentType.startsWith('application/json')) return safeJSON(response)
+
+  return response
 }
 
 export const api = {

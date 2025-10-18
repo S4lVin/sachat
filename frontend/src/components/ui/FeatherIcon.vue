@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import feather from 'feather-icons'
 
+// Options
 const props = defineProps({
   name: {
     type: String,
@@ -21,6 +22,7 @@ const props = defineProps({
   },
 })
 
+// Computed
 const icon = computed(() => {
   return (
     feather.icons[props.name]?.toSvg({

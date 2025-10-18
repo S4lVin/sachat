@@ -2,16 +2,19 @@ import Joi from 'joi'
 import { messageSchemas } from './messageSchemas.js'
 
 export const chatSchemas = {
-  createEmpty: Joi.object({
+  create: Joi.object({
     title: Joi.string().min(1).max(100).required(),
+    messages: Joi.array().items(messageSchemas.create).optional(),
   }),
 
-  updateTitle: Joi.object({
+  update: Joi.object({
     title: Joi.string().min(1).max(100).optional(),
+    messages: Joi.array().items(messageSchemas.create).optional(),
   }),
 
-  ask: Joi.object({
-    content: Joi.string().min(1).required(),
+  reply: Joi.object({
     options: Joi.object().optional(),
   }),
+
+  cancelReply: Joi.object({}),
 }

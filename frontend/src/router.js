@@ -6,13 +6,7 @@ import ChatView from './views/ChatView.vue'
 const routes = [
   { path: '/', name: 'Auth', component: AuthView },
   {
-    path: '/chat/new',
-    name: 'NewChat',
-    component: ChatView,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: '/chat/:chatId(\\d+)',
+    path: '/chat/:chatId',
     name: 'Chat',
     component: ChatView,
     meta: { requiresAuth: true },
@@ -36,7 +30,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.name === 'Auth' && isAuthenticated) {
-    return next({ name: 'NewChat' })
+    return next({ name: 'Chat', params: { chatId: 'new' } })
   }
 
   return next()

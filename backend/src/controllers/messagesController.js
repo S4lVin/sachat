@@ -8,19 +8,11 @@ export const messagesController = {
     res.json({ messages })
   },
 
-  updateContent: async (req, res) => {
-    //? Dovrebbe essere cambiato
-    const { chatId, messageId } = req.params
-    const { content } = req.body
+  create: async (req, res) => {
+    const { chatId } = req.params
+    const { sender, content } = req.body
 
-    const message = await messageService.update(messageId, chatId, req.user.id, { content })
-    res.json({ message })
-  },
-
-  delete: async (req, res) => {
-    const { chatId, messageId } = req.params
-
-    await messageService.delete(messageId, chatId, req.user.id)
-    res.status(204).end()
+    const message = await messageService.create(chatId, req.user.id, { sender, content })
+    res.status(201).json({ message })
   },
 }

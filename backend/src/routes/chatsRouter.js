@@ -6,17 +6,25 @@ import { chatSchemas } from '#schemas'
 
 export const chatsRouter = express.Router()
 
+// Messages
 chatsRouter.use('/:chatId/messages', messagesRouter)
 
-chatsRouter.route('/:chatId/ask').post(validator(chatSchemas.ask), chatsController.ask)
+// Actions
+chatsRouter.post('/:chatId/reply', validator(chatSchemas.reply), chatsController.reply)
+chatsRouter.post(
+  '/:chatId/cancel-reply',
+  validator(chatSchemas.cancelReply),
+  chatsController.cancelReply,
+)
 
+// CRUD
 chatsRouter
   .route('/:chatId')
   .get(chatsController.get)
-  .patch(validator(chatSchemas.updateTitle), chatsController.updateTitle)
+  .patch(validator(chatSchemas.update), chatsController.update)
   .delete(chatsController.delete)
 
 chatsRouter
   .route('/')
   .get(chatsController.getAll)
-  .post(validator(chatSchemas.createEmpty), chatsController.createEmpty)
+  .post(validator(chatSchemas.create), chatsController.create)

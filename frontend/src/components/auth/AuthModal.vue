@@ -1,9 +1,10 @@
 <script setup>
-import FeatherIcons from '@/components/FeatherIcon.vue'
+import FeatherIcons from '@/components/ui/FeatherIcon.vue'
 import { router } from '@/router'
 import { useAuthStore } from '@/stores/authStore'
 import { ref, computed } from 'vue'
 
+// Options
 const emit = defineEmits(['close'])
 const props = defineProps({
   type: {
