@@ -1,10 +1,9 @@
-import OpenAI from 'openai'
-import { chatService, messageService } from '#services'
-import { InternalServerError, AppError } from '#errors'
-
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+import OpenAI, { APIError } from 'openai'
+import { chatService, messageService, userService } from '#services'
+import { AppError, NotFoundError, InternalServerError } from '#errors'
 
 // Errors
+const NoApiKeyProvided = () => new NotFoundError('Nessun API key impostata', 'API_KEY_NOT_SET')
 const ResponseNotGenerated = () =>
   new InternalServerError('Nessuna risposta generata dal modello', 'NO_RESPONSE_GENERATED')
 
@@ -24,34 +23,48 @@ const buildModelInput = async (chatId, userId) => {
   return formatMessagesForApi(messages)
 }
 
-const initializeStream = async (input, options) => {
+const initializeStream = async (input, userId, userRole, options) => {
+  let apiKey
+  if (userRole === 'vip') {
+    apiKey = process.env.OPENAI_API_KEY
+  } else {
+    const user = await userService.findById(userId, { sensitive: true })
+    if (!user.apiKey) throw NoApiKeyProvided()
+    apiKey = user.apiKey
+  }
+
+  const client = new OpenAI({ apiKey })
+
   try {
     return await client.responses.create({
       input: input,
-      model: options.model,
+      model: options?.model ?? 'gpt-5-mini',
       stream: true,
     })
-  } catch (error) {
-    throw new AppError({
-      message: error.error.message,
-      statusCode: error.status,
-      errorCode: 'OPENAI_ERROR',
-    })
+  } catch (err) {
+    if (err instanceof APIError) {
+      throw new AppError({
+        message: err.error.message,
+        statusCode: err.status,
+        errorCode: 'OPENAI_ERROR',
+      })
+    }
+    throw err
   }
 }
 
 export const chatReplyService = {
-  reply: async function* (chatId, userId, options) {
+  reply: async function* (chatId, userId, userRole, options) {
     const key = `${chatId}-${userId}`
     activeReplies.set(key, { aborted: false })
-    chatService.update(chatId, userId, { status: 'generating' })
+    await chatService.updateById(chatId, userId, { status: 'generating' })
 
     try {
       let assistantMessageContent = ''
       let totalTokenUsed = 0
 
       const input = await buildModelInput(chatId, userId)
-      const stream = await initializeStream(input, options)
+      const stream = await initializeStream(input, userId, userRole, options)
 
       for await (const event of stream) {
         if (activeReplies.get(key)?.aborted) break
@@ -79,7 +92,7 @@ export const chatReplyService = {
       yield { type: 'done', data: { assistantMessage, info: { totalTokenUsed } } }
     } finally {
       activeReplies.delete(key)
-      chatService.update(chatId, userId, { status: null })
+      chatService.updateById(chatId, userId, { status: null })
     }
   },
 

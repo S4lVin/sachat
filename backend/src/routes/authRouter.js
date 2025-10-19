@@ -1,5 +1,5 @@
 import express from 'express'
-import { validator } from '#middlewares'
+import { authenticator, validator } from '#middlewares'
 import { authController } from '#controllers'
 import { authSchemas } from '#schemas'
 

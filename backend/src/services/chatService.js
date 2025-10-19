@@ -7,80 +7,77 @@ const prisma = new PrismaClient()
 const ChatNotFound = () => new NotFoundError('Chat non trovata', 'CHAT_NOT_FOUND')
 
 // Helpers
-const isNotFoundError = (error) => {
-  if (error.code === 'P2025') return true
-  return false
-}
+const isNotFoundError = (err) => err?.code === 'P2025'
 
 export const chatService = {
-  findAll: async (userId, orderBy) => {
+  findAll: async (userId, { orderBy = 'desc' } = {}) => {
     const chats = await prisma.chat.findMany({
       where: { userId },
-      orderBy: { createdAt: orderBy || 'desc' },
+      orderBy: { createdAt: orderBy },
     })
     return chats
   },
 
-  findById: async (chatId, userId) => {
-    const chat = await prisma.chat.findUnique({
-      where: { id: Number(chatId), userId },
-      include: { messages: true },
+  findById: async (id, userId) => {
+    const chat = await prisma.chat.findFirst({
+      where: { id, userId },
     })
     if (!chat) throw ChatNotFound()
     return chat
   },
 
-  create: async (userId, chat) => {
-    return await prisma.chat.create({
+  create: async (userId, chatData) => {
+    const chat = await prisma.chat.create({
       data: {
         userId,
-        status: chat.status,
-        title: chat.title,
-        messages: {
-          create:
-            chat.messages?.map((message) => ({
-              sender: message.sender,
-              content: message.content,
-            })) || [],
-        },
+        status: chatData.status,
+        title: chatData.title,
+        messages: chatData.messages
+          ? {
+              create: chatData.messages.map((msg) => ({
+                sender: msg.sender,
+                content: msg.content,
+              })),
+            }
+          : undefined,
       },
-      include: { messages: true },
     })
+    return chat
   },
 
-  update: async (chatId, userId, chat) => {
+  updateById: async (id, userId, chatData) => {
     try {
-      return await prisma.chat.update({
-        where: { id: Number(chatId), userId },
+      const chat = await prisma.chat.update({
+        where: { id, userId },
         data: {
-          status: chat.status,
-          title: chat.title,
-          messages: chat.messages
-            ? {
-                deleteMany: {},
-                create: chat.messages?.map((message) => ({
-                  sender: message.sender,
-                  content: message.content,
-                })),
-              }
-            : undefined,
+          status: chatData.status,
+          title: chatData.title,
+          ...(chatData.messages && {
+            messages: {
+              deleteMany: {}, // reset messaggi
+              create: chatData.messages.map((msg) => ({
+                sender: msg.sender,
+                content: msg.content,
+              })),
+            },
+          }),
         },
-        include: { messages: true },
       })
-    } catch (error) {
-      if (isNotFoundError(error)) throw ChatNotFound()
-      throw error
+      return chat
+    } catch (err) {
+      if (isNotFoundError(err)) throw ChatNotFound()
+      throw err
     }
   },
 
-  delete: async (chatId, userId) => {
+  deleteById: async (id, userId) => {
     try {
       await prisma.chat.delete({
-        where: { id: Number(chatId), userId },
+        where: { id, userId },
       })
-    } catch (error) {
-      if (isNotFoundError(error)) throw ChatNotFound()
-      throw error
+    } catch (err) {
+      if (isNotFoundError(err)) throw ChatNotFound()
+      throw err
     }
   },
 }

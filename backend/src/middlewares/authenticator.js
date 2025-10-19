@@ -21,7 +21,7 @@ export const authenticator = (req, res, next) => {
 
   try {
     const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-    req.user = { id: payload.userId, email: payload.email }
+    req.user = { id: payload.userId, email: payload.email, role: payload.role }
     next()
   } catch (error) {
     throw InvalidAccessToken()

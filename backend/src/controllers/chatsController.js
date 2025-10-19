@@ -14,7 +14,12 @@ export const chatsController = {
     let clientClosed = false
     req.on('close', () => (clientClosed = true))
 
-    for await (const event of chatReplyService.reply(chatId, req.user.id, options)) {
+    for await (const event of chatReplyService.reply(
+      Number(chatId),
+      req.user.id,
+      req.user.role,
+      options,
+    )) {
       if (clientClosed) return
       res.write(JSON.stringify(event) + '\n')
     }
@@ -25,7 +30,7 @@ export const chatsController = {
   cancelReply: (req, res) => {
     const { chatId } = req.params
 
-    chatReplyService.cancelReply(chatId, req.user.id)
+    chatReplyService.cancelReply(Number(chatId), req.user.id)
     res.status(204).end()
   },
 
@@ -38,7 +43,7 @@ export const chatsController = {
   get: async (req, res) => {
     const { chatId } = req.params
 
-    const chat = await chatService.findById(chatId, req.user.id)
+    const chat = await chatService.findById(Number(chatId), req.user.id)
     res.json({ chat })
   },
 
@@ -53,14 +58,14 @@ export const chatsController = {
     const { chatId } = req.params
     const { title, messages } = req.body
 
-    const chat = await chatService.update(chatId, req.user.id, { title, messages })
+    const chat = await chatService.updateById(Number(chatId), req.user.id, { title, messages })
     res.json({ chat })
   },
 
   delete: async (req, res) => {
     const { chatId } = req.params
 
-    await chatService.delete(chatId, req.user.id)
+    await chatService.deleteById(Number(chatId), req.user.id)
     res.status(204).end()
   },
 }

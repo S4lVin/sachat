@@ -1,11 +1,15 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { PrismaClient } from '@prisma/client'
+import { userService } from '#services'
 import { EmailTaken, AuthFailed, InvalidRefreshToken } from '#errors'
 
 const prisma = new PrismaClient()
 
 // Helpers
+const isConflictError = (err) => err?.code === 'P2002'
+const isNotFoundError = (err) => err?.errorCode === 'USER_NOT_FOUND'
+
 const safeJWTVerify = (token, secret) => {
   try {
     return jwt.verify(token, secret)
@@ -15,72 +19,66 @@ const safeJWTVerify = (token, secret) => {
 }
 
 const createAuthTokens = async (user) => {
-  const accessToken = jwt.sign(
-    { userId: user.id, email: user.email },
-    process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: '15m' },
-  )
-  const refreshToken = jwt.sign(
-    { userId: user.id, email: user.email },
-    process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: '30d' },
-  )
+  const payload = { userId: user.id, email: user.email, role: user.role }
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { refreshToken },
-  })
+  const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' })
+  const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
+
+  await userService.updateById(user.id, { refreshToken })
   return { accessToken, refreshToken }
 }
 
 export const authService = {
-  register: async (name, email, password) => {
+  register: async (email, password, name) => {
     const hashedPassword = await bcrypt.hash(password, 10)
-    let user = null
 
+    let user
     try {
-      user = await prisma.user.create({
-        data: {
-          email,
-          password: hashedPassword,
-          name,
-        },
+      user = await userService.create({
+        email,
+        password: hashedPassword,
+        name,
       })
-    } catch (error) {
-      if (error.code === 'P2002') throw EmailTaken()
-      throw error
+    } catch (err) {
+      if (isConflictError(err)) throw EmailTaken()
+      throw err
     }
 
     const { accessToken, refreshToken } = await createAuthTokens(user)
-    return { user, accessToken, refreshToken }
+    return { accessToken, refreshToken }
   },
 
   login: async (email, password) => {
-    const user = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-    })
-    if (!user) throw AuthFailed()
+    let user
+    try {
+      user = await userService.findByEmail(email, { sensitive: true })
+    } catch (err) {
+      if (isNotFoundError(err)) throw AuthFailed()
+      throw err
+    }
 
     const validPassword = await bcrypt.compare(password, user.password)
     if (!validPassword) throw AuthFailed()
 
     const { accessToken, refreshToken } = await createAuthTokens(user)
-    return { user, accessToken, refreshToken }
+    return { accessToken, refreshToken }
   },
 
   refresh: async (refreshToken) => {
     const payload = safeJWTVerify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
     if (!payload) throw InvalidRefreshToken()
 
-    const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
-    })
-    if (!user || user.refreshToken !== refreshToken) throw InvalidRefreshToken()
+    let user
+    try {
+      user = await userService.findById(payload.userId, { sensitive: true })
+    } catch (err) {
+      if (isNotFoundError(err)) throw InvalidRefreshToken()
+    }
+
+    if (user.refreshToken !== refreshToken) throw InvalidRefreshToken()
 
     const accessToken = jwt.sign(
-      { userId: payload.userId, email: payload.email },
+      { userId: user.id, email: user.email, role: user.role },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: '15m' },
     )
@@ -89,10 +87,12 @@ export const authService = {
   },
 
   logout: async (refreshToken) => {
-    const user = await prisma.user.findUnique({
-      where: { refreshToken },
-    })
-    if (!user) throw InvalidRefreshToken()
+    let user
+    try {
+      user = await userService.findByRefreshToken(refreshToken)
+    } catch (err) {
+      if (isNotFoundError(err)) throw InvalidRefreshToken()
+    }
 
     await prisma.user.update({
       where: { id: user.id },

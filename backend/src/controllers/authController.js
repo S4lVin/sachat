@@ -2,10 +2,10 @@ import { authService } from '#services'
 
 export const authController = {
   register: async (req, res) => {
-    const { name, email, password } = req.body
+    const { email, password, name } = req.body
 
-    const user = await authService.register(name, email, password)
-    res.status(201).json({ user })
+    const { accessToken, refreshToken } = await authService.register(email, password, name)
+    res.status(201).json({ accessToken, refreshToken })
   },
 
   login: async (req, res) => {
