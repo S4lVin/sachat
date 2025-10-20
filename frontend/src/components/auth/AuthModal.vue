@@ -1,8 +1,8 @@
 <script setup>
-import FeatherIcons from '@/components/ui/FeatherIcon.vue'
 import { router } from '@/router'
 import { useAuthStore } from '@/stores/authStore'
 import { ref, computed } from 'vue'
+import BaseModal from '../ui/BaseModal.vue'
 
 // Options
 const emit = defineEmits(['close'])
@@ -83,20 +83,10 @@ const submit = async () => {
   }
 }
 
-const closeModal = () => emit('close')
 </script>
 
 <template>
-  <div @click="closeModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm"></div>
-  <div
-    class="absolute top-1/2 left-1/2 w-112 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-neutral-800 p-8"
-  >
-    <!-- Header -->
-    <div class="mb-8 flex items-center justify-between">
-      <div class="text-2xl">{{ title }}</div>
-      <feather-icons @click="closeModal" name="x" class="cursor-pointer hover:text-neutral-300" />
-    </div>
-
+  <BaseModal @close="emit('close')" class="w-112" :title="title" :background="true">
     <!-- Error Message -->
     <div v-if="errorMessage" class="mb-2 text-red-500">
       {{ errorMessage }}
@@ -128,5 +118,5 @@ const closeModal = () => emit('close')
         Continua
       </button>
     </form>
-  </div>
+  </BaseModal>
 </template>

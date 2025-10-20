@@ -1,12 +1,14 @@
 import { api } from '@/helpers/api'
 import { jwtDecode } from 'jwt-decode'
 import { defineStore } from 'pinia'
+import { router } from '@/router'
 import { ref } from 'vue'
 
 export const useAuthStore = defineStore('auth', () => {
   // #region STATE
   const accessToken = ref(localStorage.getItem('accessToken'))
   const refreshToken = ref(localStorage.getItem('refreshToken'))
+  const user = ref()
   // #endregion
 
   // #region ACTIONS
@@ -37,10 +39,21 @@ export const useAuthStore = defineStore('auth', () => {
       password: user.password,
       name: user.name,
     })
-
-    return await login(data.user)
+    
+    setAccessToken(data.accessToken)
+    setRefreshToken(data.refreshToken)
+    return true
   }
 
+  const logout = async () => {
+    await api.post('auth/logout', {
+      refreshToken: refreshToken.value
+    })
+
+    clearTokens()
+    router.push({ name: 'Auth'})
+  }
+  
   const refreshAccessToken = async () => {
     try {
       const data = await api.post(
@@ -60,6 +73,12 @@ export const useAuthStore = defineStore('auth', () => {
   const clearTokens = () => {
     setAccessToken(null)
     setRefreshToken(null)
+  }
+
+
+  const fetchUser = async () => {
+    const data = await api.get('users/me')
+    user.value = data.user
   }
   // #endregion
 
@@ -91,11 +110,14 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     // STATE
     accessToken,
+    user,
     // ACTIONS
     login,
     register,
+    logout,
     hasValidTokenLocal,
     refreshAccessToken,
     clearTokens,
+    fetchUser
   }
 })

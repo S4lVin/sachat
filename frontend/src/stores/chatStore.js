@@ -24,7 +24,7 @@ export const useChatStore = defineStore('chat', () => {
   const createChat = async (title = 'Nuova chat') => {
     const data = await api.post('chats', { title })
     if (!Array.isArray(chats.value)) chats.value = []
-    chats.value.unshift(data.chat)
+    chats.value.push(data.chat)
     return data.chat
   }
 
@@ -74,11 +74,7 @@ export const useChatStore = defineStore('chat', () => {
 
     const tempAssistantMessage = addTempMessage('assistant', '')
 
-    const stream = await api.post(`chats/${chatId}/reply`, {
-      options: {
-        model: 'gpt-5-nano',
-      },
-    })
+    const stream = await api.post(`chats/${chatId}/reply`)
 
     for await (const event of stream) {
       if (event.type === 'delta') {
