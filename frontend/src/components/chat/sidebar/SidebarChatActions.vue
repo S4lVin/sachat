@@ -16,12 +16,12 @@ const showSearch = ref(false)
 
 <template>
   <div class="flex gap-2" :class="{ 'flex-col': collapsed }">
-    <!-- New Chat button -->
+    <!-- New Chat Button -->
     <BaseButton @click="chatStore.selectChat('new')" class="flex-1" variant="secondary" icon="plus">
       <span v-if="!collapsed">Nuova Chat</span>
     </BaseButton>
 
-    <!-- Search button -->
+    <!-- Search Button -->
     <BaseButton
       @click="showSearch = !showSearch"
       class="px-2.5"
@@ -29,7 +29,7 @@ const showSearch = ref(false)
       icon="search"
     />
 
-    <!-- Search modal -->
+    <!-- Search Modal -->
     <ChatSearchModal @close="showSearch = false" v-if="showSearch" />
   </div>
 </template>

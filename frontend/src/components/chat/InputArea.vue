@@ -4,7 +4,6 @@ import { storeToRefs } from 'pinia'
 import { ref, nextTick, computed } from 'vue'
 import BaseButton from '../ui/BaseButton.vue'
 
-// Stores
 const chatStore = useChatStore()
 const { currentChatStatus, currentChatId } = storeToRefs(chatStore)
 const MAX_HEIGHT = 512 // Altezza massima della textarea (px)

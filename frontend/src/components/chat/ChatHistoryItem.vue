@@ -4,7 +4,6 @@ import ContextMenu from '../ui/ContextMenu.vue'
 import { nextTick, ref } from 'vue'
 import BaseButton from '../ui/BaseButton.vue'
 
-// Options
 const emit = defineEmits(['select', 'rename', 'delete'])
 const props = defineProps({
   title: {
@@ -26,7 +25,6 @@ const showMenu = ref(false)
 const isEditing = ref(false)
 const editingTitle = ref('')
 const inputRef = ref(null)
-
 const actions = [
   {
     label: 'Rinomina',
@@ -72,10 +70,7 @@ const handleKeydown = (e) => {
   }
 }
 
-const toggleMenu = () => {
-  // Chiudi tutti gli altri menu prima di aprire questo
-  showMenu.value = !showMenu.value
-}
+const toggleMenu = () => showMenu.value = !showMenu.value
 </script>
 
 <template>
