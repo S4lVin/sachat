@@ -8,7 +8,7 @@ const routes = [
   {
     path: '/',
     name: 'Auth',
-    component: AuthView
+    component: AuthView,
   },
   {
     path: '/chat/:chatId',
@@ -18,7 +18,7 @@ const routes = [
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/'
+    redirect: '/',
   },
 ]
 

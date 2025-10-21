@@ -34,10 +34,8 @@ watch(
   () => props.modelValue,
   (isOpen) => {
     if (!isOpen) return
-    document.dispatchEvent(
-      new CustomEvent('close-all-menus', { detail: { openerId: menuId } })
-    )
-  }
+    document.dispatchEvent(new CustomEvent('close-all-menus', { detail: { openerId: menuId } }))
+  },
 )
 
 // Callbacks
@@ -55,7 +53,7 @@ onBeforeUnmount(() => {
   <div
     v-if="modelValue"
     ref="menuRef"
-    class="rounded-xl border border-neutral-700 bg-neutral-800 p-2 shadow-lg/25"
+    class="z-10 rounded-xl border border-neutral-700 bg-neutral-800 p-2 shadow-lg/25"
   >
     <BaseButton
       v-for="action in actions"

@@ -7,11 +7,11 @@ defineProps({
   icon: String,
   iconSize: {
     type: Number,
-    default: 20
+    default: 20,
   },
   display: {
     type: String,
-    default: 'inline-flex'
+    default: 'inline-flex',
   },
 })
 
@@ -27,7 +27,7 @@ const variants = {
     :disabled="disabled"
     :class="[
       display,
-      'items-center cursor-pointer gap-2 rounded-xl transition-colors disabled:opacity-50 disabled:pointer-events-none',
+      'cursor-pointer items-center gap-2 rounded-xl transition-colors disabled:pointer-events-none disabled:opacity-50',
       variants[variant],
     ]"
   >

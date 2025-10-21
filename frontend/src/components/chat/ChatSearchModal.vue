@@ -1,11 +1,11 @@
 <script setup>
-import { useChatStore } from '@/stores/chatStore';
-import { storeToRefs } from 'pinia';
-import { ref, computed } from 'vue';
-import BaseButton from '../ui/BaseButton.vue';
-import BaseModal from '../ui/BaseModal.vue';
+import { useChatStore } from '@/stores/chatStore'
+import { storeToRefs } from 'pinia'
+import { ref, computed } from 'vue'
+import BaseButton from '../ui/BaseButton.vue'
+import BaseModal from '../ui/BaseModal.vue'
 
-defineEmits(['close'])
+const emit = defineEmits(['close'])
 
 const chatStore = useChatStore()
 const { chats } = storeToRefs(chatStore)
@@ -18,36 +18,36 @@ const filteredChats = computed(() => {
   return chats.value.filter((chat) => chat.title.toLowerCase().includes(input.value.toLowerCase()))
 })
 
+// Actions
+const selectChat = (chatId) => {
+  chatStore.selectChat(chatId)
+  emit('close')
+}
 </script>
 
 <template>
-    <BaseModal @close="$emit('close')" class="flex flex-col h-96 w-160">
-      <!-- Header -->
-      <div class="flex items-center justify-center p-2">
-        <input v-model="input" placeholder="Cerca chat..." class="w-full p-2 focus:outline-none" />
-        <BaseButton
-          @click="$emit('close')" 
-          variant="ghost"
-          icon="x"
-          :icon-size="24"
-        />
-      </div>
+  <BaseModal @close="$emit('close')" class="flex h-96 w-160 flex-col">
+    <!-- Header -->
+    <div class="flex items-center justify-center p-2">
+      <input v-model="input" placeholder="Cerca chat..." class="w-full p-2 focus:outline-none" />
+      <BaseButton @click="$emit('close')" variant="ghost" icon="x" :icon-size="24" />
+    </div>
 
-      <!-- Chat List -->
-      <div class="p-2 border-t overflow-y-auto border-neutral-700">
-        <BaseButton 
-          v-for="chat in filteredChats" 
-          @click="chatStore.selectChat(chat.id); $emit('close')"
-          class="hover:bg-neutral-700 p-2 w-full transition-none" 
-          :key="chat.id"
-        >
-          {{ chat.title }}
-        </BaseButton>
+    <!-- Chat List -->
+    <div class="overflow-y-auto border-t border-neutral-700 p-2">
+      <BaseButton
+        v-for="chat in filteredChats"
+        @click="selectChat(chat.id)"
+        class="w-full p-2 transition-none hover:bg-neutral-700"
+        :key="chat.id"
+      >
+        {{ chat.title }}
+      </BaseButton>
 
-        <!-- Empty State -->
-        <div v-if="filteredChats?.length === 0" class="text-center text-neutral-400">
-          <p class="text-sm mt-8">Nessuna chat trovata</p>
-        </div>
+      <!-- Empty State -->
+      <div v-if="filteredChats?.length === 0" class="text-center text-neutral-400">
+        <p class="mt-8 text-sm">Nessuna chat trovata</p>
       </div>
-    </BaseModal>
+    </div>
+  </BaseModal>
 </template>

@@ -1,7 +1,7 @@
 <script setup>
 import FeatherIcons from '@/components/ui/FeatherIcon.vue'
 import ContextMenu from '../ui/ContextMenu.vue'
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
 import BaseButton from '../ui/BaseButton.vue'
 
 // Options
@@ -46,7 +46,7 @@ const renameTitle = () => {
   isEditing.value = true
   editingTitle.value = props.title
   // Focus sull'input dopo che il DOM si è aggiornato
-  setTimeout(() => {
+  nextTick(() => {
     inputRef.value?.focus()
     inputRef.value?.select()
   }, 0)
@@ -95,10 +95,10 @@ const toggleMenu = () => {
     <BaseButton
       v-else
       @click="$emit('select')"
-      class="w-full truncate p-2 hover:bg-neutral-600 transition-none"
+      class="w-full truncate p-2 transition-none hover:bg-neutral-600"
       :class="{ 'bg-neutral-700': selected }"
     >
-      {{ title }}
+      <span class="truncate">{{ title }}</span>
     </BaseButton>
 
     <!-- Generating Icon -->

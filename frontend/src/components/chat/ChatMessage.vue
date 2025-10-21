@@ -58,7 +58,7 @@ const onAction = async (name) => {
       <!-- Retry Button -->
       <BaseButton
         @click="$emit('retry')"
-        class="w-full p-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800"
+        class="w-full border border-neutral-800 bg-neutral-900 p-2 hover:bg-neutral-800"
         icon="rotate-cw"
       >
         Riprova

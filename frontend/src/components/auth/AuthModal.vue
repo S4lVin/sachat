@@ -71,7 +71,7 @@ const applyApiErrors = (err) => {
 
     return
   }
-  
+
   errorMessage.value = err?.message
 }
 
@@ -90,7 +90,6 @@ const submit = async () => {
     applyApiErrors(err)
   }
 }
-
 </script>
 
 <template>
@@ -98,7 +97,7 @@ const submit = async () => {
     <!-- Header -->
     <div class="mb-8 flex items-center justify-between">
       <div class="text-2xl">{{ title }}</div>
-      <BaseButton @click="$emit('close')" variant="ghost" icon="x" :icon-size="24"/>
+      <BaseButton @click="$emit('close')" variant="ghost" icon="x" :icon-size="24" />
     </div>
 
     <!-- General Error Message -->
@@ -125,13 +124,7 @@ const submit = async () => {
         />
       </div>
 
-      <BaseButton
-        type="submit"
-        class="w-full"
-        variant="primary"
-      >
-        Continua
-      </BaseButton>
+      <BaseButton type="submit" class="w-full" variant="primary"> Continua </BaseButton>
     </form>
   </BaseModal>
 </template>

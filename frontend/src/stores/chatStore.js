@@ -24,7 +24,7 @@ export const useChatStore = defineStore('chat', () => {
   const createChat = async (title = 'Nuova chat') => {
     const data = await api.post('chats', { title })
     if (!Array.isArray(chats.value)) chats.value = []
-    chats.value.push(data.chat)
+    chats.value.unshift(data.chat)
     return data.chat
   }
 

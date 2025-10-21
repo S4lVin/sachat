@@ -10,7 +10,7 @@ const ChatNotFound = () => new NotFoundError('Chat non trovata', 'CHAT_NOT_FOUND
 const isNotFoundError = (err) => err?.code === 'P2025'
 
 export const chatService = {
-  findAll: async (userId, { orderBy = 'asc' } = {}) => {
+  findAll: async (userId, { orderBy = 'desc' } = {}) => {
     const chats = await prisma.chat.findMany({
       where: { userId },
       orderBy: { createdAt: orderBy },

@@ -1,10 +1,10 @@
 <script setup>
-import TheSidebar from '@/components/chat/TheSidebar.vue'
 import InputArea from '@/components/chat/InputArea.vue'
 import ChatMessage from '@/components/chat/ChatMessage.vue'
 import { watch, ref, nextTick, onMounted } from 'vue'
 import { useChatStore } from '@/stores/chatStore'
 import { storeToRefs } from 'pinia'
+import ChatSidebar from '@/components/chat/sidebar/ChatSidebar.vue'
 
 const chatStore = useChatStore()
 const { chats, messages, currentChatId, keepLocalOnNextSelection } = storeToRefs(chatStore)
@@ -77,7 +77,7 @@ onMounted(async () => {
 <template>
   <div class="flex h-screen w-screen text-neutral-200">
     <!-- Sidebar -->
-    <TheSidebar />
+    <ChatSidebar />
 
     <div class="relative flex flex-1">
       <!-- Message Area -->

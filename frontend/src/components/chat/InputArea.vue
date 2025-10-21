@@ -66,10 +66,7 @@ const handleAction = () => {
 
     <!-- Actions -->
     <div class="flex items-center justify-between">
-      <BaseButton
-        class="p-2 text-neutral-500 hover:text-neutral-400"
-        icon="search"
-      />
+      <BaseButton class="p-2 text-neutral-500 hover:text-neutral-400" icon="search" />
 
       <BaseButton
         @click="handleAction"

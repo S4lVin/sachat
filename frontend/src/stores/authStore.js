@@ -39,7 +39,7 @@ export const useAuthStore = defineStore('auth', () => {
       password: user.password,
       name: user.name,
     })
-    
+
     setAccessToken(data.accessToken)
     setRefreshToken(data.refreshToken)
     return true
@@ -47,14 +47,14 @@ export const useAuthStore = defineStore('auth', () => {
 
   const logout = async () => {
     await api.post('auth/logout', {
-      refreshToken: refreshToken.value
+      refreshToken: refreshToken.value,
     })
 
     clearTokens()
     user.value = null
-    router.push({ name: 'Auth'})
+    router.push({ name: 'Auth' })
   }
-  
+
   const refreshAccessToken = async () => {
     try {
       const data = await api.post(
@@ -75,7 +75,6 @@ export const useAuthStore = defineStore('auth', () => {
     setAccessToken(null)
     setRefreshToken(null)
   }
-
 
   const fetchUser = async () => {
     const data = await api.get('users/me')
@@ -119,6 +118,6 @@ export const useAuthStore = defineStore('auth', () => {
     hasValidTokenLocal,
     refreshAccessToken,
     clearTokens,
-    fetchUser
+    fetchUser,
   }
 })

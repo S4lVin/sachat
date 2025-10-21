@@ -7,7 +7,7 @@ defineProps({ background: Boolean })
 
 // Helpers
 const handleKeydown = (e) => {
-if (e.key === 'Escape') emit('close')
+  if (e.key === 'Escape') emit('close')
 }
 
 // Callbacks
@@ -16,13 +16,13 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleKeydown))
 </script>
 
 <template>
-  <div 
+  <div
     @click.self="$emit('close')"
-    class="fixed inset-0 flex items-center justify-center" 
+    class="fixed inset-0 flex items-center justify-center"
     :class="{ 'bg-black/50 backdrop-blur-sm': background }"
   >
-    <div class="rounded-xl shadow-lg/25 bg-neutral-800 z-10" v-bind="$attrs">
-      <slot/>
+    <div class="z-10 rounded-xl bg-neutral-800 shadow-lg/25" v-bind="$attrs">
+      <slot />
     </div>
   </div>
 </template>
