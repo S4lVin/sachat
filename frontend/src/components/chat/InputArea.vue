@@ -1,8 +1,8 @@
 <script setup>
-import FeatherIcons from '@/components/ui/FeatherIcon.vue'
 import { useChatStore } from '@/stores/chatStore'
 import { storeToRefs } from 'pinia'
 import { ref, nextTick, computed } from 'vue'
+import BaseButton from '../ui/BaseButton.vue'
 
 // Stores
 const chatStore = useChatStore()
@@ -66,28 +66,18 @@ const handleAction = () => {
 
     <!-- Actions -->
     <div class="flex items-center justify-between">
-      <button
-        class="cursor-pointer rounded-xl p-2 text-neutral-500 transition-colors hover:text-neutral-400"
-        type="button"
-        aria-label="Cerca"
-      >
-        <feather-icons :size="20" name="search" />
-      </button>
+      <BaseButton
+        class="p-2 text-neutral-500 hover:text-neutral-400"
+        icon="search"
+      />
 
-      <button
+      <BaseButton
         @click="handleAction"
         :disabled="!canSend && !isGenerating"
-        :class="[
-          'cursor-pointer rounded-xl p-2 transition-colors',
-          canSend || isGenerating
-            ? 'bg-indigo-800 hover:bg-indigo-900'
-            : 'cursor-not-allowed bg-neutral-700',
-        ]"
-        type="button"
-        :aria-label="isGenerating ? 'Ferma generazione' : 'Invia messaggio'"
-      >
-        <feather-icons :name="buttonIcon" />
-      </button>
+        variant="primary"
+        :icon="buttonIcon"
+        :icon-size="24"
+      />
     </div>
   </div>
 </template>

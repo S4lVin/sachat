@@ -1,5 +1,6 @@
 <script setup>
 import AuthModal from '@/components/auth/AuthModal.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
 import { ref } from 'vue'
 
 // State
@@ -33,20 +34,19 @@ const closeForm = () => {
 
         <!-- Action Buttons -->
         <div class="flex gap-4 font-medium">
-          <button
+          <BaseButton
             @click="openForm('login')"
-            class="w-32 cursor-pointer rounded-xl bg-indigo-800 p-4 transition-colors hover:bg-indigo-900 focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:outline-none"
+            class="w-32 justify-center bg-indigo-800 p-4 hover:bg-indigo-900"
             type="button"
           >
             Accedi
-          </button>
-          <button
+          </BaseButton>
+          <BaseButton
             @click="openForm('register')"
-            class="w-32 cursor-pointer rounded-xl bg-neutral-700 p-4 transition-colors hover:bg-neutral-800 focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:outline-none"
-            type="button"
+            class="w-32 justify-center bg-neutral-700 p-4 hover:bg-neutral-800"
           >
             Registrati
-          </button>
+          </BaseButton>
         </div>
       </section>
     </main>
@@ -57,7 +57,7 @@ const closeForm = () => {
         <small>&copy; 2025 Salvatore Giaquinto. Tutti i diritti riservati.</small>
         <nav class="flex gap-4 text-sm">
           <a
-            href="#"
+            href="https://github.com/S4lVin/sachat"
             class="transition-colors hover:text-neutral-300"
             target="_blank"
             rel="noopener"

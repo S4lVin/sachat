@@ -1,18 +1,18 @@
 <script setup>
-import FeatherIcons from '@/components/ui/FeatherIcon.vue'
+import { onMounted, onBeforeUnmount } from 'vue'
 
 defineOptions({ inheritAttrs: false })
-defineEmits(['close'])
-defineProps({
-  title: {
-    type: String,
-    required: true
-  },
-  background: {
-    type: Boolean,
-    default: false
-  }
-})
+const emit = defineEmits(['close'])
+defineProps({ background: Boolean })
+
+// Helpers
+const handleKeydown = (e) => {
+if (e.key === 'Escape') emit('close')
+}
+
+// Callbacks
+onMounted(() => document.addEventListener('keydown', handleKeydown))
+onBeforeUnmount(() => document.removeEventListener('keydown', handleKeydown))
 </script>
 
 <template>
@@ -21,15 +21,8 @@ defineProps({
     class="fixed inset-0 flex items-center justify-center" 
     :class="{ 'bg-black/50 backdrop-blur-sm': background }"
   >
-    <div class="rounded-xl shadow-lg/25 bg-neutral-800 p-8 z-10" v-bind="$attrs">
-      <!-- Header -->
-      <div class="mb-8 flex items-center justify-between">
-        <div class="text-2xl">{{ title }}</div>
-        <feather-icons @click="$emit('close')" name="x" class="cursor-pointer hover:text-neutral-300" />
-      </div>
-      <slot></slot>
+    <div class="rounded-xl shadow-lg/25 bg-neutral-800 z-10" v-bind="$attrs">
+      <slot/>
     </div>
   </div>
-
-  <!-- Background -->
 </template>

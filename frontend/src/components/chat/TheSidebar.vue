@@ -7,6 +7,7 @@ import { storeToRefs } from 'pinia'
 import { ref, computed } from 'vue'
 import ContextMenu from '../ui/ContextMenu.vue'
 import ChatSearchModal from './ChatSearchModal.vue'
+import BaseButton from '../ui/BaseButton.vue'
 
 // Stores
 const chatStore = useChatStore()
@@ -32,7 +33,7 @@ const actions = [
 ]
 
 // Computed
-const reversedChats = computed(() => [...chats.value].reverse())
+const reversedChats = computed(() => [...chats.value ?? []].reverse())
 
 // Actions
 const isChatSelected = (chatId) => chatId === currentChatId.value
@@ -53,38 +54,41 @@ const toggleMenu = () => {
     <!-- Header -->
     <header class="flex items-center justify-between border-b-2 border-neutral-700 p-4">
       <h2 class="text-xl font-bold">SaChat</h2>
-      <button
+      <BaseButton
         @click="toggleSidebar"
-        class="cursor-pointer transition-colors hover:text-neutral-300"
-      >
-        <feather-icons name="sidebar" />
-      </button>
+        variant="ghost"
+        icon="sidebar"
+        :icon-size="24"
+      />
     </header>
 
     <div class="h-full overflow-y-auto p-4">
 
       <!-- Actions -->
-      <div class="sticky top-0 z-10 flex gap-2">
-        <button
+      <div class="sticky top-0 z-10 mb-4 flex gap-2">
+        <!-- New Chat button -->
+        <BaseButton
           @click="chatStore.selectChat('new')"
-          class="mb-4 flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-neutral-700 bg-neutral-800 p-2 transition-colors hover:bg-neutral-700"
+          class="flex-1"
+          variant="secondary"
+          icon="plus"
         >
-          <feather-icons name="plus" :size="20" />
           Nuova Chat
-        </button>
+        </BaseButton>
 
-        <button
+        <!-- Search button -->
+        <BaseButton
           @click="showSearch = !showSearch"
-          class="mb-4 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-neutral-700 bg-neutral-800 p-2 transition-colors hover:bg-neutral-700"
-        >
-          <feather-icons name="search" class="px-0.5" :size="20" />
-        </button>
+          class="px-2.5"
+          variant="secondary"
+          icon="search"
+        />
 
         <ChatSearchModal @close="showSearch = false" v-if="showSearch" />
       </div>
 
       <!-- Chat List -->
-      <div aria-label="Lista chat">
+      <div>
         <ChatHistoryItem
           v-for="chat in reversedChats"
           :key="chat.id"
@@ -105,14 +109,14 @@ const toggleMenu = () => {
 
     <!-- Footer -->
     <footer class="border-t-2 border-neutral-700 p-2 relative">
-      <button
+      <BaseButton
         @click.stop="toggleMenu"
-        class="flex w-full cursor-pointer items-center gap-2 rounded-xl p-3 transition-colors hover:bg-neutral-700"
-        aria-label="Crea nuova chat"
+        class="w-full p-3"
+        variant="ghost"
+        icon="user"
       >
-      <feather-icons name="user" />
-      {{ user.name }}
-    </button>
+      {{ user?.name }}
+      </BaseButton>
     <ContextMenu :actions="actions" v-model="showMenu" class="absolute w-56 -mb-1 bottom-full left-2"/>
     </footer>
   </aside>
@@ -151,7 +155,6 @@ const toggleMenu = () => {
       <button
         @click.stop="toggleMenu"
         class="flex w-full cursor-pointer items-center gap-2 rounded-xl p-3 transition-colors hover:bg-neutral-700"
-        aria-label="Crea nuova chat"
       >
       <feather-icons name="user" />
     </button>

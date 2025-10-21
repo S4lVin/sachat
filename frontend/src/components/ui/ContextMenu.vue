@@ -1,10 +1,10 @@
 <script setup>
-import FeatherIcons from '@/components/ui/FeatherIcon.vue'
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import BaseButton from './BaseButton.vue'
 
 // Options
 const emit = defineEmits(['update:modelValue'])
-defineProps({
+const props = defineProps({
   modelValue: Boolean,
   actions: {
     type: Array,
@@ -14,6 +14,7 @@ defineProps({
 
 // State
 const menuRef = ref(null)
+const menuId = Symbol('context-menu')
 
 // Actions
 const handleClickOutside = (event) => {
@@ -22,9 +23,22 @@ const handleClickOutside = (event) => {
   }
 }
 
-const handleCloseAllMenus = () => {
+const handleCloseAllMenus = (e) => {
+  // se l'evento è stato emesso da me, ignoro
+  if (e?.detail?.openerId === menuId) return
   emit('update:modelValue', false)
 }
+
+// Watchers
+watch(
+  () => props.modelValue,
+  (isOpen) => {
+    if (!isOpen) return
+    document.dispatchEvent(
+      new CustomEvent('close-all-menus', { detail: { openerId: menuId } })
+    )
+  }
+)
 
 // Callbacks
 onMounted(() => {
@@ -43,7 +57,7 @@ onBeforeUnmount(() => {
     ref="menuRef"
     class="rounded-xl border border-neutral-700 bg-neutral-800 p-2 shadow-lg/25"
   >
-    <button
+    <BaseButton
       v-for="action in actions"
       :key="action.label"
       @click="
@@ -52,11 +66,13 @@ onBeforeUnmount(() => {
           emit('update:modelValue', false)
         }
       "
-      class="flex w-full cursor-pointer items-center gap-2 rounded-xl p-2 text-left text-sm transition-colors hover:bg-neutral-700"
+      class="w-full text-sm"
       :class="action.class"
+      variant="ghost"
+      :icon="action.icon"
+      :icon-size="16"
     >
-      <feather-icons :size="16" :name="action.icon" />
       <span>{{ action.label }}</span>
-    </button>
+    </BaseButton>
   </div>
 </template>

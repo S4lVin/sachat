@@ -2,6 +2,7 @@
 import FeatherIcons from '@/components/ui/FeatherIcon.vue'
 import ContextMenu from '../ui/ContextMenu.vue'
 import { ref } from 'vue'
+import BaseButton from '../ui/BaseButton.vue'
 
 // Options
 const emit = defineEmits(['select', 'rename', 'delete'])
@@ -73,7 +74,6 @@ const handleKeydown = (e) => {
 
 const toggleMenu = () => {
   // Chiudi tutti gli altri menu prima di aprire questo
-  if (!showMenu.value) document.dispatchEvent(new CustomEvent('close-all-menus'))
   showMenu.value = !showMenu.value
 }
 </script>
@@ -92,14 +92,14 @@ const toggleMenu = () => {
     />
 
     <!-- Chat Title (normal mode) -->
-    <button
+    <BaseButton
       v-else
       @click="$emit('select')"
-      class="w-full cursor-pointer truncate rounded-xl p-2 text-left hover:bg-neutral-600"
+      class="w-full truncate p-2 hover:bg-neutral-600 transition-none"
       :class="{ 'bg-neutral-700': selected }"
     >
       {{ title }}
-    </button>
+    </BaseButton>
 
     <!-- Generating Icon -->
     <feather-icons
@@ -111,12 +111,13 @@ const toggleMenu = () => {
     />
 
     <!-- More Options -->
-    <button
-      class="hidden cursor-pointer transition-colors group-hover:inline hover:text-neutral-300"
+    <BaseButton
       @click.stop="toggleMenu"
-    >
-      <feather-icons name="more-vertical" />
-    </button>
+      variant="ghost"
+      icon="more-vertical"
+      :icon-size="24"
+      display="hidden group-hover:inline-flex"
+    />
 
     <!-- Context Menu -->
     <ContextMenu

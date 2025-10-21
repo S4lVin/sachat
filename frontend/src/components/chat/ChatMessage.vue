@@ -1,6 +1,7 @@
 <script setup>
 import FeatherIcons from '@/components/ui/FeatherIcon.vue'
 import { computed } from 'vue'
+import BaseButton from '../ui/BaseButton.vue'
 
 // Options
 const emit = defineEmits(['retry'])
@@ -55,21 +56,19 @@ const onAction = async (name) => {
       </div>
 
       <!-- Retry Button -->
-      <button
+      <BaseButton
         @click="$emit('retry')"
-        class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-neutral-800 bg-neutral-900 p-2 transition-colors hover:bg-neutral-800"
+        class="w-full p-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800"
+        icon="rotate-cw"
       >
-        <feather-icons :size="20" name="rotate-cw" />
-        <span>Riprova</span>
-      </button>
+        Riprova
+      </BaseButton>
     </div>
 
     <!-- Assistant Message -->
     <div v-else class="flex flex-col">
       <span class="mb-1 font-bold uppercase">{{ sender }}</span>
-
-      <feather-icons v-if="isLoading" :spin="true" name="loader" />
-      {{ content }}
+      <feather-icons v-if="isLoading" :spin="true" name="loader" />{{ content }}
     </div>
 
     <!-- Actions -->
@@ -78,18 +77,13 @@ const onAction = async (name) => {
       class="absolute bottom-0 hidden gap-x-2 pb-2 group-hover:flex"
       :class="isUser ? 'right-0' : 'left-0'"
     >
-      <button
+      <BaseButton
         v-for="(action, i) in actions"
         :key="i"
-        class="cursor-pointer"
+        class="text-neutral-500 hover:text-neutral-600"
         @click="onAction(action.name)"
-      >
-        <feather-icons
-          :size="20"
-          class="text-neutral-500 transition-colors hover:text-neutral-600"
-          :name="action.name"
-        />
-      </button>
+        :icon="action.name"
+      />
     </div>
   </div>
 </template>

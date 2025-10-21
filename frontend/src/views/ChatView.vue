@@ -2,7 +2,7 @@
 import TheSidebar from '@/components/chat/TheSidebar.vue'
 import InputArea from '@/components/chat/InputArea.vue'
 import ChatMessage from '@/components/chat/ChatMessage.vue'
-import { watch, ref, nextTick } from 'vue'
+import { watch, ref, nextTick, onMounted } from 'vue'
 import { useChatStore } from '@/stores/chatStore'
 import { storeToRefs } from 'pinia'
 
@@ -38,8 +38,6 @@ const scrollToBottomIfNeeded = async (smooth = false) => {
 watch(
   () => currentChatId.value,
   async (chatId) => {
-    if (!chats.value) await chatStore.loadChats()
-
     if (keepLocalOnNextSelection.value) {
       keepLocalOnNextSelection.value = false
       return
@@ -68,6 +66,12 @@ watch(
     await scrollToBottomIfNeeded(true)
   },
 )
+
+// Callbacks
+onMounted(async () => {
+  chats.value = null
+  await chatStore.loadChats()
+})
 </script>
 
 <template>

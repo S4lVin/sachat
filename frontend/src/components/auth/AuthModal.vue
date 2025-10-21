@@ -3,6 +3,7 @@ import { router } from '@/router'
 import { useAuthStore } from '@/stores/authStore'
 import { ref, computed } from 'vue'
 import BaseModal from '../ui/BaseModal.vue'
+import BaseButton from '../ui/BaseButton.vue'
 
 // Options
 const emit = defineEmits(['close'])
@@ -35,10 +36,9 @@ const fields = computed(() => [
   { key: 'email', type: 'email', placeholder: 'Email', autocomplete: 'email' },
   { key: 'password', type: 'password', placeholder: 'Password', autocomplete: 'current-password' },
 ])
+const fieldKeys = computed(() => fields.value.map((field) => field.key))
 
 // Helpers
-const fieldKeys = computed(() => fields.value.map((f) => f.key))
-
 const resetFieldErrors = () => {
   errorMessage.value = ''
   fieldKeys.value.forEach((key) => {
@@ -47,24 +47,32 @@ const resetFieldErrors = () => {
 }
 
 const buildPayload = () => {
-  // Solo i campi visibili, trim sulle stringhe
-  return fieldKeys.value.reduce((acc, key) => {
-    const v = formData.value[key]?.value
-    acc[key] = typeof v === 'string' ? v.trim() : v
-    return acc
-  }, {})
+  const payload = {}
+
+  for (const key of fieldKeys.value) {
+    const rawValue = formData.value[key]?.value
+    const cleanValue = typeof rawValue === 'string' ? rawValue.trim() : rawValue
+
+    payload[key] = cleanValue
+  }
+
+  return payload
 }
 
 const applyApiErrors = (err) => {
-  if (err?.details && Array.isArray(err.details)) {
-    err.details.forEach((detail) => {
-      if (detail.field && formData.value[detail.field]) {
-        formData.value[detail.field].error = detail.message
-      }
-    })
-  } else {
-    errorMessage.value = err?.message || 'Si è verificato un errore. Riprova.'
+  const details = err?.details
+
+  if (Array.isArray(details)) {
+    for (const detail of details) {
+      const field = detail?.field
+      if (!formData.value[field]) continue
+      formData.value[detail.field].error = detail.message
+    }
+
+    return
   }
+  
+  errorMessage.value = err?.message
 }
 
 // Actions
@@ -86,14 +94,20 @@ const submit = async () => {
 </script>
 
 <template>
-  <BaseModal @close="emit('close')" class="w-112" :title="title" :background="true">
-    <!-- Error Message -->
+  <BaseModal @close="emit('close')" class="w-112 p-4" :title="title" :background="true">
+    <!-- Header -->
+    <div class="mb-8 flex items-center justify-between">
+      <div class="text-2xl">{{ title }}</div>
+      <BaseButton @click="$emit('close')" variant="ghost" icon="x" :icon-size="24"/>
+    </div>
+
+    <!-- General Error Message -->
     <div v-if="errorMessage" class="mb-2 text-red-500">
       {{ errorMessage }}
     </div>
 
     <!-- Form -->
-    <form @submit.prevent="submit" class="mb-6 flex flex-col gap-4">
+    <form @submit.prevent="submit" class="mb-4 flex flex-col gap-4">
       <div v-for="field in fields" :key="field.key">
         <div v-if="formData[field.key].error" class="mb-1 text-sm text-red-500">
           {{ formData[field.key].error }}
@@ -111,12 +125,13 @@ const submit = async () => {
         />
       </div>
 
-      <button
+      <BaseButton
         type="submit"
-        class="w-full cursor-pointer rounded-xl bg-indigo-800 p-2 transition-colors hover:bg-indigo-900"
+        class="w-full"
+        variant="primary"
       >
         Continua
-      </button>
+      </BaseButton>
     </form>
   </BaseModal>
 </template>

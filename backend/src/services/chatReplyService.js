@@ -23,16 +23,18 @@ const buildModelInput = async (chatId, userId) => {
   return formatMessagesForApi(messages)
 }
 
-const initializeStream = async (input, userId, userRole, options) => {
-  let apiKey
+const getApiKey = async (userId, userRole) => {
   if (userRole === 'vip') {
-    apiKey = process.env.OPENAI_API_KEY
-  } else {
-    const user = await userService.findById(userId, { sensitive: true })
-    if (!user.apiKey) throw NoApiKeyProvided()
-    apiKey = user.apiKey
+    return process.env.OPENAI_API_KEY
   }
 
+  const user = await userService.findById(userId, { sensitive: true })
+  if (!user.apiKey) throw NoApiKeyProvided()
+  return user.apiKey
+}
+
+const initializeStream = async (input, userId, userRole, options) => {
+  const apiKey = await getApiKey(userId, userRole)
   const client = new OpenAI({ apiKey })
 
   try {
