@@ -11,7 +11,7 @@ export const userController = {
 
     const user = await userService.updateById(req.user.id, {
       name,
-      settings
+      settings,
     })
     res.json({ user })
   },
@@ -19,5 +19,5 @@ export const userController = {
   delete: async (req, res) => {
     await userService.deleteById(req.user.id)
     res.status(204).end()
-  }
+  },
 }

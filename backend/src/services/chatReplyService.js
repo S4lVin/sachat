@@ -23,19 +23,19 @@ const buildModelInput = async (chatId, userId) => {
   return formatMessagesForApi(messages)
 }
 
-const getApiKey = async (userId, userRole) => {
+const getApiKey = async (userId) => {
   const user = await userService.findById(userId)
 
-  if (userRole === 'vip' && !user.settings?.useApiKey) {
+  if (user.role === 'vip' && !user.settings?.useApiKey) {
     return process.env.OPENAI_API_KEY
   }
-  
+
   if (!user.settings?.apiKey) throw NoApiKeyProvided()
   return user.settings.apiKey
 }
 
-const initializeStream = async (input, userId, userRole, options) => {
-  const apiKey = await getApiKey(userId, userRole)
+const initializeStream = async (input, userId, options) => {
+  const apiKey = await getApiKey(userId)
   const client = new OpenAI({ apiKey })
 
   try {
@@ -57,7 +57,7 @@ const initializeStream = async (input, userId, userRole, options) => {
 }
 
 export const chatReplyService = {
-  reply: async function* (chatId, userId, userRole, options) {
+  reply: async function* (chatId, userId, options) {
     const key = `${chatId}-${userId}`
     activeReplies.set(key, { aborted: false })
     await chatService.updateById(chatId, userId, { status: 'generating' })
@@ -67,7 +67,7 @@ export const chatReplyService = {
       let totalTokenUsed = 0
 
       const input = await buildModelInput(chatId, userId)
-      const stream = await initializeStream(input, userId, userRole, options)
+      const stream = await initializeStream(input, userId, options)
 
       for await (const event of stream) {
         if (activeReplies.get(key)?.aborted) break

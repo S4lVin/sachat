@@ -19,7 +19,7 @@ const safeJWTVerify = (token, secret) => {
 }
 
 const createAuthTokens = async (user) => {
-  const payload = { userId: user.id, email: user.email, role: user.role }
+  const payload = { userId: user.id, email: user.email }
 
   const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' })
   const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
@@ -78,7 +78,7 @@ export const authService = {
     if (user.refreshToken !== refreshToken) throw InvalidRefreshToken()
 
     const accessToken = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
+      { userId: user.id, email: user.email },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: '15m' },
     )

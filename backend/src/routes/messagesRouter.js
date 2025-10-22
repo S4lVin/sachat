@@ -5,6 +5,7 @@ import { messageSchemas } from '#schemas'
 
 export const messagesRouter = express.Router({ mergeParams: true })
 
-messagesRouter.route('/')
+messagesRouter
+  .route('/')
   .get(messagesController.getAll)
   .post(validator(messageSchemas.create), messagesController.create)

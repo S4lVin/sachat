@@ -14,12 +14,7 @@ export const chatsController = {
     let clientClosed = false
     req.on('close', () => (clientClosed = true))
 
-    for await (const event of chatReplyService.reply(
-      Number(chatId),
-      req.user.id,
-      req.user.role,
-      options,
-    )) {
+    for await (const event of chatReplyService.reply(Number(chatId), req.user.id, options)) {
       if (clientClosed) return
       res.write(JSON.stringify(event) + '\n')
     }
