@@ -74,7 +74,7 @@ const toggleMenu = () => (showMenu.value = !showMenu.value)
 </script>
 
 <template>
-  <div class="group relative mb-2 flex items-center justify-between gap-x-2">
+  <div class="group relative flex items-center justify-between gap-x-2">
     <!-- Chat Title (editing mode) -->
     <input
       v-if="isEditing"
@@ -115,10 +115,24 @@ const toggleMenu = () => (showMenu.value = !showMenu.value)
     />
 
     <!-- Context Menu -->
-    <ContextMenu
-      class="absolute top-full right-0 z-10 mt-1 w-32"
-      v-model="showMenu"
-      :actions="actions"
-    />
+    <ContextMenu class="absolute top-full right-0 z-10 mt-1 w-32" v-model="showMenu">
+      <BaseButton
+        v-for="action in actions"
+        :key="action.label"
+        @click="
+          () => {
+            action.handler()
+            showMenu = false
+          }
+        "
+        class="w-full text-sm"
+        :class="action.class"
+        variant="ghost"
+        :icon="action.icon"
+        :icon-size="16"
+      >
+        <span>{{ action.label }}</span>
+      </BaseButton>
+    </ContextMenu>
   </div>
 </template>

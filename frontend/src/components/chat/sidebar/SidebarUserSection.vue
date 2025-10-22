@@ -54,11 +54,25 @@ const toggleMenu = () => (showMenu.value = !showMenu.value)
     </BaseButton>
 
     <!-- Context Menu -->
-    <ContextMenu
-      :actions="actions"
-      v-model="showMenu"
-      class="absolute bottom-full left-2 -mb-1 w-56"
-    />
+    <ContextMenu v-model="showMenu" class="absolute bottom-full left-2 -mb-1 w-56">
+      <BaseButton
+        v-for="action in actions"
+        :key="action.label"
+        @click="
+          () => {
+            action.handler()
+            showMenu = false
+          }
+        "
+        class="w-full text-sm"
+        :class="action.class"
+        variant="ghost"
+        :icon="action.icon"
+        :icon-size="16"
+      >
+        <span>{{ action.label }}</span>
+      </BaseButton>
+    </ContextMenu>
 
     <SettingsModal @close="showModal = false" v-if="showModal" />
   </div>

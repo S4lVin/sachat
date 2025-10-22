@@ -12,7 +12,7 @@ const isChatGenerating = (chatId) => chatStore.findChat(chatId).status === 'gene
 </script>
 
 <template>
-  <div>
+  <div class="flex flex-col gap-2">
     <ChatHistoryItem
       v-for="chat in chats"
       :key="chat.id"
