@@ -2,21 +2,16 @@
 import BaseButton from '../ui/BaseButton.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { storeToRefs } from 'pinia'
-import { computed, ref, toRaw } from 'vue'
+import { computed, ref } from 'vue'
 
 const authStore = useAuthStore()
 const { user } = storeToRefs(authStore)
 
 // State
 const userName = ref(user.value.name)
-const settings = ref(structuredClone(toRaw(user.value.settings)))
 
 // Computed
-const areSettingsEqual = computed(
-  () =>
-    JSON.stringify(toRaw(user.value.settings)) === JSON.stringify(settings.value) &&
-    user.value.name === userName.value,
-)
+const isNameEqual = computed(() => user.value.name === userName.value)
 </script>
 
 <template>
@@ -40,8 +35,8 @@ const areSettingsEqual = computed(
   </div>
   <div class="flex justify-end">
     <BaseButton
-      :disabled="areSettingsEqual"
-      @click="authStore.updateUser({ name: userName, settings })"
+      :disabled="isNameEqual"
+      @click="authStore.updateUser({ name: userName })"
       variant="primary"
     >
       Applica

@@ -24,7 +24,8 @@ const areSettingsEqual = computed(
     <div class="flex flex-col gap-1">
       <span>Istruzioni personalizzate</span>
       <AutoResizeTextarea
-        v-model="settings.customPrompt"
+        :value="settings.customPrompt"
+        @input="settings.customPrompt = $event.target.value || undefined"
         :max-height="96"
         placeholder="Preferenze aggiuntive relative a comportamento, stile e tono"
         class="rounded-lg border border-neutral-600 bg-neutral-700 p-1"
@@ -44,7 +45,8 @@ const areSettingsEqual = computed(
     >
       <span>API Key</span>
       <input
-        v-model="settings.apiKey"
+        :value="settings.apiKey"
+        @input="settings.apiKey = $event.target.value || undefined"
         placeholder="Inserisci la tua API key"
         :disabled="!settings.useApiKey && isUserVip"
         class="rounded-lg border border-neutral-600 bg-neutral-700 p-1 focus:outline-none"
