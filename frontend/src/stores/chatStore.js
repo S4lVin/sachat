@@ -5,17 +5,18 @@ import { useRoute } from 'vue-router'
 import { reactive, ref, computed } from 'vue'
 
 export const useChatStore = defineStore('chat', () => {
-  // State
+  // #region STATE
   const route = useRoute()
   const chats = ref()
   const messages = ref()
   const keepLocalOnNextSelection = ref(false)
+  // #endregion
 
   // Computed
   const currentChatId = computed(() => Number(route.params.chatId) || route.params.chatId)
   const currentChatStatus = computed(() => findChat(currentChatId.value)?.status)
 
-  // Actions (Chat)
+  // #region ACTIONS
   const loadChats = async () => {
     const data = await api.get('chats')
     chats.value = data.chats || []
@@ -50,7 +51,6 @@ export const useChatStore = defineStore('chat', () => {
     return chats.value?.find((chat) => chat.id === chatId)
   }
 
-  // Actions (Messages)
   const loadMessages = async (chatId) => {
     const data = await api.get(`chats/${chatId}/messages`)
     messages.value = data.messages || []
@@ -102,8 +102,9 @@ export const useChatStore = defineStore('chat', () => {
     await api.post(`chats/${chatId}/cancel-reply`)
     setChatStatus(chatId, null)
   }
+  // #endregion
 
-  // Helpers
+  // #region HELPERS
   const ensureChat = async (chatId) => {
     if (chats.value.find((chat) => chat.id === chatId)) return chatId
 
@@ -124,16 +125,17 @@ export const useChatStore = defineStore('chat', () => {
     const chat = findChat(chatId)
     chat.status = status
   }
+  // #endregion
 
   return {
-    // State
+    // STATE
     chats,
     messages,
     currentChatId,
     currentChatStatus,
     keepLocalOnNextSelection,
 
-    // Actions
+    // ACTIONS
     loadChats,
     createChat,
     renameChat,

@@ -18,7 +18,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleKeydown))
 <template>
   <div
     @click.self="$emit('close')"
-    class="fixed inset-0 flex items-center justify-center z-15"
+    class="fixed inset-0 z-15 flex items-center justify-center"
     :class="{ 'bg-black/25 backdrop-blur-xs': background }"
   >
     <div class="z-20 rounded-xl bg-neutral-800 shadow-lg/25" v-bind="$attrs">

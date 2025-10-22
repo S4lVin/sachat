@@ -18,13 +18,11 @@ chatsRouter.post(
 )
 
 // CRUD
-chatsRouter
-  .route('/:chatId')
+chatsRouter.route('/:chatId')
   .get(chatsController.get)
   .patch(validator(chatSchemas.update), chatsController.update)
   .delete(chatsController.delete)
 
-chatsRouter
-  .route('/')
+chatsRouter.route('/')
   .get(chatsController.getAll)
   .post(validator(chatSchemas.create), chatsController.create)

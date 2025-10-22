@@ -24,13 +24,14 @@ const buildModelInput = async (chatId, userId) => {
 }
 
 const getApiKey = async (userId, userRole) => {
-  if (userRole === 'vip') {
+  const user = await userService.findById(userId)
+
+  if (userRole === 'vip' && !user.settings?.useApiKey) {
     return process.env.OPENAI_API_KEY
   }
-
-  const user = await userService.findById(userId, { sensitive: true })
-  if (!user.apiKey) throw NoApiKeyProvided()
-  return user.apiKey
+  
+  if (!user.settings?.apiKey) throw NoApiKeyProvided()
+  return user.settings.apiKey
 }
 
 const initializeStream = async (input, userId, userRole, options) => {

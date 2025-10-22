@@ -3,4 +3,6 @@ import { userController } from '#controllers'
 
 export const userRouter = express.Router()
 
-userRouter.get('/me', userController.get)
+userRouter.route('/me')
+  .get(userController.get)
+  .patch(userController.update)

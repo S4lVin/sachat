@@ -22,7 +22,7 @@ model User {
   name         String
   role         String    @default("user")
   chats        Chat[]
-  apiKey       String?
+  settings     Json      @default("{}")
   refreshToken String?   @unique
 }
 

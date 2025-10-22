@@ -95,7 +95,7 @@ const submit = async () => {
 <template>
   <BaseModal @close="emit('close')" class="w-112 p-4" :title="title" :background="true">
     <!-- Header -->
-    <div class="mb-8 flex items-center justify-between w-full">
+    <div class="mb-8 flex w-full items-center justify-between">
       <div class="text-2xl">{{ title }}</div>
       <BaseButton @click="$emit('close')" variant="ghost" icon="x" :icon-size="24" />
     </div>

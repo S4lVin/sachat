@@ -1,5 +1,6 @@
 import Joi from 'joi'
 
+// Validation Messages
 const emailMessages = {
   'any.required': "L'email è richiesta",
   'string.email': "L'email non è valida",

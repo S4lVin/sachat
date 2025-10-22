@@ -12,7 +12,7 @@ const isNotFoundError = (err) => err?.code === 'P2025'
 
 const toSafeUser = (user) => {
   if (!user) return null
-  const { password, refreshToken, apiKey, ...safe } = user
+  const { password, refreshToken, ...safe } = user
   return safe
 }
 
@@ -47,7 +47,7 @@ export const userService = {
         password: userData.password,
         name: userData.name,
         role: userData.role,
-        apiKey: userData.apiKey,
+        settings: userData.settings,
         refreshToken: userData.refreshToken,
       },
     })
@@ -63,7 +63,7 @@ export const userService = {
           password: userData.password,
           name: userData.name,
           role: userData.role,
-          apiKey: userData.apiKey,
+          settings: userData.settings,
           refreshToken: userData.refreshToken,
         },
       })

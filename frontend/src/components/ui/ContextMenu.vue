@@ -55,6 +55,7 @@ onBeforeUnmount(() => {
     ref="menuRef"
     class="z-10 rounded-xl border border-neutral-700 bg-neutral-800 p-2 shadow-lg/25"
   >
+    <!-- Actions -->
     <BaseButton
       v-for="action in actions"
       :key="action.label"

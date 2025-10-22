@@ -70,7 +70,7 @@ const handleKeydown = (e) => {
   }
 }
 
-const toggleMenu = () => showMenu.value = !showMenu.value
+const toggleMenu = () => (showMenu.value = !showMenu.value)
 </script>
 
 <template>

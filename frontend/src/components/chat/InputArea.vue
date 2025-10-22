@@ -1,16 +1,15 @@
 <script setup>
 import { useChatStore } from '@/stores/chatStore'
 import { storeToRefs } from 'pinia'
-import { ref, nextTick, computed } from 'vue'
+import { ref, computed } from 'vue'
 import BaseButton from '../ui/BaseButton.vue'
+import AutoResizeTextarea from '../ui/AutoResizeTextarea.vue'
 
 const chatStore = useChatStore()
 const { currentChatStatus, currentChatId } = storeToRefs(chatStore)
-const MAX_HEIGHT = 512 // Altezza massima della textarea (px)
 
 // State
 const input = ref('')
-const textArea = ref(null)
 
 // Computed
 const isGenerating = computed(() => currentChatStatus.value === 'generating')
@@ -18,21 +17,12 @@ const canSend = computed(() => input.value.trim() && !isGenerating.value)
 const buttonIcon = computed(() => (isGenerating.value ? 'stop-circle' : 'arrow-up'))
 
 // Actions
-const autoResize = () => {
-  nextTick(() => {
-    if (!textArea.value) return
-
-    textArea.value.style.height = 'auto'
-    textArea.value.style.height = Math.min(textArea.value.scrollHeight, MAX_HEIGHT) + 'px'
-  })
-}
 
 const send = async () => {
   if (!canSend.value) return
 
   const message = input.value.trim()
   input.value = ''
-  autoResize()
 
   await chatStore.sendMessage(message, currentChatId.value)
 }
@@ -40,9 +30,9 @@ const send = async () => {
 const handleAction = () => {
   if (isGenerating.value) {
     chatStore.cancelReply(currentChatId.value)
-  } else {
-    send()
+    return
   }
+  send()
 }
 </script>
 
@@ -51,15 +41,11 @@ const handleAction = () => {
     class="flex w-full flex-col rounded-xl border border-neutral-700 bg-neutral-800 p-2 shadow-lg/25"
   >
     <!-- Text Area -->
-    <textarea
-      ref="textArea"
+    <AutoResizeTextarea
       v-model="input"
       @keydown.enter.prevent="send"
-      @input="autoResize"
-      rows="1"
-      type="text"
       placeholder="Scrivi un messaggio..."
-      class="mb-4 w-full resize-none p-2 focus:outline-none"
+      class="mb-4 w-full p-2"
       :disabled="isGenerating"
     />
 

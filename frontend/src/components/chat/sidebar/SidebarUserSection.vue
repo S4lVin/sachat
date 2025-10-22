@@ -1,10 +1,10 @@
 <script setup>
 import BaseButton from '@/components/ui/BaseButton.vue'
 import ContextMenu from '@/components/ui/ContextMenu.vue'
-import UserSettingsModal from '@/components/user/UserSettingsModal.vue'
+import SettingsModal from '@/components/settings/SettingsModal.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { storeToRefs } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 defineProps({
   collapsed: Boolean,
@@ -20,7 +20,7 @@ const actions = [
   {
     label: 'Impostazioni',
     icon: 'settings',
-    handler: () => showModal.value = true
+    handler: () => (showModal.value = true),
   },
   {
     label: 'Disconnettiti',
@@ -30,8 +30,11 @@ const actions = [
   },
 ]
 
+// Computed
+const isUserVip = computed(() => user.value?.role === 'vip')
+
 // Actions
-const toggleMenu = () => showMenu.value = !showMenu.value
+const toggleMenu = () => (showMenu.value = !showMenu.value)
 </script>
 
 <template>
@@ -40,12 +43,14 @@ const toggleMenu = () => showMenu.value = !showMenu.value
     <BaseButton
       @click.stop="toggleMenu"
       class="w-full"
-      :class="collapsed ? 'p-2' : 'p-3'"
       variant="ghost"
       icon="user"
       :icon-size="collapsed ? 24 : 20"
     >
-      <span v-if="!collapsed">{{ user?.name }}</span>
+      <div v-if="!collapsed" class="flex w-full items-center justify-between">
+        {{ user?.name }}
+        <span v-if="isUserVip" class="rounded-lg bg-indigo-900/75 p-1 font-medium">VIP</span>
+      </div>
     </BaseButton>
 
     <!-- Context Menu -->
@@ -55,6 +60,6 @@ const toggleMenu = () => showMenu.value = !showMenu.value
       class="absolute bottom-full left-2 -mb-1 w-56"
     />
 
-    <UserSettingsModal @close="showModal = false" v-if="showModal"/>
+    <SettingsModal @close="showModal = false" v-if="showModal" />
   </div>
 </template>

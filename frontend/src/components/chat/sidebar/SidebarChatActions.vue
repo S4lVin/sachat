@@ -29,7 +29,6 @@ const showSearch = ref(false)
       icon="search"
     />
 
-    <!-- Search Modal -->
     <ChatSearchModal @close="showSearch = false" v-if="showSearch" />
   </div>
 </template>

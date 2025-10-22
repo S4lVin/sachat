@@ -80,6 +80,14 @@ export const useAuthStore = defineStore('auth', () => {
     const data = await api.get('users/me')
     user.value = data.user
   }
+
+  const updateUser = async (userData) => {
+    const data = await api.patch('users/me', {
+      name: userData.name,
+      settings: userData.settings,
+    })
+    user.value = data.user
+  }
   // #endregion
 
   // #region HELPERS
@@ -111,6 +119,7 @@ export const useAuthStore = defineStore('auth', () => {
     // STATE
     accessToken,
     user,
+
     // ACTIONS
     login,
     register,
@@ -119,5 +128,6 @@ export const useAuthStore = defineStore('auth', () => {
     refreshAccessToken,
     clearTokens,
     fetchUser,
+    updateUser,
   }
 })
