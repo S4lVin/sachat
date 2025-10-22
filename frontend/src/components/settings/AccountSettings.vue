@@ -16,7 +16,6 @@ const isNameEqual = computed(() => user.value.name === userName.value)
 
 <template>
   <div class="mb-4 flex flex-1 flex-col overflow-auto text-sm">
-
     <!-- Name Field -->
     <div class="flex flex-col gap-1">
       <span>Nome</span>

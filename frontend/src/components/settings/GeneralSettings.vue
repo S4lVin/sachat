@@ -21,7 +21,6 @@ const areSettingsEqual = computed(
 
 <template>
   <div class="mb-4 flex flex-1 flex-col overflow-auto text-sm">
-
     <!-- Custom Prompt Field -->
     <div class="flex flex-col gap-1">
       <span>Istruzioni personalizzate</span>

@@ -16,7 +16,6 @@ const showSearch = ref(false)
 
 <template>
   <div class="flex gap-2" :class="{ 'flex-col': collapsed }">
-    
     <!-- New Chat Button -->
     <BaseButton @click="chatStore.selectChat('new')" class="flex-1" variant="secondary" icon="plus">
       <span v-if="!collapsed">Nuova Chat</span>

@@ -39,7 +39,6 @@ const toggleMenu = () => (showMenu.value = !showMenu.value)
 
 <template>
   <div>
-    
     <!-- User Button -->
     <BaseButton
       @click.stop="toggleMenu"
