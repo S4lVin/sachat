@@ -88,6 +88,14 @@ export const useAuthStore = defineStore('auth', () => {
     })
     user.value = data.user
   }
+
+  const deleteUser = async () => {
+    await api.delete('users/me')
+
+    clearTokens()
+    user.value = null
+    router.push({ name: 'Auth' })
+  }
   // #endregion
 
   // #region HELPERS
@@ -129,5 +137,6 @@ export const useAuthStore = defineStore('auth', () => {
     clearTokens,
     fetchUser,
     updateUser,
+    deleteUser,
   }
 })

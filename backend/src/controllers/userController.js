@@ -14,5 +14,10 @@ export const userController = {
       settings
     })
     res.json({ user })
+  },
+
+  delete: async (req, res) => {
+    await userService.deleteById(req.user.id)
+    res.status(204).end()
   }
 }

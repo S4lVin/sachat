@@ -3,13 +3,14 @@ import BaseModal from '../ui/BaseModal.vue'
 import BaseButton from '../ui/BaseButton.vue'
 import { ref } from 'vue'
 import GeneralSettings from './GeneralSettings.vue'
+import AccountSettings from './AccountSettings.vue'
 
 defineEmits(['close'])
 
 // State
 const menus = [
   { name: 'general', label: 'Generale', icon: 'settings' },
-  // { name: 'account', label: 'Account', icon: 'user' },
+  { name: 'account', label: 'Account', icon: 'user' },
 ]
 const selectedMenu = ref(menus[0])
 
@@ -19,7 +20,7 @@ const isMenuSelected = (menu) => menu.name === selectedMenu.value.name
 
 <template>
   <BaseModal @close="$emit('close')" :background="true" class="flex h-96 w-160">
-    <!-- Menu Selector -->
+    <!-- Sidebar -->
     <aside
       class="flex w-48 flex-col gap-1 rounded-l-xl border-r border-neutral-700 bg-neutral-800 p-4 shadow-lg/25"
     >
@@ -36,7 +37,7 @@ const isMenuSelected = (menu) => menu.name === selectedMenu.value.name
       </BaseButton>
     </aside>
 
-    <!-- Settings Body -->
+    <!-- Body -->
     <div class="flex flex-1 flex-col p-4">
       <!-- Header -->
       <header class="mb-4 flex items-center justify-between">
@@ -46,6 +47,7 @@ const isMenuSelected = (menu) => menu.name === selectedMenu.value.name
 
       <!-- Settings -->
       <GeneralSettings v-if="selectedMenu.name === 'general'" />
+      <AccountSettings v-else-if="selectedMenu.name === 'account'" />
     </div>
   </BaseModal>
 </template>

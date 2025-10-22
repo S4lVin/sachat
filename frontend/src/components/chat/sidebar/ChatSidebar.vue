@@ -20,14 +20,14 @@ const toggleSidebar = () => (collapsed.value = !collapsed.value)
     <!-- Header -->
     <header
       class="flex items-center justify-between border-b-2 border-neutral-700"
-      :class="collapsed ? 'p-2' : 'p-4'"
+      :class="collapsed ? 'p-2' : 'p-3'"
     >
       <h2 v-if="!collapsed" class="text-xl font-bold">SaChat</h2>
       <BaseButton @click="toggleSidebar" variant="ghost" icon="sidebar" :icon-size="24" />
     </header>
 
     <!-- Body -->
-    <div class="h-full overflow-y-auto" :class="collapsed ? 'p-2' : 'p-4'">
+    <div class="h-full overflow-y-auto py-4" :class="collapsed ? 'px-2' : 'px-3'">
       <SidebarChatActions :collapsed="collapsed" class="sticky top-0 z-10 mb-4" />
       <SidebarChatList v-if="!collapsed" />
     </div>
