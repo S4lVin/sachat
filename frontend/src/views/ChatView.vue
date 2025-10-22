@@ -47,11 +47,6 @@ watch(
       isUserAtBottom.value = true
       return
     }
-    if (!chatStore.findChat(chatId)) {
-      // Redirect a /new se chat non esiste
-      chatStore.selectChat('new')
-      return
-    }
 
     messages.value = null
     await chatStore.loadMessages(chatId)
@@ -71,6 +66,11 @@ watch(
 onMounted(async () => {
   chats.value = null
   await chatStore.loadChats()
+
+  if (!chatStore.findChat(currentChatId.value)) {
+    // Redirect a /new se chat non esiste
+    chatStore.selectChat('new')
+  }
 })
 </script>
 
