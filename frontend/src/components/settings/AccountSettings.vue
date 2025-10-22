@@ -16,6 +16,8 @@ const isNameEqual = computed(() => user.value.name === userName.value)
 
 <template>
   <div class="mb-4 flex flex-1 flex-col overflow-auto text-sm">
+
+    <!-- Name Field -->
     <div class="flex flex-col gap-1">
       <span>Nome</span>
       <input
@@ -23,6 +25,8 @@ const isNameEqual = computed(() => user.value.name === userName.value)
         class="rounded-lg border border-neutral-600 bg-neutral-700 p-1 focus:outline-none"
       />
     </div>
+
+    <!-- Delete Account Button-->
     <hr class="my-6 text-neutral-700" />
     <div>
       <BaseButton
@@ -33,6 +37,8 @@ const isNameEqual = computed(() => user.value.name === userName.value)
       </BaseButton>
     </div>
   </div>
+
+  <!-- Apply Button -->
   <div class="flex justify-end">
     <BaseButton
       :disabled="isNameEqual"

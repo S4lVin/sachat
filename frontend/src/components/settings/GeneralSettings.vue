@@ -21,6 +21,8 @@ const areSettingsEqual = computed(
 
 <template>
   <div class="mb-4 flex flex-1 flex-col overflow-auto text-sm">
+
+    <!-- Custom Prompt Field -->
     <div class="flex flex-col gap-1">
       <span>Istruzioni personalizzate</span>
       <AutoResizeTextarea
@@ -31,7 +33,10 @@ const areSettingsEqual = computed(
         class="rounded-lg border border-neutral-600 bg-neutral-700 p-1"
       />
     </div>
+
     <hr class="my-6 text-neutral-700" />
+
+    <!-- Personal API Key Toggle -->
     <div v-if="isUserVip" class="mb-4 flex items-center justify-between gap-1">
       <span>Usa API Key personale</span>
       <ToggleSwitch
@@ -39,6 +44,8 @@ const areSettingsEqual = computed(
         @toggle="settings.useApiKey = !settings.useApiKey"
       />
     </div>
+
+    <!-- API Key Field -->
     <div
       class="flex flex-col gap-1 border-neutral-700"
       :class="{ 'opacity-50': !settings.useApiKey && isUserVip }"
@@ -53,6 +60,8 @@ const areSettingsEqual = computed(
       />
     </div>
   </div>
+
+  <!-- Apply Button -->
   <div class="flex justify-end">
     <BaseButton
       :disabled="areSettingsEqual"
