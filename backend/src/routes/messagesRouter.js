@@ -5,6 +5,14 @@ import { messageSchemas } from '#schemas'
 
 export const messagesRouter = express.Router({ mergeParams: true })
 
+// Actions
+messagesRouter.post('/:messageId/reply', validator(messageSchemas.reply), messagesController.reply)
+messagesRouter.post(
+  '/:messageId/cancel-reply',
+  validator(messageSchemas.cancelReply),
+  messagesController.cancelReply,
+)
+
 messagesRouter
   .route('/')
   .get(messagesController.getAll)

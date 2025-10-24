@@ -8,7 +8,6 @@ const prisma = new PrismaClient()
 
 // Helpers
 const isConflictError = (err) => err?.code === 'P2002'
-const isNotFoundError = (err) => err?.errorCode === 'USER_NOT_FOUND'
 
 const safeJWTVerify = (token, secret) => {
   try {
@@ -49,13 +48,8 @@ export const authService = {
   },
 
   login: async (email, password) => {
-    let user
-    try {
-      user = await userService.findByEmail(email, { sensitive: true })
-    } catch (err) {
-      if (isNotFoundError(err)) throw AuthFailed()
-      throw err
-    }
+    const user = await userService.findByEmail(email, { sensitive: true })
+    if (!user) throw AuthFailed()
 
     const validPassword = await bcrypt.compare(password, user.password)
     if (!validPassword) throw AuthFailed()
@@ -68,12 +62,8 @@ export const authService = {
     const payload = safeJWTVerify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
     if (!payload) throw InvalidRefreshToken()
 
-    let user
-    try {
-      user = await userService.findById(payload.userId, { sensitive: true })
-    } catch (err) {
-      if (isNotFoundError(err)) throw InvalidRefreshToken()
-    }
+    const user = await userService.findById(payload.userId, { sensitive: true })
+    if (!user) throw InvalidRefreshToken()
 
     if (user.refreshToken !== refreshToken) throw InvalidRefreshToken()
 
@@ -87,12 +77,8 @@ export const authService = {
   },
 
   logout: async (refreshToken) => {
-    let user
-    try {
-      user = await userService.findByRefreshToken(refreshToken)
-    } catch (err) {
-      if (isNotFoundError(err)) throw InvalidRefreshToken()
-    }
+    const user = await userService.findByRefreshToken(refreshToken)
+    if (!user) throw InvalidRefreshToken()
 
     await prisma.user.update({
       where: { id: user.id },

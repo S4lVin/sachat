@@ -9,18 +9,9 @@ export const chatsRouter = express.Router()
 // Messages
 chatsRouter.use('/:chatId/messages', messagesRouter)
 
-// Actions
-chatsRouter.post('/:chatId/reply', validator(chatSchemas.reply), chatsController.reply)
-chatsRouter.post(
-  '/:chatId/cancel-reply',
-  validator(chatSchemas.cancelReply),
-  chatsController.cancelReply,
-)
-
 // CRUD
 chatsRouter
   .route('/:chatId')
-  .get(chatsController.get)
   .patch(validator(chatSchemas.update), chatsController.update)
   .delete(chatsController.delete)
 

@@ -1,72 +1,48 @@
 import { PrismaClient } from '@prisma/client'
-import { NotFoundError } from '#errors'
+import { NotFoundError, BadRequestError } from '#errors'
 
 const prisma = new PrismaClient()
 
 // Errors
 const MessageNotFound = () => new NotFoundError('Messaggio non trovato', 'MESSAGE_NOT_FOUND')
+const ChatNotFound = () => new NotFoundError('Chat non trovata', 'CHAT_NOT_FOUND')
+const MessageParentNotFound = () => new NotFoundError('Messaggio padre non trovato', 'MESSAGE_PARENT_NOT_FOUND')
+const SameParentSender = () => new BadRequestError('Mittente del messaggio uguale al mittente del messaggio padre', 'SAME_PARENT_SENDER')
 
 // Helpers
 const isNotFoundError = (err) => err?.code === 'P2025'
+const isReferenceError = (err) => err?.code === 'P2003'
 
 export const messageService = {
-  findAllByChatId: async (chatId, userId, { orderBy = 'asc' } = {}) => {
-    const messages = await prisma.message.findMany({
+  getAllByChat: async (chatId, userId) => {
+    return await prisma.message.findMany({
       where: { chatId, chat: { userId } },
-      orderBy: { createdAt: orderBy },
     })
-    return messages
   },
 
-  findById: async (id, chatId, userId) => {
-    const message = await prisma.message.findUnique({
-      where: {
-        id,
-        chatId,
-        chat: { userId },
-      },
-    })
-    if (!message) throw MessageNotFound()
-    return message
-  },
-
-  create: async (chatId, userId, messageData) => {
-    // Verifica che la chat appartenga all'utente
-    const chat = await prisma.chat.findUnique({
-      where: { id: chatId, userId },
-    })
-    if (!chat) throw MessageNotFound()
-
-    const message = await prisma.message.create({
-      data: {
-        chatId,
-        sender: messageData.sender,
-        content: messageData.content,
-      },
-    })
-    return message
-  },
-
-  updateById: async (id, chatId, userId, messageData) => {
+  createForChat: async (chatId, userId, message) => {
+    const chat = await prisma.chat.findUnique({ where: { id: chatId } })
+    if (!chat || chat.userId !== userId) throw ChatNotFound()
+    
     try {
-      const message = await prisma.message.update({
-        where: { id, chatId, chat: { userId } },
+      return await prisma.message.create({
         data: {
-          sender: messageData.sender,
-          content: messageData.content,
-        },
+          sender: 'user',
+          content: message.content,
+          parentId: message.parentId,
+          chatId
+        }
       })
-      return message
     } catch (err) {
-      if (isNotFoundError(err)) throw MessageNotFound()
+      if (isReferenceError(err)) throw MessageParentNotFound()
       throw err
     }
   },
 
-  deleteById: async (id, chatId, userId) => {
+  delete: async (id, userId) => {
     try {
       await prisma.message.delete({
-        where: { id, chatId, chat: { userId } },
+        where: { id, chat: { userId } },
       })
     } catch (err) {
       if (isNotFoundError(err)) throw MessageNotFound()

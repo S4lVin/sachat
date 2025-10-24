@@ -18,18 +18,13 @@ const formatMessagesForApi = (messages) => {
   }))
 }
 
-const buildModelInput = async (chatId, userId) => {
-  const messages = await messageService.findAllByChatId(chatId, userId)
-  return formatMessagesForApi(messages)
-}
-
 const getApiKey = async (userId) => {
   const user = await userService.findById(userId)
 
   if (user.role === 'vip' && !user.settings?.useApiKey) {
     return process.env.OPENAI_API_KEY
   }
-
+  
   if (!user.settings?.apiKey) throw NoApiKeyProvided()
   return user.settings.apiKey
 }
@@ -56,18 +51,33 @@ const initializeStream = async (input, userId, options) => {
   }
 }
 
+//! SOLO PROTOTIPO | Estremamente inefficiente (n+1 query)
+const getMessageChain = async (messageId, userId) => {
+  const messageChain = []
+  let message = await messageService.findById(messageId, userId)
+
+  while (true) {
+    messageChain.unshift(message)
+    if (!message.parentId) break
+    message = await messageService.findById(message.parentId, userId)
+  }
+  return messageChain
+}
+
 export const chatReplyService = {
-  reply: async function* (chatId, userId, options) {
-    const key = `${chatId}-${userId}`
+  reply: async function* (messageId, userId, options) {
+    const key = `${messageId}-${userId}`
     activeReplies.set(key, { aborted: false })
-    await chatService.updateById(chatId, userId, { status: 'generating' })
+    // await chatService.updateById(chatId, userId, { status: 'generating' })
+
+    const messageChain = await getMessageChain(messageId, userId)
+    const messageHistory = formatMessagesForApi(messageChain)
 
     try {
       let assistantMessageContent = ''
       let totalTokenUsed = 0
 
-      const input = await buildModelInput(chatId, userId)
-      const stream = await initializeStream(input, userId, options)
+      const stream = await initializeStream(messageHistory, userId, options)
 
       for await (const event of stream) {
         if (activeReplies.get(key)?.aborted) break
@@ -87,7 +97,7 @@ export const chatReplyService = {
       }
 
       if (!assistantMessageContent) throw ResponseNotGenerated()
-      const assistantMessage = await messageService.create(chatId, userId, {
+      const assistantMessage = await messageService.create(messageId, userId, {
         sender: 'assistant',
         content: assistantMessageContent,
       })
@@ -95,7 +105,7 @@ export const chatReplyService = {
       yield { type: 'done', data: { assistantMessage, info: { totalTokenUsed } } }
     } finally {
       activeReplies.delete(key)
-      chatService.updateById(chatId, userId, { status: null })
+      //chatService.updateById(chatId, userId, { status: null })
     }
   },
 

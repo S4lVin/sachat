@@ -17,40 +17,8 @@ const toSafeUser = (user) => {
 }
 
 export const userService = {
-  findAll: async () => {
-    const users = await prisma.user.findMany()
-    return users.map(toSafeUser)
-  },
-
-  findById: async (id, { sensitive = false } = {}) => {
+  findById: async (id) => {
     const user = await prisma.user.findUnique({ where: { id } })
-    if (!user) throw UserNotFound()
-    return sensitive ? user : toSafeUser(user)
-  },
-
-  findByEmail: async (email, { sensitive = false } = {}) => {
-    const user = await prisma.user.findUnique({ where: { email } })
-    if (!user) throw UserNotFound()
-    return sensitive ? user : toSafeUser(user)
-  },
-
-  findByRefreshToken: async (refreshToken, { sensitive = false } = {}) => {
-    const user = await prisma.user.findUnique({ where: { refreshToken } })
-    if (!user) throw UserNotFound()
-    return sensitive ? user : toSafeUser(user)
-  },
-
-  create: async (userData) => {
-    const user = await prisma.user.create({
-      data: {
-        email: userData.email,
-        password: userData.password,
-        name: userData.name,
-        role: userData.role,
-        settings: userData.settings,
-        refreshToken: userData.refreshToken,
-      },
-    })
     return toSafeUser(user)
   },
 
@@ -59,12 +27,8 @@ export const userService = {
       const user = await prisma.user.update({
         where: { id },
         data: {
-          email: userData.email,
-          password: userData.password,
           name: userData.name,
-          role: userData.role,
           settings: userData.settings,
-          refreshToken: userData.refreshToken,
         },
       })
       return toSafeUser(user)

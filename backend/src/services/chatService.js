@@ -10,67 +10,39 @@ const ChatNotFound = () => new NotFoundError('Chat non trovata', 'CHAT_NOT_FOUND
 const isNotFoundError = (err) => err?.code === 'P2025'
 
 export const chatService = {
-  findAll: async (userId, { orderBy = 'desc' } = {}) => {
-    const chats = await prisma.chat.findMany({
+  getAll: async (userId) => {
+    return await prisma.chat.findMany({
       where: { userId },
-      orderBy: { createdAt: orderBy },
+      orderBy: { createdAt: 'desc' },
     })
-    return chats
   },
 
-  findById: async (id, userId) => {
-    const chat = await prisma.chat.findFirst({
-      where: { id, userId },
-    })
-    if (!chat) throw ChatNotFound()
-    return chat
-  },
-
-  create: async (userId, chatData) => {
-    const chat = await prisma.chat.create({
+  create: async (userId, chat) => {
+    return await prisma.chat.create({
       data: {
         userId,
-        status: chatData.status,
-        title: chatData.title,
-        messages: chatData.messages
-          ? {
-              create: chatData.messages.map((msg) => ({
-                sender: msg.sender,
-                content: msg.content,
-              })),
-            }
-          : undefined,
+        title: chat.title,
+        messages: chat.messages ?? [],
       },
     })
-    return chat
   },
 
-  updateById: async (id, userId, chatData) => {
+  update: async (id, userId, chat) => {
     try {
-      const chat = await prisma.chat.update({
+      return await prisma.chat.update({
         where: { id, userId },
         data: {
-          status: chatData.status,
-          title: chatData.title,
-          ...(chatData.messages && {
-            messages: {
-              deleteMany: {}, // reset messaggi
-              create: chatData.messages.map((msg) => ({
-                sender: msg.sender,
-                content: msg.content,
-              })),
-            },
-          }),
+          status: chat.status,
+          title: chat.title,
         },
       })
-      return chat
     } catch (err) {
       if (isNotFoundError(err)) throw ChatNotFound()
       throw err
     }
   },
 
-  deleteById: async (id, userId) => {
+  delete: async (id, userId) => {
     try {
       await prisma.chat.delete({
         where: { id, userId },
