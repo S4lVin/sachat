@@ -22,13 +22,6 @@ export const useChatStore = defineStore('chat', () => {
     chats.value = data.chats || []
   }
 
-  const createChat = async (title = 'Nuova chat') => {
-    const data = await api.post('chats', { title })
-    if (!Array.isArray(chats.value)) chats.value = []
-    chats.value.unshift(data.chat)
-    return data.chat
-  }
-
   const renameChat = async (chatId, title) => {
     const chat = findChat(chatId)
     chat.title = title
@@ -56,74 +49,51 @@ export const useChatStore = defineStore('chat', () => {
     messages.value = data.messages || []
   }
 
-  const sendMessage = async (content, chatId) => {
+  const sendMessage = async (content, chatId, parentId) => {
+    chatId = Number(chatId) || undefined
     const tempUserMessage = addTempMessage('user', content)
-    chatId = await ensureChat(chatId)
-
-    const data = await api.post(`chats/${chatId}/messages`, {
-      sender: 'user',
-      content,
-    })
-    Object.assign(tempUserMessage, data.message)
-
-    await createReply(chatId)
-  }
-
-  const createReply = async (chatId) => {
-    setChatStatus(chatId, 'generating')
-
     const tempAssistantMessage = addTempMessage('assistant', '')
 
-    const stream = await api.post(`chats/${chatId}/reply`)
+    const eventStream = await api.post('/conversation/send', {
+      parentId,
+      chatId,
+      content,
+    })
 
-    for await (const event of stream) {
+    for await (const event of eventStream) {
+      if (event.type === 'chat') {
+        const chat = event.data.chat
+        const localChat = findChat(chat.id)
+        if (localChat) continue
+
+        chats.value.unshift(event.data.chat)
+        keepLocalOnNextSelection.value = true
+        selectChat(event.data.chat.id)
+      }
+      if (event.type === 'message') {
+        const message = event.data.message
+
+        if (message.sender === 'user') {
+          Object.assign(tempUserMessage, message)
+          continue
+        }
+
+        Object.assign(tempAssistantMessage, message)
+      }
       if (event.type === 'delta') {
-        tempAssistantMessage.content += event.data.text
-      }
-      if (event.type === 'done') {
-        Object.assign(tempAssistantMessage, event.data.assistantMessage)
-      }
-      if (event.type === 'error') {
-        tempAssistantMessage.status = 'error'
-        tempAssistantMessage.content = event.data.error.message
+        const delta = event.data.delta
+        tempAssistantMessage.content += delta
       }
     }
-
-    setChatStatus(chatId, null)
-  }
-
-  const retryReply = async (chatId) => {
-    const lastMessage = messages.value.at(-1)
-    if (lastMessage.sender !== 'user') messages.value.pop()
-    await createReply(chatId)
-  }
-
-  const cancelReply = async (chatId) => {
-    await api.post(`chats/${chatId}/cancel-reply`)
-    setChatStatus(chatId, null)
   }
   // #endregion
 
   // #region HELPERS
-  const ensureChat = async (chatId) => {
-    if (chats.value.find((chat) => chat.id === chatId)) return chatId
-
-    const newChat = await createChat()
-    keepLocalOnNextSelection.value = true
-    selectChat(newChat.id)
-    return newChat.id
-  }
-
   const addTempMessage = (sender, content = '', status) => {
     const tempId = 'temp-' + Date.now()
     const message = reactive({ tempId, sender, content, status })
     messages.value.push(message)
     return message
-  }
-
-  const setChatStatus = (chatId, status) => {
-    const chat = findChat(chatId)
-    chat.status = status
   }
   // #endregion
 
@@ -137,15 +107,11 @@ export const useChatStore = defineStore('chat', () => {
 
     // ACTIONS
     loadChats,
-    createChat,
     renameChat,
     deleteChat,
     selectChat,
     findChat,
     loadMessages,
     sendMessage,
-    createReply,
-    retryReply,
-    cancelReply,
   }
 })

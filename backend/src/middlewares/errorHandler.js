@@ -1,5 +1,5 @@
-import { AppError } from '#errors'
-import { logger } from '#utils'
+import { AppError } from '#core/errors/appErrors.js'
+import { logger } from '#providers'
 
 export const errorHandler = (err, req, res, next) => {
   const isAppError = err instanceof AppError

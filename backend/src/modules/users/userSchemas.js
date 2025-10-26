@@ -9,6 +9,6 @@ const settingsSchema = {
 export const userSchemas = {
   update: Joi.object({
     name: Joi.string().min(3).max(50).optional(),
-    settings: Joi.object(settingsSchema).optional().unknown(false),
+    settings: Joi.object(settingsSchema).optional(),
   }),
 }

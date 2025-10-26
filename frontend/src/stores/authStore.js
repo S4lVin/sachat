@@ -28,8 +28,7 @@ export const useAuthStore = defineStore('auth', () => {
       password: user.password,
     })
 
-    setAccessToken(data.accessToken)
-    setRefreshToken(data.refreshToken)
+    setTokens(data.accessToken, data.refreshToken)
     return true
   }
 
@@ -40,15 +39,12 @@ export const useAuthStore = defineStore('auth', () => {
       name: user.name,
     })
 
-    setAccessToken(data.accessToken)
-    setRefreshToken(data.refreshToken)
+    setTokens(data.accessToken, data.refreshToken)
     return true
   }
 
   const logout = async () => {
-    await api.post('auth/logout', {
-      refreshToken: refreshToken.value,
-    })
+    await api.post('auth/logout')
 
     clearTokens()
     user.value = null
@@ -63,8 +59,8 @@ export const useAuthStore = defineStore('auth', () => {
         { hasRetried: true },
       )
 
-      setAccessToken(data.accessToken)
-      return data.accessToken
+      setTokens(data.accessToken, data.refreshToken)
+      return true
     } catch (error) {
       clearTokens()
       throw error
@@ -109,6 +105,11 @@ export const useAuthStore = defineStore('auth', () => {
     refreshToken.value = token
     if (token) localStorage.setItem('refreshToken', token)
     else localStorage.removeItem('refreshToken')
+  }
+
+  const setTokens = (accessToken, refreshToken) => {
+    setAccessToken(accessToken)
+    setRefreshToken(refreshToken)
   }
 
   const isTokenExpired = (token) => {
