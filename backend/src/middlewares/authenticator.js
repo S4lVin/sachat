@@ -20,6 +20,8 @@ export const authenticator = (req, res, next) => {
   if (!token) throw MissingAccessToken()
 
   const payload = jwtoken.verifyAccessToken(token)
+  // Per compatibilità
+  req.user = { id: payload.userId, email: payload.email }
   req.userId = payload.userId
   next()
 }

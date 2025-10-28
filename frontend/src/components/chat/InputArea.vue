@@ -6,7 +6,7 @@ import BaseButton from '../ui/BaseButton.vue'
 import AutoResizeTextarea from '../ui/AutoResizeTextarea.vue'
 
 const chatStore = useChatStore()
-const { currentChatStatus, currentChatId } = storeToRefs(chatStore)
+const { activeMessagePath, currentChatStatus, currentChatId } = storeToRefs(chatStore)
 
 // State
 const input = ref('')
@@ -21,10 +21,11 @@ const buttonIcon = computed(() => (isGenerating.value ? 'stop-circle' : 'arrow-u
 const send = async () => {
   if (!canSend.value) return
 
-  const message = input.value.trim()
+  const content = input.value.trim()
+  const parentId = activeMessagePath.value.at(-1)
   input.value = ''
 
-  await chatStore.sendMessage(message, currentChatId.value)
+  await chatStore.sendMessage({ content, parentId })
 }
 
 const handleAction = () => {

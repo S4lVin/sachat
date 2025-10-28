@@ -22,7 +22,10 @@ const toggleSidebar = () => (collapsed.value = !collapsed.value)
       class="flex items-center justify-between border-b-2 border-neutral-700"
       :class="collapsed ? 'p-2' : 'p-3'"
     >
-      <h2 v-if="!collapsed" class="text-xl font-bold">SaChat</h2>
+      <h2 v-if="!collapsed" class="text-xl font-bold">
+        SaChat -
+        <span class="text-lg bg-red-500/25 px-1 py-0.5 rounded-lg">BETA</span>
+      </h2>
       <BaseButton @click="toggleSidebar" variant="ghost" icon="sidebar" :icon-size="24" />
     </header>
 

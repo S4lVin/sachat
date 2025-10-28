@@ -16,6 +16,6 @@ export const validator = (schema) => (req, res, next) => {
     throw new BadRequestError('Richiesta non valida', 'INVALID_REQUEST', errors)
   }
 
-  req.validatedBody = result.value
+  req.body = result.value
   next()
 }

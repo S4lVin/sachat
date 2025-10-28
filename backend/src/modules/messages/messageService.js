@@ -15,6 +15,7 @@ export const messageService = {
   findAllByChat: async function ({ chatId, userId }) {
     return await db.message.findMany({
       where: { chatId, chat: { userId } },
+      orderBy: { createdAt: 'asc' },
     })
   },
 

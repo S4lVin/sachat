@@ -4,11 +4,11 @@ import { storeToRefs } from 'pinia'
 import { useChatStore } from '@/stores/chatStore'
 
 const chatStore = useChatStore()
-const { chats, currentChatId } = storeToRefs(chatStore)
+const { chats, chatById, currentChatId } = storeToRefs(chatStore)
 
 // Helpers
 const isChatSelected = (chatId) => chatId === currentChatId.value
-const isChatGenerating = (chatId) => chatStore.findChat(chatId).status === 'generating'
+const isChatGenerating = (chatId) => chatById[chatId]?.status === 'generating'
 </script>
 
 <template>

@@ -7,7 +7,7 @@ import { storeToRefs } from 'pinia'
 import ChatSidebar from '@/components/chat/sidebar/ChatSidebar.vue'
 
 const chatStore = useChatStore()
-const { chats, messages, currentChatId, keepLocalOnNextSelection } = storeToRefs(chatStore)
+const { chats, messages, activeMessagePath, activeMessages, childrenByMessage, chatById, currentChatId, keepLocalOnNextSelection } = storeToRefs(chatStore)
 
 // Constants
 const BOTTOM_THRESHOLD = 80 // Quanto vicino al fondo consideriamo "in fondo" (in px)
@@ -42,6 +42,9 @@ watch(
       keepLocalOnNextSelection.value = false
       return
     }
+
+    activeMessagePath.value = []
+
     if (chatId === 'new') {
       messages.value = []
       isUserAtBottom.value = true
@@ -67,7 +70,7 @@ onMounted(async () => {
   chats.value = null
   await chatStore.loadChats()
 
-  if (!chatStore.findChat(currentChatId.value)) {
+  if (!chatById.value[currentChatId.value]) {
     // Redirect a /new se chat non esiste
     chatStore.selectChat('new')
   }
@@ -89,12 +92,15 @@ onMounted(async () => {
       >
         <div class="mx-auto mb-36 max-w-5xl">
           <ChatMessage
-            v-for="message in messages"
+            v-for="message in activeMessages"
             @retry="chatStore.retryReply(currentChatId)"
+            @select="(childId) => chatStore.selectMessageChild(message.parentId, childId)"
             :key="message.id"
             :sender="message.sender"
             :content="message.content"
             :status="message.status"
+            :self-id="message.id"
+            :siblings="childrenByMessage[message.parentId]"
           />
 
           <!-- Empty State -->

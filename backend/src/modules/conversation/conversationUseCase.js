@@ -7,6 +7,8 @@ import { BadRequestError, NotFoundError } from '#core/errors/appErrors.js'
 const MissingApiKey = () => new BadRequestError('API Key mancante', 'MISSING_API_KEY')
 const ChatNotFound = () => new NotFoundError('Chat non trovata', 'CHAT_NOT_FOUND')
 
+// TODO: Add cancelReply
+
 export const conversationUseCase = {
   sendMessage: async function* ({ parentId, chatId, userId, content }) {
     const chat = await this.findOrCreateChat({ chatId, userId })

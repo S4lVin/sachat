@@ -12,6 +12,8 @@ export class AppError extends Error {
   }
 }
 
+// TODO: Improve errors management
+
 // Common HTTP Errors
 export class BadRequestError extends AppError {
   constructor(message = 'Richiesta non valida', errorCode = 'BAD_REQUEST', details) {
