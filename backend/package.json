@@ -9,7 +9,7 @@
     "seed": "node --env-file=.env prisma/seed.js"
   },
   "imports": {
-    "#middlewares": "./src/middlewares/index.js",
+    "#src/*": "./src/*",
     "#providers": "./src/providers/index.js",
     "#core/*": "./src/core/*",
     "#modules/*": "./src/modules/*"

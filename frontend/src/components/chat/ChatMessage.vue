@@ -1,23 +1,24 @@
 <script setup>
 import FeatherIcons from '@/components/ui/FeatherIcon.vue'
-import { computed, ref, watch, onMounted } from 'vue'
+import { computed, ref, watch, onMounted, nextTick } from 'vue'
 import BaseButton from '../ui/BaseButton.vue'
+import AutoResizeTextarea from '../ui/AutoResizeTextarea.vue'
 
-// Events & Props
-const emit = defineEmits(['retry', 'select'])
+const emit = defineEmits(['retry', 'select', 'edit'])
 const props = defineProps({
   sender: { type: String, required: true },
   content: { type: String, required: true },
   status: { type: String, required: false },
-  // Qui i "siblings" sono i FRATELLI del messaggio corrente (incluso se stesso)
   siblings: { type: Array, default: () => [] },
-  // ID del messaggio corrente (necessario per capire quale posizione ha tra i fratelli)
   selfId: { type: [String, Number], required: true },
 })
 
 // State
-// indice 0-based dell’elemento selezionato (cioè del fratello mostrato)
+const isEditing = ref(false)
+const inputRef = ref(null)
+const editingContent = ref('')
 const selectedIndex = ref(0)
+const isSaving = ref(false)
 
 // Computed
 const isUser = computed(() => props.sender === 'user')
@@ -48,22 +49,60 @@ const onAction = async (name) => {
     case 'repeat':
       emit('retry')
       break
+    case 'edit':
+      editContent()
+      break
   }
 }
 
-// Allinea l’indice alla posizione effettiva del self tra i fratelli
+// Sincronizza l'indice selezionato con la posizione del messaggio corrente tra i fratelli
 const syncSelectedIndex = () => {
-  console.log(!props.siblings?.length)
-  if (props.siblings?.length <= 1) {
+  if (!props.siblings?.length || props.siblings.length <= 1) {
     selectedIndex.value = 0
     return
   }
-  const idx = props.siblings.findIndex(m => m.id === props.selfId)
+  const idx = props.siblings.findIndex((m) => m.id === props.selfId)
   selectedIndex.value = clamp(idx, 0, props.siblings.length - 1)
 }
 
 const prev = () => goToIndex(selectedIndex.value - 1)
 const next = () => goToIndex(selectedIndex.value + 1)
+
+const editContent = () => {
+  isEditing.value = true
+  editingContent.value = props.content
+  // Focus sull'input dopo che il DOM si è aggiornato
+  nextTick(() => {
+    inputRef.value?.focus()
+    inputRef.value?.select()
+  })
+}
+
+const saveContent = () => {
+  if (!isEditing.value || isSaving.value) return
+  if (editingContent.value.trim() && editingContent.value.trim() !== props.content) {
+    isSaving.value = true
+    isEditing.value = false
+    emit('edit', editingContent.value.trim())
+    isSaving.value = false
+  } else {
+    isEditing.value = false
+  }
+}
+
+const cancelEdit = () => {
+  isEditing.value = false
+  editingContent.value = ''
+}
+
+const handleKeydown = (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault()
+    saveContent()
+  } else if (e.key === 'Escape') {
+    cancelEdit()
+  }
+}
 
 // Watchers
 watch(() => [props.siblings, props.selfId], syncSelectedIndex, { deep: true })
@@ -75,9 +114,19 @@ onMounted(syncSelectedIndex)
 <template>
   <div class="group relative mb-2 flex pb-9 whitespace-pre-wrap" :class="{ 'justify-end': isUser }">
     <!-- User Message -->
-    <div v-if="isUser" class="max-w-[80%] rounded-xl bg-neutral-800 p-3">
+    <div v-if="isUser && !isEditing" class="max-w-[80%] rounded-xl bg-neutral-800 p-3">
       {{ content }}
     </div>
+
+    <AutoResizeTextarea
+      v-else-if="isUser && isEditing"
+      ref="inputRef"
+      v-model="editingContent"
+      @blur="saveContent"
+      @keydown="handleKeydown"
+      class="w-full max-w-[80%] rounded-xl bg-neutral-800 p-3 ring-2 ring-indigo-800 outline-none"
+      type="text"
+    />
 
     <!-- Error Message -->
     <div v-else-if="isError" class="rounded-xl bg-red-500/10 p-3">
@@ -115,10 +164,20 @@ onMounted(syncSelectedIndex)
       />
 
       <!-- Selector -->
-      <div class="items-center flex" v-if="siblings?.length > 1">
-        <BaseButton class="hover:text-neutral-300" @click="prev" icon="chevron-left" :disabled="selectedIndex <= 0" />
-        {{ (selectedIndex + 1) + '/' + siblings.length }}
-        <BaseButton class="hover:text-neutral-300" @click="next" icon="chevron-right" :disabled="selectedIndex >= siblings.length - 1" />
+      <div class="flex items-center" v-if="siblings?.length > 1">
+        <BaseButton
+          class="hover:text-neutral-300"
+          @click="prev"
+          icon="chevron-left"
+          :disabled="selectedIndex <= 0"
+        />
+        {{ selectedIndex + 1 + '/' + siblings.length }}
+        <BaseButton
+          class="hover:text-neutral-300"
+          @click="next"
+          icon="chevron-right"
+          :disabled="selectedIndex >= siblings.length - 1"
+        />
       </div>
     </div>
   </div>

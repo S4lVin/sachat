@@ -8,7 +8,7 @@ const { chats, chatById, currentChatId } = storeToRefs(chatStore)
 
 // Helpers
 const isChatSelected = (chatId) => chatId === currentChatId.value
-const isChatGenerating = (chatId) => chatById[chatId]?.status === 'generating'
+const isChatGenerating = (chatId) => chatById.value[chatId]?.status === 'generating'
 </script>
 
 <template>

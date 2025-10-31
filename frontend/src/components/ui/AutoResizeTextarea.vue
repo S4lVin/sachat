@@ -27,6 +27,13 @@ const autoResize = () => {
 
 // Watchers
 watch(() => props.modelValue, autoResize)
+
+// Expose textarea ref to parent component
+defineExpose({
+  focus: () => textArea.value?.focus(),
+  select: () => textArea.value?.select(),
+  blur: () => textArea.value?.blur(),
+})
 </script>
 
 <template>

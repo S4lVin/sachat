@@ -7,7 +7,16 @@ import { storeToRefs } from 'pinia'
 import ChatSidebar from '@/components/chat/sidebar/ChatSidebar.vue'
 
 const chatStore = useChatStore()
-const { chats, messages, activeMessagePath, activeMessages, childrenByMessage, chatById, currentChatId, keepLocalOnNextSelection } = storeToRefs(chatStore)
+const {
+  chats,
+  messages,
+  selectedMessagePath,
+  activeMessages,
+  messagesByParent,
+  chatById,
+  currentChatId,
+  skipNextLoad,
+} = storeToRefs(chatStore)
 
 // Constants
 const BOTTOM_THRESHOLD = 80 // Quanto vicino al fondo consideriamo "in fondo" (in px)
@@ -38,12 +47,14 @@ const scrollToBottomIfNeeded = async (smooth = false) => {
 watch(
   () => currentChatId.value,
   async (chatId) => {
-    if (keepLocalOnNextSelection.value) {
-      keepLocalOnNextSelection.value = false
+    // Skip reload if navigating to a newly created chat (to preserve temporary messages)
+    if (skipNextLoad.value) {
+      skipNextLoad.value = false
       return
     }
 
-    activeMessagePath.value = []
+    // Reset selection when changing chat
+    selectedMessagePath.value = []
 
     if (chatId === 'new') {
       messages.value = []
@@ -93,19 +104,25 @@ onMounted(async () => {
         <div class="mx-auto mb-36 max-w-5xl">
           <ChatMessage
             v-for="message in activeMessages"
-            @retry="chatStore.retryReply(currentChatId)"
-            @select="(childId) => chatStore.selectMessageChild(message.parentId, childId)"
             :key="message.id"
             :sender="message.sender"
             :content="message.content"
             :status="message.status"
             :self-id="message.id"
-            :siblings="childrenByMessage[message.parentId]"
+            :siblings="messagesByParent[message.parentId]"
+            @select="(childId) => chatStore.selectMessageBranch(message.parentId, childId)"
+            @retry="
+              () => chatStore.regenerateReply({ messageId: message.id, parentId: message.parentId })
+            "
+            @edit="
+              (content) =>
+                chatStore.sendMessage({ content, parentId: message.parentId, edit: true })
+            "
           />
 
           <!-- Empty State -->
           <div v-if="messages?.length === 0" class="mt-8 text-center text-neutral-400">
-            <p class="text-sm">Nessun messaggio presesnte</p>
+            <p class="text-sm">Nessun messaggio presente</p>
           </div>
         </div>
       </div>

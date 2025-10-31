@@ -24,7 +24,7 @@ const toggleSidebar = () => (collapsed.value = !collapsed.value)
     >
       <h2 v-if="!collapsed" class="text-xl font-bold">
         SaChat -
-        <span class="text-lg bg-red-500/25 px-1 py-0.5 rounded-lg">BETA</span>
+        <span class="rounded-lg bg-red-500/25 px-1 py-0.5 text-lg">BETA</span>
       </h2>
       <BaseButton @click="toggleSidebar" variant="ghost" icon="sidebar" :icon-size="24" />
     </header>

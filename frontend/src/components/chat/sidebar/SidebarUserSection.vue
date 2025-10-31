@@ -49,7 +49,9 @@ const toggleMenu = () => (showMenu.value = !showMenu.value)
     >
       <div v-if="!collapsed" class="flex w-full items-center justify-between">
         {{ user?.name }}
-        <span v-if="isUserVip" class="rounded-lg bg-indigo-900/75 px-1 py-0.5 font-medium">VIP</span>
+        <span v-if="isUserVip" class="rounded-lg bg-indigo-900/75 px-1 py-0.5 font-medium"
+          >VIP</span
+        >
       </div>
     </BaseButton>
 

@@ -6,7 +6,7 @@ import BaseButton from '../ui/BaseButton.vue'
 import AutoResizeTextarea from '../ui/AutoResizeTextarea.vue'
 
 const chatStore = useChatStore()
-const { activeMessagePath, currentChatStatus, currentChatId } = storeToRefs(chatStore)
+const { selectedMessagePath, currentChatStatus } = storeToRefs(chatStore)
 
 // State
 const input = ref('')
@@ -14,26 +14,16 @@ const input = ref('')
 // Computed
 const isGenerating = computed(() => currentChatStatus.value === 'generating')
 const canSend = computed(() => input.value.trim() && !isGenerating.value)
-const buttonIcon = computed(() => (isGenerating.value ? 'stop-circle' : 'arrow-up'))
 
 // Actions
-
 const send = async () => {
   if (!canSend.value) return
 
   const content = input.value.trim()
-  const parentId = activeMessagePath.value.at(-1)
+  const parentId = selectedMessagePath.value.at(-1)
   input.value = ''
 
   await chatStore.sendMessage({ content, parentId })
-}
-
-const handleAction = () => {
-  if (isGenerating.value) {
-    chatStore.cancelReply(currentChatId.value)
-    return
-  }
-  send()
 }
 </script>
 
@@ -55,10 +45,10 @@ const handleAction = () => {
       <BaseButton class="p-2 text-neutral-500 hover:text-neutral-400" icon="search" />
 
       <BaseButton
-        @click="handleAction"
-        :disabled="!canSend && !isGenerating"
+        @click="send"
+        :disabled="!canSend"
         variant="primary"
-        :icon="buttonIcon"
+        icon="arrow-up"
         :icon-size="24"
       />
     </div>
