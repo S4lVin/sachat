@@ -4,22 +4,10 @@ import feather from 'feather-icons'
 
 // Options
 const props = defineProps({
-  name: {
-    type: String,
-    required: true,
-  },
-  size: {
-    type: Number,
-    default: 24,
-  },
-  strokeWidth: {
-    type: Number,
-    default: 2,
-  },
-  spin: {
-    type: Boolean,
-    default: false,
-  },
+  name: { type: String, required: true },
+  size: { type: Number, default: 24 },
+  strokeWidth: { type: Number, default: 2 },
+  spin: { type: Boolean, default: false },
 })
 
 // Computed

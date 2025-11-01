@@ -7,18 +7,9 @@ import { useEditable } from '@/composables/useEditable'
 
 const emit = defineEmits(['select', 'rename', 'delete'])
 const props = defineProps({
-  title: {
-    type: String,
-    required: true,
-  },
-  selected: {
-    type: Boolean,
-    required: true,
-  },
-  generating: {
-    type: Boolean,
-    required: false,
-  },
+  title: { type: String, required: true },
+  selected: { type: Boolean, required: true },
+  generating: { type: Boolean, required: false },
 })
 
 const actions = [

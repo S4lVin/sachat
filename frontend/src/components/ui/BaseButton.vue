@@ -5,14 +5,8 @@ defineProps({
   disabled: Boolean,
   variant: String,
   icon: String,
-  iconSize: {
-    type: Number,
-    default: 20,
-  },
-  display: {
-    type: String,
-    default: 'inline-flex',
-  },
+  iconSize: { type: Number, default: 20 },
+  display: { type: String, default: 'inline-flex' },
 })
 
 const variants = {

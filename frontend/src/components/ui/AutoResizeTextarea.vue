@@ -3,10 +3,7 @@ import { ref, nextTick, watch } from 'vue'
 
 const emit = defineEmits(['update:modelValue', 'enter'])
 const props = defineProps({
-  maxHeight: {
-    type: Number,
-    default: 256,
-  },
+  maxHeight: { type: Number, default: 256 },
   modelValue: String,
   placeholder: String,
   disabled: Boolean,
