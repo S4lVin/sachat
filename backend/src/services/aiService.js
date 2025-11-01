@@ -9,7 +9,7 @@ function formatMessagesForApi(messages) {
   }))
 }
 
-export const ai = {
+export const aiService = {
   generateStream: async function* ({ apiKey, messages }) {
     const input = formatMessagesForApi(messages)
     const stream = await this.initializeResponse({ apiKey, input })

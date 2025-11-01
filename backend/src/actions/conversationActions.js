@@ -1,5 +1,5 @@
 import { chatManager, messageManager, userManager } from '../managers/index.js'
-import { ai as assistant } from '../services/index.js'
+import { aiService } from '../services/index.js'
 import { BadRequestError, NotFoundError } from '../errors.js'
 
 // Helpers
@@ -30,12 +30,10 @@ export const conversationActions = {
     yield* this.generateAssistantReply({ userMessage, userId })
   },
 
-  retry: async function* ({ messageId, userId }) {
-    const message = await messageManager.find({ id: messageId, userId })
-    if (!message) throw MessageNotFound()
-    if (message.sender !== 'assistant') throw InvalidMessageSender()
-
-    const userMessage = await messageManager.find({ id: message.parentId, userId })
+  regenerate: async function* ({ parentId, userId }) {
+    const userMessage = await messageManager.find({ id: parentId, userId })
+    if (!userMessage) throw MessageNotFound()
+    if (userMessage.sender !== 'user') throw InvalidMessageSender()
 
     yield* this.generateAssistantReply({ userMessage, userId })
   },
@@ -48,7 +46,7 @@ export const conversationActions = {
 
     let response
     try {
-      const stream = assistant.generateStream({ apiKey, messages })
+      const stream = aiService.generateStream({ apiKey, messages })
       for await (const event of stream) {
         yield event
         if (event.type === 'completed') {

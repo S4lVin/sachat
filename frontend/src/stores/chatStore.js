@@ -75,8 +75,6 @@ export const useChatStore = defineStore('chat', () => {
   const loadMessages = async (chatId) => {
     if (chatId === 'new') {
       messages.value = []
-      messagesByParent.value = {}
-      selectedMessagePath.value = []
       return
     }
 
@@ -84,57 +82,33 @@ export const useChatStore = defineStore('chat', () => {
     messages.value = data.messages || []
     messagesByParent.value = buildMessagesByParent(messages.value)
 
-    // Select the last message in the root thread
-    const rootMessages = messagesByParent.value[null] || []
-    const lastRootMessage = rootMessages[rootMessages.length - 1]
-
-    if (lastRootMessage) {
-      selectedMessagePath.value = buildMessagePath(lastRootMessage.id)
-    } else {
-      selectedMessagePath.value = []
-    }
+    selectedMessagePath.value = buildMessagePath(null)
   }
 
-  const selectMessageBranch = (messageId, childId) => {
-    const messageIndex = selectedMessagePath.value.indexOf(messageId)
-
-    // If message not in path, select from root
-    if (messageIndex === -1) {
-      selectedMessagePath.value = buildMessagePath(childId)
-      return
-    }
-
-    // Replace path from selected message onwards
-    const pathPrefix = selectedMessagePath.value.slice(0, messageIndex + 1)
-    const pathSuffix = buildMessagePath(childId)
-    selectedMessagePath.value = [...pathPrefix, ...pathSuffix]
+  const resetMessages = () => {
+    messages.value = null
+    messagesByParent.value = {}
+    selectedMessagePath.value = []
   }
 
-  const sendMessage = async ({ content, parentId, edit }) => {
+  const sendMessage = async ({ content, parentId }) => {
     const userMessage = addTemporaryMessage({
       sender: 'user',
       content,
       parentId,
     })
 
-    // If editing, navigate to the new branch
-    if (edit) {
-      selectMessageBranch(parentId, userMessage.id)
-    }
-
     await processAssistantReply(userMessage)
   }
 
-  const regenerateReply = async ({ messageId, parentId }) => {
+  const regenerateReply = async ({ parentId }) => {
     const assistantMessage = addTemporaryMessage({
       sender: 'assistant',
       content: '',
       parentId,
     })
 
-    selectMessageBranch(parentId, assistantMessage.id)
-
-    const eventStream = await api.post('/conversation/retry', { messageId })
+    const eventStream = await api.post('/conversation/regenerate', { parentId })
 
     for await (const event of eventStream) {
       if (event.type === 'delta') {
@@ -145,11 +119,20 @@ export const useChatStore = defineStore('chat', () => {
     // Reload messages to get server data
     await loadMessages(currentChatId.value)
   }
+
+  const selectMessageChild = (messageId, childId) => {
+    const messageIndex = selectedMessagePath.value.indexOf(messageId)
+
+    // Replace path from selected message onwards
+    const pathPrefix = selectedMessagePath.value.slice(0, messageIndex + 1)
+    const pathSuffix = buildMessagePath(childId)
+    selectedMessagePath.value = [...pathPrefix, ...pathSuffix]
+  }
   // #endregion
 
   // #region HELPERS
   const addTemporaryMessage = ({ sender, content, parentId }) => {
-    const tempId = `temp-${Date.now()}`
+    const tempId = `temp-${Math.random().toString(36).slice(2)}`;
     const message = reactive({
       id: tempId,
       sender,
@@ -158,14 +141,8 @@ export const useChatStore = defineStore('chat', () => {
     })
 
     messages.value.push(message)
-
-    // Initialize parent array if needed
-    if (!messagesByParent.value[parentId]) {
-      messagesByParent.value[parentId] = []
-    }
-
-    messagesByParent.value[parentId].push(message)
-    selectedMessagePath.value.push(tempId)
+    (messagesByParent.value[parentId] ??= []).push(message)
+    selectMessageChild(parentId, tempId)
 
     return message
   }
@@ -255,7 +232,8 @@ export const useChatStore = defineStore('chat', () => {
     renameChat,
     deleteChat,
     loadMessages,
-    selectMessageBranch,
+    resetMessages,
+    selectMessageChild,
     sendMessage,
     regenerateReply,
   }

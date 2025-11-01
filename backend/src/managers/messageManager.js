@@ -35,6 +35,7 @@ export const messageManager = {
     })
   },
 
+  // TODO: IMPROVE EFFICIENCY (currently N queries)
   getMessageChain: async ({ id, userId }) => {
     const messageChain = []
     let message = await db.message.findUnique({

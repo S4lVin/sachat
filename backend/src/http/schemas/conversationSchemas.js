@@ -7,7 +7,7 @@ export const conversationSchemas = {
     content: Joi.string().min(1).required(),
   }),
 
-  retry: Joi.object({
-    messageId: Joi.number().required(),
+  regenerate: Joi.object({
+    parentId: Joi.number().required(),
   }),
 }

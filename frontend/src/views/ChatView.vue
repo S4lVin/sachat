@@ -10,7 +10,6 @@ const chatStore = useChatStore()
 const {
   chats,
   messages,
-  selectedMessagePath,
   activeMessages,
   messagesByParent,
   chatById,
@@ -53,16 +52,7 @@ watch(
       return
     }
 
-    // Reset selection when changing chat
-    selectedMessagePath.value = []
-
-    if (chatId === 'new') {
-      messages.value = []
-      isUserAtBottom.value = true
-      return
-    }
-
-    messages.value = null
+    chatStore.resetMessages()
     await chatStore.loadMessages(chatId)
     isUserAtBottom.value = true
   },
@@ -110,13 +100,13 @@ onMounted(async () => {
             :status="message.status"
             :self-id="message.id"
             :siblings="messagesByParent[message.parentId]"
-            @select="(childId) => chatStore.selectMessageBranch(message.parentId, childId)"
+            @select="(childId) => chatStore.selectMessageChild(message.parentId, childId)"
             @retry="
-              () => chatStore.regenerateReply({ messageId: message.id, parentId: message.parentId })
+              () => chatStore.regenerateReply({ parentId: message.parentId })
             "
             @edit="
               (content) =>
-                chatStore.sendMessage({ content, parentId: message.parentId, edit: true })
+                chatStore.sendMessage({ content, parentId: message.parentId })
             "
           />
 

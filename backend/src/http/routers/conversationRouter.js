@@ -6,9 +6,5 @@ import { conversationSchemas } from '../schemas/index.js'
 export const conversationRouter = express.Router()
 
 conversationRouter.post('/send', validator(conversationSchemas.send), conversationController.send)
-conversationRouter.post(
-  '/retry',
-  validator(conversationSchemas.retry),
-  conversationController.retry,
-)
+conversationRouter.post('/regenerate', validator(conversationSchemas.regenerate), conversationController.regenerate)
 // conversationRouter.post('/cancel', validator(conversationSchemas.cancel), conversationController.cancelReply)

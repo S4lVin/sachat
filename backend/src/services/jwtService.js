@@ -7,7 +7,7 @@ const InvalidRefreshToken = () =>
 const InvalidAccessToken = () =>
   new UnauthorizedError('Access token non valido', 'INVALID_ACCESS_TOKEN')
 
-export const jwt = {
+export const jwtService = {
   signAccessToken: (payload) => {
     return jsonwebtoken.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' })
   },

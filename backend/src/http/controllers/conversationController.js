@@ -27,12 +27,12 @@ export const conversationController = {
     await writeStream(res, eventStream)
   },
 
-  retry: async (req, res) => {
-    const { messageId } = req.body
+  regenerate: async (req, res) => {
+    const { parentId } = req.body
 
     initializeStream(res)
-    const eventStream = conversationActions.retry({
-      messageId,
+    const eventStream = conversationActions.regenerate({
+      parentId,
       userId: req.userId,
     })
 
