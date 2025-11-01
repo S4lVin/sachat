@@ -7,15 +7,8 @@ import { storeToRefs } from 'pinia'
 import ChatSidebar from '@/components/chat/sidebar/ChatSidebar.vue'
 
 const chatStore = useChatStore()
-const {
-  chats,
-  messages,
-  activeMessages,
-  messagesByParent,
-  chatById,
-  currentChatId,
-  skipNextLoad,
-} = storeToRefs(chatStore)
+const { chats, messages, activeMessages, messagesByParent, chatById, currentChatId, skipNextLoad } =
+  storeToRefs(chatStore)
 
 // Constants
 const BOTTOM_THRESHOLD = 80 // Quanto vicino al fondo consideriamo "in fondo" (in px)
@@ -101,13 +94,8 @@ onMounted(async () => {
             :self-id="message.id"
             :siblings="messagesByParent[message.parentId]"
             @select="(childId) => chatStore.selectMessageChild(message.parentId, childId)"
-            @retry="
-              () => chatStore.regenerateReply({ parentId: message.parentId })
-            "
-            @edit="
-              (content) =>
-                chatStore.sendMessage({ content, parentId: message.parentId })
-            "
+            @retry="() => chatStore.regenerateReply({ parentId: message.parentId })"
+            @edit="(content) => chatStore.sendMessage({ content, parentId: message.parentId })"
           />
 
           <!-- Empty State -->

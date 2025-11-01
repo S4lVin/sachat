@@ -98,7 +98,20 @@ export const useChatStore = defineStore('chat', () => {
       parentId,
     })
 
-    await processAssistantReply(userMessage)
+    const chatId = currentChatId.value === 'new' ? undefined : currentChatId.value
+    const assistantMessage = addTemporaryMessage({
+      sender: 'assistant',
+      content: '',
+      parentId: userMessage.id,
+    })
+
+    const eventStream = await api.post('/conversation/send', {
+      chatId,
+      parentId: userMessage.parentId ?? undefined,
+      content: userMessage.content,
+    })
+
+    await processAssistantStream(eventStream, assistantMessage)
   }
 
   const regenerateReply = async ({ parentId }) => {
@@ -110,14 +123,7 @@ export const useChatStore = defineStore('chat', () => {
 
     const eventStream = await api.post('/conversation/regenerate', { parentId })
 
-    for await (const event of eventStream) {
-      if (event.type === 'delta') {
-        assistantMessage.content += event.data.delta
-      }
-    }
-
-    // Reload messages to get server data
-    await loadMessages(currentChatId.value)
+    await processAssistantStream(eventStream, assistantMessage)
   }
 
   const selectMessageChild = (messageId, childId) => {
@@ -132,7 +138,7 @@ export const useChatStore = defineStore('chat', () => {
 
   // #region HELPERS
   const addTemporaryMessage = ({ sender, content, parentId }) => {
-    const tempId = `temp-${Math.random().toString(36).slice(2)}`;
+    const tempId = `temp-${Math.random().toString(36).slice(2)}`
     const message = reactive({
       id: tempId,
       sender,
@@ -140,27 +146,15 @@ export const useChatStore = defineStore('chat', () => {
       parentId,
     })
 
-    messages.value.push(message)
-    (messagesByParent.value[parentId] ??= []).push(message)
+    messages.value
+      .push(message)((messagesByParent.value[parentId] ??= []))
+      .push(message)
     selectMessageChild(parentId, tempId)
 
     return message
   }
 
-  const processAssistantReply = async (userMessage) => {
-    const chatId = currentChatId.value === 'new' ? undefined : currentChatId.value
-    const assistantMessage = addTemporaryMessage({
-      sender: 'assistant',
-      content: '',
-      parentId: userMessage.id,
-    })
-
-    const eventStream = await api.post('/conversation/send', {
-      chatId,
-      parentId: userMessage.parentId ?? undefined,
-      content: userMessage.content,
-    })
-
+  const processAssistantStream = async (eventStream, assistantMessage) => {
     for await (const event of eventStream) {
       if (event.type === 'chat') {
         // New chat created - add it to the list and navigate to it
