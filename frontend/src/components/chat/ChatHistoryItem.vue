@@ -1,8 +1,9 @@
 <script setup>
 import FeatherIcons from '@/components/ui/FeatherIcon.vue'
 import ContextMenu from '../ui/ContextMenu.vue'
-import { nextTick, ref } from 'vue'
+import { ref } from 'vue'
 import BaseButton from '../ui/BaseButton.vue'
+import { useEditable } from '@/composables/useEditable'
 
 const emit = defineEmits(['select', 'rename', 'delete'])
 const props = defineProps({
@@ -20,16 +21,11 @@ const props = defineProps({
   },
 })
 
-// State
-const showMenu = ref(false)
-const isEditing = ref(false)
-const editingTitle = ref('')
-const inputRef = ref(null)
 const actions = [
   {
     label: 'Rinomina',
     icon: 'edit-2',
-    handler: () => renameTitle(),
+    handler: () => startEdit(),
   },
   {
     label: 'Elimina',
@@ -39,34 +35,20 @@ const actions = [
   },
 ]
 
+// State
+const showMenu = ref(false)
+const { isEditing, editingValue, inputRef, startEdit, save, cancel } = useEditable(
+  () => props.title,
+  (newTitle) => emit('rename', newTitle),
+)
+
 // Actions
-const renameTitle = () => {
-  isEditing.value = true
-  editingTitle.value = props.title
-  // Focus sull'input dopo che il DOM si è aggiornato
-  nextTick(() => {
-    inputRef.value?.focus()
-    inputRef.value?.select()
-  }, 0)
-}
-
-const saveTitle = () => {
-  if (editingTitle.value.trim()) {
-    emit('rename', editingTitle.value.trim())
-  }
-  isEditing.value = false
-}
-
-const cancelEdit = () => {
-  isEditing.value = false
-  editingTitle.value = ''
-}
-
 const handleKeydown = (e) => {
-  if (e.key === 'Enter') {
-    saveTitle()
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault()
+    save()
   } else if (e.key === 'Escape') {
-    cancelEdit()
+    cancel()
   }
 }
 
@@ -79,8 +61,8 @@ const toggleMenu = () => (showMenu.value = !showMenu.value)
     <input
       v-if="isEditing"
       ref="inputRef"
-      v-model="editingTitle"
-      @blur="saveTitle"
+      v-model="editingValue"
+      @blur="save"
       @keydown="handleKeydown"
       class="w-full rounded-xl bg-neutral-700 p-2 text-left ring-2 ring-indigo-800 outline-none"
       type="text"

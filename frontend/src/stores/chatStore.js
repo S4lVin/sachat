@@ -146,9 +146,10 @@ export const useChatStore = defineStore('chat', () => {
       parentId,
     })
 
-    messages.value
-      .push(message)((messagesByParent.value[parentId] ??= []))
-      .push(message)
+    messages.value.push(message)
+
+    const parentMessages = (messagesByParent.value[parentId] ??= [])
+    parentMessages.push(message)
     selectMessageChild(parentId, tempId)
 
     return message

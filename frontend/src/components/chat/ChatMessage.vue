@@ -1,8 +1,9 @@
 <script setup>
 import FeatherIcons from '@/components/ui/FeatherIcon.vue'
-import { computed, ref, watch, onMounted, nextTick } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import BaseButton from '../ui/BaseButton.vue'
 import AutoResizeTextarea from '../ui/AutoResizeTextarea.vue'
+import { useEditable } from '@/composables/useEditable'
 
 const emit = defineEmits(['retry', 'select', 'edit'])
 const props = defineProps({
@@ -14,11 +15,17 @@ const props = defineProps({
 })
 
 // State
-const isEditing = ref(false)
-const inputRef = ref(null)
-const editingContent = ref('')
 const selectedIndex = ref(0)
-const isSaving = ref(false)
+const { isEditing, editingValue, inputRef, startEdit, save, cancel } = useEditable(
+  () => props.content,
+  (newContent) => emit('edit', newContent),
+  {
+    validate: (value) => {
+      const trimmed = value.trim()
+      return trimmed && trimmed !== props.content ? trimmed : null
+    },
+  },
+)
 
 // Computed
 const isUser = computed(() => props.sender === 'user')
@@ -50,7 +57,7 @@ const onAction = async (name) => {
       emit('retry')
       break
     case 'edit':
-      editContent()
+      startEdit()
       break
   }
 }
@@ -65,44 +72,18 @@ const syncSelectedIndex = () => {
   selectedIndex.value = clamp(idx, 0, props.siblings.length - 1)
 }
 
-const prev = () => goToIndex(selectedIndex.value - 1)
-const next = () => goToIndex(selectedIndex.value + 1)
-
-const editContent = () => {
-  isEditing.value = true
-  editingContent.value = props.content
-  // Focus sull'input dopo che il DOM si è aggiornato
-  nextTick(() => {
-    inputRef.value?.focus()
-    inputRef.value?.select()
-  })
-}
-
-const saveContent = () => {
-  if (!isEditing.value || isSaving.value) return
-  if (editingContent.value.trim() && editingContent.value.trim() !== props.content) {
-    isSaving.value = true
-    isEditing.value = false
-    emit('edit', editingContent.value.trim())
-    isSaving.value = false
-  } else {
-    isEditing.value = false
-  }
-}
-
-const cancelEdit = () => {
-  isEditing.value = false
-  editingContent.value = ''
-}
-
 const handleKeydown = (e) => {
-  if (e.key === 'Enter') {
+  if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault()
-    saveContent()
+    save()
   } else if (e.key === 'Escape') {
-    cancelEdit()
+    cancel()
   }
 }
+
+const prev = () => goToIndex(selectedIndex.value - 1)
+
+const next = () => goToIndex(selectedIndex.value + 1)
 
 // Watchers
 watch(() => [props.siblings, props.selfId], syncSelectedIndex, { deep: true })
@@ -121,8 +102,8 @@ onMounted(syncSelectedIndex)
     <AutoResizeTextarea
       v-else-if="isUser && isEditing"
       ref="inputRef"
-      v-model="editingContent"
-      @blur="saveContent"
+      v-model="editingValue"
+      @blur="save"
       @keydown="handleKeydown"
       class="w-full max-w-[80%] rounded-xl bg-neutral-800 p-3 ring-2 ring-indigo-800 outline-none"
       type="text"
