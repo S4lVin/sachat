@@ -88,11 +88,11 @@ onMounted(async () => {
     <!-- Sidebar -->
     <ChatSidebar />
 
-    <div class="relative flex flex-1">
+    <div class="relative flex min-w-0 flex-1">
       <!-- Message Area -->
       <div
         ref="scrollerRef"
-        class="w-full overflow-y-auto px-4 py-4 md:px-8"
+        class="w-full min-w-0 overflow-x-hidden overflow-y-auto px-4 py-4 md:px-8"
         style="scrollbar-gutter: stable both-edges"
         @scroll="updateIsAtBottom"
       >
@@ -106,7 +106,10 @@ onMounted(async () => {
             :self-id="message.id"
             :siblings="messagesByParent[message.parentId]"
             @select="(childId) => messageStore.selectMessageChild(message.parentId, childId)"
-            @retry="() => messageStore.regenerateReply({ messageId: message.id, parentId: message.parentId })"
+            @retry="
+              () =>
+                messageStore.regenerateReply({ messageId: message.id, parentId: message.parentId })
+            "
             @edit="(content) => messageStore.sendMessage({ content, parentId: message.parentId })"
           />
 

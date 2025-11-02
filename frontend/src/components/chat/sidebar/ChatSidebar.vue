@@ -15,7 +15,7 @@ const toggleSidebar = () => (collapsed.value = !collapsed.value)
 <template>
   <aside
     class="relative flex flex-col border-r border-neutral-700 bg-neutral-800 shadow-lg/25"
-    :class="collapsed ? 'w-14' : 'w-64'"
+    :class="collapsed ? 'w-14 min-w-14' : 'w-64 min-w-64'"
   >
     <!-- Header -->
     <header

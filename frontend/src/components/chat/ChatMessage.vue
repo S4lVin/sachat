@@ -1,9 +1,12 @@
 <script setup>
 import FeatherIcons from '@/components/ui/FeatherIcon.vue'
 import { computed, ref, watch, onMounted } from 'vue'
+import { onClickOutside } from '@vueuse/core'
 import BaseButton from '../ui/BaseButton.vue'
 import AutoResizeTextarea from '../ui/AutoResizeTextarea.vue'
 import { useEditable } from '@/composables/useEditable'
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 
 const emit = defineEmits(['retry', 'select', 'edit'])
 const props = defineProps({
@@ -16,6 +19,7 @@ const props = defineProps({
 
 // State
 const selectedIndex = ref(0)
+const containerRef = ref(null)
 const { isEditing, editingValue, inputRef, startEdit, save, cancel } = useEditable(
   () => props.content,
   (newContent) => emit('edit', newContent),
@@ -44,6 +48,11 @@ const goToIndex = (nextIdx) => {
   if (clamped === selectedIndex.value) return
   selectedIndex.value = clamped
   emit('select', props.siblings[selectedIndex.value].id)
+}
+
+const renderMarkdown = (text) => {
+  const html = marked.parse(text || '')
+  return DOMPurify.sanitize(html)
 }
 
 // Actions
@@ -89,24 +98,36 @@ watch(() => [props.siblings, props.selfId], syncSelectedIndex, { deep: true })
 
 // Callbacks
 onMounted(syncSelectedIndex)
+onClickOutside(containerRef, save)
 </script>
 
 <template>
-  <div class="group relative mb-2 flex pb-9 whitespace-pre-wrap" :class="{ 'justify-end': isUser }">
+  <div class="group debug relative mb-2 flex min-w-0 pb-9" :class="{ 'justify-end': isUser }">
     <!-- User Message -->
-    <div v-if="isUser && !isEditing" class="max-w-[80%] rounded-xl bg-neutral-800 p-3">
+    <div
+      v-if="isUser && !isEditing"
+      class="max-w-[80%] rounded-xl bg-neutral-800 p-3 whitespace-pre-wrap"
+    >
       {{ content }}
     </div>
 
-    <AutoResizeTextarea
+    <div
+      ref="containerRef"
+      class="w-full max-w-[80%] rounded-xl bg-neutral-800 ring-2 ring-indigo-800"
       v-else-if="isUser && isEditing"
-      ref="inputRef"
-      v-model="editingValue"
-      @blur="save"
-      @keydown="handleKeydown"
-      class="w-full max-w-[80%] rounded-xl bg-neutral-800 p-3 ring-2 ring-indigo-800 outline-none"
-      type="text"
-    />
+    >
+      <AutoResizeTextarea
+        ref="inputRef"
+        v-model="editingValue"
+        @keydown="handleKeydown"
+        class="w-full p-3"
+        type="text"
+      />
+      <div class="flex justify-end gap-2 px-3 pb-3">
+        <BaseButton @click="cancel" variant="secondary">Anulla</BaseButton>
+        <BaseButton @click="save" variant="primary">Salva</BaseButton>
+      </div>
+    </div>
 
     <!-- Error Message -->
     <div v-else-if="status === 'failed'" class="rounded-xl bg-red-500/10 p-3">
@@ -124,9 +145,13 @@ onMounted(syncSelectedIndex)
     </div>
 
     <!-- Assistant Message -->
-    <div v-else class="flex flex-col">
+    <div v-else class="flex max-w-full min-w-0 flex-col">
       <span class="mb-1 font-bold uppercase">{{ sender }}</span>
-      <feather-icons v-if="isLoading" :spin="true" name="loader" />{{ content }}
+      <feather-icons v-if="isLoading" :spin="true" name="loader" />
+      <div
+        class="prose prose-neutral prose-invert prose-headings:text-neutral-200 prose-p:text-neutral-200 prose-strong:text-neutral-200 prose-em:text-neutral-200 prose-a:text-neutral-200 prose-code:text-neutral-200 prose-pre:text-neutral-200 prose-blockquote:text-neutral-200 prose-ul:text-neutral-200 prose-ol:text-neutral-200 prose-li:text-neutral-200 prose-hr:text-neutral-200 prose-table:text-neutral-200 prose-th:text-neutral-200 prose-td:text-neutral-200 prose-del:text-neutral-200 prose-img:text-neutral-200 prose-img:max-w-full prose-a:break-all max-w-full min-w-0 break-words text-neutral-200"
+        v-html="renderMarkdown(content)"
+      ></div>
     </div>
 
     <!-- Actions -->
@@ -162,3 +187,30 @@ onMounted(syncSelectedIndex)
     </div>
   </div>
 </template>
+<style scoped>
+.prose {
+  min-width: 0;
+}
+
+/* Blocchi di codice - NON wrappano, scroll orizzontale */
+.prose :deep(pre) {
+  overflow-x: auto;
+  white-space: pre;
+  min-width: 0;
+}
+
+.prose :deep(pre code) {
+  white-space: pre;
+}
+
+/* Tabelle - scroll orizzontale */
+.prose :deep(table) {
+  display: block;
+  overflow-x: auto;
+  min-width: 0;
+}
+
+.prose :deep(img) {
+  max-width: 100%;
+}
+</style>

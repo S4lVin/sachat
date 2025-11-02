@@ -8,6 +8,7 @@ export const useMessageStore = defineStore('message', () => {
   const messages = ref(null)
   const messagesByParent = ref({})
   const selectedMessagePath = ref([])
+  const options = ref({})
   // #endregion
 
   // #region COMPUTED
@@ -79,6 +80,7 @@ export const useMessageStore = defineStore('message', () => {
       chatId: chatId === 'new' ? undefined : chatId,
       parentId: userMessage.parentId ?? undefined,
       content: userMessage.content,
+      options: options.value,
     })
 
     if (data.chat) {
@@ -100,6 +102,7 @@ export const useMessageStore = defineStore('message', () => {
 
     const data = await api.post('conversation/regenerate', {
       messageId,
+      options: options.value,
     })
 
     processStream(data.assistantMessage.id, assistantMessage)
@@ -188,6 +191,7 @@ export const useMessageStore = defineStore('message', () => {
     messages,
     messagesByParent,
     selectedMessagePath,
+    options,
 
     // COMPUTED
     messageById,

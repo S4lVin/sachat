@@ -14,9 +14,9 @@ const InvalidMessageSender = () =>
 const activeGenerations = new Map()
 
 // Stream
-const streamResponse = async ({ apiKey, messages, messageId, session }) => {
+const streamResponse = async ({ apiKey, messages, messageId, session, options }) => {
   try {
-    const stream = aiService.generateStream({ apiKey, messages })
+    const stream = aiService.generateStream({ apiKey, messages, options })
     for await (const event of stream) {
       if (!activeGenerations.has(messageId)) break
       session.content += event.data.delta || ''
@@ -60,7 +60,7 @@ export const conversationActions = {
     if (error) throw error
   },
 
-  send: async function ({ parentId, chatId, userId, content }) {
+  send: async function ({ parentId, chatId, userId, content, options }) {
     const { chat, created } = await chatManager.findOrCreate({ id: chatId, userId })
 
     let parentMessage
@@ -76,12 +76,12 @@ export const conversationActions = {
       content,
     })
 
-    const assistantMessage = await this.createAssistantReply({ userMessage, userId })
+    const assistantMessage = await this.createAssistantReply({ userMessage, userId, options })
     if (created) return { chat, assistantMessage }
     return { assistantMessage }
   },
 
-  regenerate: async function ({ messageId, userId }) {
+  regenerate: async function ({ messageId, userId, options }) {
     const assistantMessage = await messageManager.find({ id: messageId, userId })
     if (!assistantMessage) throw MessageNotFound()
     if (assistantMessage.sender !== 'assistant') throw InvalidMessageSender()
@@ -91,7 +91,7 @@ export const conversationActions = {
     }
 
     const userMessage = await messageManager.find({ id: assistantMessage.parentId, userId })
-    return await this.createAssistantReply({ userMessage, userId })
+    return await this.createAssistantReply({ userMessage, userId, options })
   },
 
   cancel: async function ({ messageId, userId }) {
@@ -101,7 +101,7 @@ export const conversationActions = {
     activeGenerations.delete(messageId)
   },
 
-  createAssistantReply: async function ({ userMessage, userId }) {
+  createAssistantReply: async function ({ userMessage, userId, options }) {
     const apiKey = await userManager.getApiKey({ id: userId })
     const messages = await messageManager.getMessageChain({ id: userMessage.id, userId })
 
@@ -117,7 +117,7 @@ export const conversationActions = {
     const session = { emitter, content: '', userId }
     activeGenerations.set(assistantMessage.id, session)
 
-    streamResponse({ apiKey, messages, messageId: assistantMessage.id, session })
+    streamResponse({ apiKey, messages, messageId: assistantMessage.id, session, options })
       .catch(async (err) => {
         session.emitter.emit('event', 'error', { err })
       })

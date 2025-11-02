@@ -28,23 +28,25 @@ export const conversationController = {
   },
 
   send: async (req, res) => {
-    const { parentId, chatId, content } = req.body
+    const { parentId, chatId, content, options } = req.body
 
     const data = await conversationActions.send({
       parentId,
       chatId,
       userId: req.user.id,
       content,
+      options
     })
     res.json(data)
   },
 
   regenerate: async (req, res) => {
-    const { messageId } = req.body
+    const { messageId, options } = req.body
 
     const assistantMessage = await conversationActions.regenerate({
       messageId,
       userId: req.userId,
+      options
     })
     res.json({ assistantMessage })
   },

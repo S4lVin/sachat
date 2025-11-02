@@ -4,6 +4,7 @@ import { ref, computed } from 'vue'
 import BaseButton from '../ui/BaseButton.vue'
 import AutoResizeTextarea from '../ui/AutoResizeTextarea.vue'
 import { useMessageStore } from '@/stores/messageStore'
+import ModelSelector from './ModelSelector.vue'
 
 const messageStore = useMessageStore()
 
@@ -54,12 +55,12 @@ const handleAction = () => {
     />
 
     <!-- Actions -->
-    <div class="flex items-center justify-between">
-      <BaseButton class="p-2 text-neutral-500 hover:text-neutral-400" icon="search" />
+    <div class="relative flex items-center justify-between">
+      <ModelSelector />
 
       <BaseButton
         @click="handleAction"
-        :disabled="!canSend && !isGenerating || isError"
+        :disabled="(!canSend && !isGenerating) || isError"
         variant="primary"
         :icon="buttonIcon"
         :icon-size="24"

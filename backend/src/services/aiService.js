@@ -10,9 +10,9 @@ function formatMessagesForApi(messages) {
 }
 
 export const aiService = {
-  generateStream: async function* ({ apiKey, messages }) {
+  generateStream: async function* ({ apiKey, messages, options }) {
     const input = formatMessagesForApi(messages)
-    const stream = await this.initializeResponse({ apiKey, input })
+    const stream = await this.initializeResponse({ apiKey, input, options })
 
     let response = ''
     let usage
@@ -32,13 +32,16 @@ export const aiService = {
     yield { type: 'completed', data: { response, usage } }
   },
 
-  initializeResponse: async function ({ apiKey, input }) {
+  initializeResponse: async function ({ apiKey, input, options }) {
     const client = new OpenAI({ apiKey: apiKey ?? '' })
 
     try {
       return await client.responses.create({
         input,
-        model: 'gpt-5-mini',
+        model: options?.model ?? 'gpt-5-mini',
+        tools: [
+          { type: "web_search" }
+        ],
         stream: true,
       })
     } catch (err) {
