@@ -10,14 +10,4 @@ export const messageController = {
     })
     res.json({ messages })
   },
-
-  delete: async (req, res) => {
-    const { messageId } = req.params
-
-    await messageManager.delete({
-      id: Number(messageId),
-      userId: req.userId,
-    })
-    res.status(204).end()
-  },
 }

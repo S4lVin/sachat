@@ -32,7 +32,6 @@ model Chat {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  status       String?
   title        String 
   messages     Message[]
 
@@ -44,13 +43,19 @@ model Message {
   id           Int       @id @default(autoincrement())
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
-  
+
   sender       String
   content      String
-  branches     Message[] @relation("MessageBranches")
+  status       String    @default("success")
 
   chatId       Int
-  parentId     Int?
   chat         Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  parent       Message?  @relation("MessageBranches", fields: [parentId], references: [id], onDelete: Cascade)
+
+  parentId     Int?
+  parent       Message?  @relation("MessageTree", fields: [parentId, chatId], references: [id, chatId], onDelete: Cascade)
+  children     Message[] @relation("MessageTree")
+
+  @@unique([id, chatId])
+  @@index([chatId])
+  @@index([parentId, chatId])
 }

@@ -1,18 +1,67 @@
 import { chatManager, messageManager, userManager } from '../managers/index.js'
 import { aiService } from '../services/index.js'
 import { BadRequestError, NotFoundError } from '../errors.js'
+import { EventEmitter, on } from 'events'
 
 // Helpers
-const MissingApiKey = () => new BadRequestError('API Key mancante', 'MISSING_API_KEY')
-const ChatNotFound = () => new NotFoundError('Chat non trovata', 'CHAT_NOT_FOUND')
 const MessageNotFound = () => new NotFoundError('Messaggio non trovato', 'MESSAGE_NOT_FOUND')
+const GenerationNotFound = () =>
+  new NotFoundError('Generazione non trovata', 'GENERATION_NOT_FOUND')
 const InvalidMessageSender = () =>
   new BadRequestError('Mittente del messaggio non valido', 'INVALID_MESSAGE_SENDER')
 
+// State
+const activeGenerations = new Map()
+
+// Stream
+const streamResponse = async ({ apiKey, messages, messageId, session }) => {
+  try {
+    const stream = aiService.generateStream({ apiKey, messages })
+    for await (const event of stream) {
+      if (!activeGenerations.has(messageId)) break
+      session.content += event.data.delta || ''
+      session.emitter.emit('event', event.type, event.data)
+    }
+
+    await messageManager.update({
+      id: messageId,
+      content: session.content,
+      status: 'success',
+    })
+  } catch (err) {
+    await messageManager.update({
+      id: messageId,
+      content: err.message,
+      status: 'failed',
+    })
+    throw err
+  } finally {
+    session.emitter.emit('event', 'done')
+    activeGenerations.delete(messageId)
+  }
+}
+
 export const conversationActions = {
-  send: async function* ({ parentId, chatId, userId, content }) {
-    const chat = await chatManager.findOrCreate({ id: chatId, userId })
-    yield { type: 'chat', data: { chat } }
+  getStream: async function* ({ messageId, userId }) {
+    const session = activeGenerations.get(messageId)
+    if (!session || session.userId !== userId) throw GenerationNotFound()
+
+    if (session.content) {
+      yield { type: 'delta', data: { delta: session.content } }
+    }
+
+    let error
+    for await (const [type, data] of on(session.emitter, 'event')) {
+      yield { type, data }
+      if (type === 'error') error = data.err
+      if (type === 'done') break
+    }
+
+    if (error) throw error
+  },
+
+  send: async function ({ parentId, chatId, userId, content }) {
+    const { chat, created } = await chatManager.findOrCreate({ id: chatId, userId })
 
     let parentMessage
     if (parentId) {
@@ -27,41 +76,51 @@ export const conversationActions = {
       content,
     })
 
-    yield* this.generateAssistantReply({ userMessage, userId })
+    const assistantMessage = await this.createAssistantReply({ userMessage, userId })
+    if (created) return { chat, assistantMessage }
+    return { assistantMessage }
   },
 
-  regenerate: async function* ({ parentId, userId }) {
-    const userMessage = await messageManager.find({ id: parentId, userId })
-    if (!userMessage) throw MessageNotFound()
-    if (userMessage.sender !== 'user') throw InvalidMessageSender()
+  regenerate: async function ({ messageId, userId }) {
+    const assistantMessage = await messageManager.find({ id: messageId, userId })
+    if (!assistantMessage) throw MessageNotFound()
+    if (assistantMessage.sender !== 'assistant') throw InvalidMessageSender()
 
-    yield* this.generateAssistantReply({ userMessage, userId })
+    if (assistantMessage.status === 'failed') {
+      await messageManager.delete({ id: messageId })
+    }
+
+    const userMessage = await messageManager.find({ id: assistantMessage.parentId, userId })
+    return await this.createAssistantReply({ userMessage, userId })
   },
 
-  generateAssistantReply: async function* ({ userMessage, userId }) {
+  cancel: async function ({ messageId, userId }) {
+    const message = await messageManager.find({ id: messageId, userId })
+    if (!message) throw MessageNotFound()
+
+    activeGenerations.delete(messageId)
+  },
+
+  createAssistantReply: async function ({ userMessage, userId }) {
     const apiKey = await userManager.getApiKey({ id: userId })
     const messages = await messageManager.getMessageChain({ id: userMessage.id, userId })
-
-    await chatManager.update({ id: userMessage.chatId, userId, status: 'generating' })
-
-    let response
-    try {
-      const stream = aiService.generateStream({ apiKey, messages })
-      for await (const event of stream) {
-        yield event
-        if (event.type === 'completed') {
-          response = event.data.response
-        }
-      }
-    } finally {
-      await chatManager.update({ id: userMessage.chatId, userId, status: null })
-    }
 
     const assistantMessage = await messageManager.create({
       parentId: userMessage.id,
       chatId: userMessage.chatId,
       sender: 'assistant',
-      content: response,
+      content: '',
+      status: 'generating',
     })
+
+    const emitter = new EventEmitter()
+    const session = { emitter, content: '', userId }
+    activeGenerations.set(assistantMessage.id, session)
+
+    streamResponse({ apiKey, messages, messageId: assistantMessage.id, session })
+      .catch(async (err) => {
+        session.emitter.emit('event', 'error', { err })
+      })
+    return assistantMessage
   },
 }

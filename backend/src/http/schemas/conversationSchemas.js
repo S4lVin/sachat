@@ -1,6 +1,10 @@
 import Joi from 'joi'
 
 export const conversationSchemas = {
+  getStream: Joi.object({
+    messageId: Joi.number().required(),
+  }),
+
   send: Joi.object({
     parentId: Joi.number().optional(),
     chatId: Joi.number().optional(),
@@ -8,6 +12,10 @@ export const conversationSchemas = {
   }),
 
   regenerate: Joi.object({
-    parentId: Joi.number().required(),
+    messageId: Joi.number().required(),
+  }),
+
+  cancel: Joi.object({
+    messageId: Joi.number().required(),
   }),
 }

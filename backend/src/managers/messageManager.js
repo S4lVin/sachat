@@ -1,11 +1,9 @@
 import db from '../db.js'
-import { NotFoundError, BadRequestError } from '../errors.js'
+import { NotFoundError } from '../errors.js'
 
 // Helpers
-const MessageNotFound = () => new NotFoundError('Messaggio non trovato', 'MESSAGE_NOT_FOUND')
 const MessageParentNotFound = () =>
   new NotFoundError('Messaggio parent non trovato', 'MESSAGE_PARENT_NOT_FOUND')
-const isNotFoundError = (err) => err?.code === 'P2025'
 const isReferenceError = (err) => err?.code === 'P2003'
 
 export const messageManager = {
@@ -19,19 +17,6 @@ export const messageManager = {
   find: async ({ id, userId }) => {
     return await db.message.findUnique({
       where: { id, chat: { userId } },
-    })
-  },
-
-  findByParent: async ({ parentId, userId }) => {
-    return await db.message.findUnique({
-      where: { parentId, chat: { userId } },
-    })
-  },
-
-  findLastOfChat: async ({ chatId, userId }) => {
-    return await db.message.findFirst({
-      where: { chatId },
-      orderBy: { createdAt: 'desc' },
     })
   },
 
@@ -53,10 +38,17 @@ export const messageManager = {
     return messageChain
   },
 
-  create: async ({ parentId, chatId, sender, content }) => {
+  update: async ({ id, status, content }) => {
+    await db.message.update({
+      where: { id },
+      data: { status, content },
+    })
+  },
+
+  create: async ({ parentId, chatId, sender, content, status }) => {
     try {
       return await db.message.create({
-        data: { sender, content, parentId, chatId },
+        data: { sender, content, status, parentId, chatId },
       })
     } catch (err) {
       if (isReferenceError(err)) throw MessageParentNotFound()
@@ -64,14 +56,9 @@ export const messageManager = {
     }
   },
 
-  delete: async ({ id, userId }) => {
-    try {
-      await db.message.delete({
-        where: { id, chat: { userId } },
-      })
-    } catch (err) {
-      if (isNotFoundError(err)) throw MessageNotFound()
-      throw err
-    }
-  },
+  delete: async ({ id }) => {
+    await db.message.delete({
+      where: { id }
+    })
+  }
 }

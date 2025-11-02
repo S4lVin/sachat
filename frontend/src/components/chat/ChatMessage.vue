@@ -29,8 +29,7 @@ const { isEditing, editingValue, inputRef, startEdit, save, cancel } = useEditab
 
 // Computed
 const isUser = computed(() => props.sender === 'user')
-const isLoading = computed(() => props.content === '')
-const isError = computed(() => props?.status === 'error')
+const isLoading = computed(() => props.status === 'generating' && props.content === '')
 const actions = computed(() =>
   isUser.value ? [{ name: 'copy' }, { name: 'edit' }] : [{ name: 'copy' }, { name: 'repeat' }],
 )
@@ -110,7 +109,7 @@ onMounted(syncSelectedIndex)
     />
 
     <!-- Error Message -->
-    <div v-else-if="isError" class="rounded-xl bg-red-500/10 p-3">
+    <div v-else-if="status === 'failed'" class="rounded-xl bg-red-500/10 p-3">
       <div class="mb-2 flex text-red-500">
         <feather-icons name="alert-circle" />
         {{ content }}
@@ -132,7 +131,7 @@ onMounted(syncSelectedIndex)
 
     <!-- Actions -->
     <div
-      v-if="!isLoading"
+      v-if="status === 'success'"
       class="absolute bottom-0 hidden gap-x-2 pb-2 group-hover:flex"
       :class="isUser ? 'right-0' : 'left-0'"
     >

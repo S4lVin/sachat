@@ -24,22 +24,23 @@ export const chatManager = {
       const chat = await db.chat.findUnique({
         where: { id, userId },
       })
-      if (chat) return chat
+      if (chat) return { chat, created: false }
     }
 
-    return await db.chat.create({
+    const chat = await db.chat.create({
       data: {
         title: 'Nuova chat',
         userId,
       },
     })
+    return { chat, created: true }
   },
 
-  update: async ({ id, userId, status, title }) => {
+  update: async ({ id, userId, title }) => {
     try {
       return await db.chat.update({
         where: { id, userId },
-        data: { status, title },
+        data: { title },
       })
     } catch (err) {
       if (isNotFoundError(err)) throw ChatNotFound()

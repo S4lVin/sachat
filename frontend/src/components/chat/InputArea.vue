@@ -1,19 +1,22 @@
 <script setup>
-import { useChatStore } from '@/stores/chatStore'
 import { storeToRefs } from 'pinia'
 import { ref, computed } from 'vue'
 import BaseButton from '../ui/BaseButton.vue'
 import AutoResizeTextarea from '../ui/AutoResizeTextarea.vue'
+import { useMessageStore } from '@/stores/messageStore'
 
-const chatStore = useChatStore()
-const { selectedMessagePath, currentChatStatus } = storeToRefs(chatStore)
+const messageStore = useMessageStore()
+
+const { selectedMessagePath, activeGeneration, activeError } = storeToRefs(messageStore)
 
 // State
 const input = ref('')
 
 // Computed
-const isGenerating = computed(() => currentChatStatus.value === 'generating')
+const isGenerating = computed(() => Boolean(activeGeneration.value))
+const isError = computed(() => Boolean(activeError.value))
 const canSend = computed(() => input.value.trim() && !isGenerating.value)
+const buttonIcon = computed(() => (isGenerating.value ? 'stop-circle' : 'arrow-up'))
 
 // Actions
 const send = async () => {
@@ -23,7 +26,17 @@ const send = async () => {
   const parentId = selectedMessagePath.value.at(-1)
   input.value = ''
 
-  await chatStore.sendMessage({ content, parentId })
+  await messageStore.sendMessage({ content, parentId })
+}
+
+const handleAction = () => {
+  if (isGenerating.value) {
+    messageStore.cancelReply({
+      messageId: activeGeneration.value?.realId ?? activeGeneration.value.id,
+    })
+    return
+  }
+  send()
 }
 </script>
 
@@ -37,7 +50,7 @@ const send = async () => {
       @keydown.enter.prevent="send"
       placeholder="Scrivi un messaggio..."
       class="mb-4 w-full p-2"
-      :disabled="isGenerating"
+      :disabled="isGenerating || isError"
     />
 
     <!-- Actions -->
@@ -45,10 +58,10 @@ const send = async () => {
       <BaseButton class="p-2 text-neutral-500 hover:text-neutral-400" icon="search" />
 
       <BaseButton
-        @click="send"
-        :disabled="!canSend"
+        @click="handleAction"
+        :disabled="!canSend && !isGenerating || isError"
         variant="primary"
-        icon="arrow-up"
+        :icon="buttonIcon"
         :icon-size="24"
       />
     </div>

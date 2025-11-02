@@ -5,10 +5,13 @@ import { watch, ref, nextTick, onMounted } from 'vue'
 import { useChatStore } from '@/stores/chatStore'
 import { storeToRefs } from 'pinia'
 import ChatSidebar from '@/components/chat/sidebar/ChatSidebar.vue'
+import { useMessageStore } from '@/stores/messageStore'
 
 const chatStore = useChatStore()
-const { chats, messages, activeMessages, messagesByParent, chatById, currentChatId, skipNextLoad } =
-  storeToRefs(chatStore)
+const messageStore = useMessageStore()
+
+const { chats, chatById, currentChatId, skipNextLoad } = storeToRefs(chatStore)
+const { messages, activeMessages, activeGeneration, messagesByParent } = storeToRefs(messageStore)
 
 // Constants
 const BOTTOM_THRESHOLD = 80 // Quanto vicino al fondo consideriamo "in fondo" (in px)
@@ -45,11 +48,20 @@ watch(
       return
     }
 
-    chatStore.resetMessages()
-    await chatStore.loadMessages(chatId)
+    messageStore.resetMessages()
+    await messageStore.loadMessages(chatId)
     isUserAtBottom.value = true
   },
   { immediate: true },
+)
+
+watch(
+  () => activeGeneration.value,
+  async (message) => {
+    if (message && !message.local) {
+      messageStore.processStream(message.id, message)
+    }
+  },
 )
 
 watch(
@@ -93,9 +105,9 @@ onMounted(async () => {
             :status="message.status"
             :self-id="message.id"
             :siblings="messagesByParent[message.parentId]"
-            @select="(childId) => chatStore.selectMessageChild(message.parentId, childId)"
-            @retry="() => chatStore.regenerateReply({ parentId: message.parentId })"
-            @edit="(content) => chatStore.sendMessage({ content, parentId: message.parentId })"
+            @select="(childId) => messageStore.selectMessageChild(message.parentId, childId)"
+            @retry="() => messageStore.regenerateReply({ messageId: message.id, parentId: message.parentId })"
+            @edit="(content) => messageStore.sendMessage({ content, parentId: message.parentId })"
           />
 
           <!-- Empty State -->
