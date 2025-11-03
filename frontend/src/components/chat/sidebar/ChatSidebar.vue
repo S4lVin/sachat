@@ -7,7 +7,7 @@ import SidebarUserSection from './SidebarUserSection.vue'
 import { onClickOutside } from '@vueuse/core'
 
 // State
-const collapsed = ref(false)
+const collapsed = ref(true)
 const sidebar = ref(null)
 
 // Actions
