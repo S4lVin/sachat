@@ -32,7 +32,7 @@ onClickOutside(sidebar, () => {
     icon-size="24"
   />
   <aside
-    class="absolute z-10 flex h-screen flex-col border-r border-neutral-700 bg-neutral-800 shadow-lg/25 sm:relative sm:z-5"
+    class="absolute z-10 flex h-full flex-col border-r border-neutral-700 bg-neutral-800 shadow-lg/25 sm:relative sm:z-5"
     ref="sidebar"
     :class="collapsed ? 'hidden w-14 min-w-14 sm:flex' : 'w-64 min-w-64'"
   >

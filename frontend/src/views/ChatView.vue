@@ -84,7 +84,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex h-screen w-screen text-neutral-200">
+  <div class="flex h-screen w-screen text-neutral-200 sm:h-[100dvh]">
     <!-- Sidebar -->
     <ChatSidebar />
 
@@ -92,7 +92,7 @@ onMounted(async () => {
       <!-- Message Area -->
       <div
         ref="scrollerRef"
-        class="w-full min-w-0 overflow-x-hidden overflow-y-auto px-4 py-4 md:px-8"
+        class="w-full min-w-0 overflow-x-hidden overflow-y-auto px-4 py-4 sm:px-8"
         style="scrollbar-gutter: stable both-edges"
         @scroll="updateIsAtBottom"
       >
@@ -121,7 +121,7 @@ onMounted(async () => {
       </div>
 
       <!-- Input Area -->
-      <div class="absolute bottom-0 w-full px-4 py-4 md:px-8">
+      <div class="absolute bottom-0 w-full px-4 py-4 sm:px-8">
         <InputArea class="mx-auto max-w-5xl" />
       </div>
     </div>

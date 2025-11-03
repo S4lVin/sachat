@@ -23,11 +23,11 @@ const closeForm = () => {
     <AuthModal v-if="isModalOpen" :type="authType" @close="closeForm" />
 
     <!-- Main Content -->
-    <main class="flex flex-1 items-center px-4 py-8 md:px-8">
+    <main class="flex flex-1 items-center px-4 py-8 sm:px-8">
       <section class="mx-auto w-full max-w-5xl">
         <!-- Welcome Message -->
-        <h1 class="mb-4 text-3xl font-bold md:text-4xl">Benvenuto su SaChat</h1>
-        <p class="mb-8 max-w-3xl leading-7 text-neutral-300 md:leading-8">
+        <h1 class="mb-4 text-3xl font-bold sm:text-4xl">Benvenuto su SaChat</h1>
+        <p class="mb-8 max-w-3xl leading-7 text-neutral-300 sm:leading-8">
           SaChat è una WebApp creata da Salvatore Giaquinto per poter interagire con LLM (Large
           Language Model) forniti da OpenAI.
         </p>
@@ -52,7 +52,7 @@ const closeForm = () => {
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-neutral-800 px-4 py-4 md:px-8">
+    <footer class="border-t border-neutral-800 px-4 py-4 sm:px-8">
       <div class="mx-auto flex w-full max-w-5xl justify-between text-neutral-400">
         <small>&copy; 2025 Salvatore Giaquinto. Tutti i diritti riservati.</small>
         <nav class="flex gap-4 text-sm">
