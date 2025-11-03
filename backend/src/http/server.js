@@ -24,15 +24,6 @@ server.use(corsHandler)
 server.use(express.json())
 server.use(httpLogger)
 
-//! TEMPORARY
-const delay = 300
-if (delay !== 0) {
-  server.use('/api', async (req, res, next) => {
-    await new Promise((r) => setTimeout(r, delay))
-    next()
-  })
-}
-
 // RPC
 server.use('/api/auth', authRouter)
 server.use('/api/conversation', authenticator, conversationRouter)

@@ -20,6 +20,7 @@ const props = defineProps({
 // State
 const selectedIndex = ref(0)
 const containerRef = ref(null)
+const showActions = ref(false)
 const { isEditing, editingValue, inputRef, startEdit, save, cancel } = useEditable(
   () => props.content,
   (newContent) => emit('edit', newContent),
@@ -89,6 +90,8 @@ const handleKeydown = (e) => {
   }
 }
 
+const toggleActions = () => (showActions.value = !showActions.value)
+
 const prev = () => goToIndex(selectedIndex.value - 1)
 
 const next = () => goToIndex(selectedIndex.value + 1)
@@ -102,7 +105,7 @@ onClickOutside(containerRef, save)
 </script>
 
 <template>
-  <div class="group debug relative mb-2 flex min-w-0 pb-9" :class="{ 'justify-end': isUser }">
+  <div @click="toggleActions" class="group relative mb-2 flex min-w-0 pb-9" :class="{ 'justify-end': isUser }">
     <!-- User Message -->
     <div
       v-if="isUser && !isEditing"
@@ -158,7 +161,10 @@ onClickOutside(containerRef, save)
     <div
       v-if="status === 'success'"
       class="absolute bottom-0 hidden gap-x-2 pb-2 group-hover:flex"
-      :class="isUser ? 'right-0' : 'left-0'"
+      :class="[
+        isUser ? 'right-0' : 'left-0',
+        showActions ? 'flex' : 'hidden'
+      ]"
     >
       <BaseButton
         v-for="(action, i) in actions"
