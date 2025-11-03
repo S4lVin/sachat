@@ -9,12 +9,12 @@ export const conversationSchemas = {
     parentId: Joi.number().optional(),
     chatId: Joi.number().optional(),
     content: Joi.string().min(1).required(),
-    options: Joi.object().optional()
+    options: Joi.object().optional(),
   }),
 
   regenerate: Joi.object({
     messageId: Joi.number().required(),
-    options: Joi.object().optional()
+    options: Joi.object().optional(),
   }),
 
   cancel: Joi.object({

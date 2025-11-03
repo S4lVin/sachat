@@ -6,6 +6,7 @@ defineProps({
   variant: String,
   icon: String,
   iconSize: { type: Number, default: 20 },
+  iconPosition: { type: String, default: 'left' },
   display: { type: String, default: 'inline-flex' },
 })
 
@@ -23,6 +24,7 @@ const variants = {
       display,
       'cursor-pointer items-center gap-2 rounded-xl transition-colors disabled:pointer-events-none disabled:opacity-50',
       variants[variant],
+      iconPosition === 'right' ? 'flex-row-reverse' : '',
     ]"
   >
     <FeatherIcon v-if="icon" :name="icon" :size="iconSize" aria-hidden="true" />

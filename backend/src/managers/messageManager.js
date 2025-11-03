@@ -58,7 +58,7 @@ export const messageManager = {
 
   delete: async ({ id }) => {
     await db.message.delete({
-      where: { id }
+      where: { id },
     })
-  }
+  },
 }

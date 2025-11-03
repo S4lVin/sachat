@@ -37,6 +37,16 @@ export const userManager = {
     return user.settings.apiKey
   },
 
+  getSettings: async ({ id }) => {
+    const user = await db.user.findUnique({
+      where: { id },
+      select: { settings: true },
+    })
+    if (!user) return null
+
+    return user.settings
+  },
+
   findByEmail: async ({ email }) => {
     return await db.user.findUnique({
       where: { email },

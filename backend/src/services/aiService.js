@@ -1,6 +1,10 @@
 import OpenAI, { APIError } from 'openai'
 import { AppError } from '../errors.js'
 
+const aiConfig = await import('../configs/aiConfig.json', {
+  with: { type: 'json' },
+}).then((m) => m.default)
+
 // Helpers
 function formatMessagesForApi(messages) {
   return messages.map((msg) => ({
@@ -10,9 +14,11 @@ function formatMessagesForApi(messages) {
 }
 
 export const aiService = {
-  generateStream: async function* ({ apiKey, messages, options }) {
+  config: aiConfig,
+
+  generateStream: async function* ({ apiKey, messages, options, settings }) {
     const input = formatMessagesForApi(messages)
-    const stream = await this.initializeResponse({ apiKey, input, options })
+    const stream = await this.initializeResponse({ apiKey, input, options, settings })
 
     let response = ''
     let usage
@@ -32,17 +38,26 @@ export const aiService = {
     yield { type: 'completed', data: { response, usage } }
   },
 
-  initializeResponse: async function ({ apiKey, input, options }) {
+  initializeResponse: async function ({ apiKey, input, options, settings }) {
+    const { default_reasoning, default_model, system_prompt, max_messages } = this.config
     const client = new OpenAI({ apiKey: apiKey ?? '' })
+    const effort = options?.reasoning ?? default_reasoning
+    const model = options?.model ?? default_model
+    const systemPrompt = system_prompt
+
+    console.log(settings)
 
     try {
       return await client.responses.create({
-        input,
-        model: options?.model ?? 'gpt-5-mini',
-        tools: [
-          { type: "web_search" }
-        ],
+        model,
+        reasoning: { effort },
         stream: true,
+        tools: [{ type: 'web_search' }],
+        input: [
+          { role: 'system', content: systemPrompt },
+          { role: 'developer', content: settings?.customPrompt ?? '' },
+          ...input.slice(-max_messages),
+        ],
       })
     } catch (err) {
       if (err instanceof APIError) {

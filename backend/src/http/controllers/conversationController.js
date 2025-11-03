@@ -35,7 +35,7 @@ export const conversationController = {
       chatId,
       userId: req.user.id,
       content,
-      options
+      options,
     })
     res.json(data)
   },
@@ -46,7 +46,7 @@ export const conversationController = {
     const assistantMessage = await conversationActions.regenerate({
       messageId,
       userId: req.userId,
-      options
+      options,
     })
     res.json({ assistantMessage })
   },

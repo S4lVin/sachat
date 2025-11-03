@@ -14,9 +14,9 @@ const InvalidMessageSender = () =>
 const activeGenerations = new Map()
 
 // Stream
-const streamResponse = async ({ apiKey, messages, messageId, session, options }) => {
+const streamResponse = async ({ apiKey, messages, messageId, session, options, settings }) => {
   try {
-    const stream = aiService.generateStream({ apiKey, messages, options })
+    const stream = aiService.generateStream({ apiKey, messages, options, settings })
     for await (const event of stream) {
       if (!activeGenerations.has(messageId)) break
       session.content += event.data.delta || ''
@@ -103,6 +103,7 @@ export const conversationActions = {
 
   createAssistantReply: async function ({ userMessage, userId, options }) {
     const apiKey = await userManager.getApiKey({ id: userId })
+    const settings = await userManager.getSettings({ id: userId })
     const messages = await messageManager.getMessageChain({ id: userMessage.id, userId })
 
     const assistantMessage = await messageManager.create({
@@ -117,10 +118,11 @@ export const conversationActions = {
     const session = { emitter, content: '', userId }
     activeGenerations.set(assistantMessage.id, session)
 
-    streamResponse({ apiKey, messages, messageId: assistantMessage.id, session, options })
-      .catch(async (err) => {
+    streamResponse({ apiKey, messages, messageId: assistantMessage.id, session, options, settings }).catch(
+      async (err) => {
         session.emitter.emit('event', 'error', { err })
-      })
+      },
+    )
     return assistantMessage
   },
 }

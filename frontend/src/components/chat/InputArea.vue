@@ -8,7 +8,7 @@ import ModelSelector from './ModelSelector.vue'
 
 const messageStore = useMessageStore()
 
-const { selectedMessagePath, activeGeneration, activeError } = storeToRefs(messageStore)
+const { selectedMessagePath, activeGeneration, activeError, options } = storeToRefs(messageStore)
 
 // State
 const input = ref('')
@@ -56,15 +56,27 @@ const handleAction = () => {
 
     <!-- Actions -->
     <div class="relative flex items-center justify-between">
-      <ModelSelector />
-
       <BaseButton
-        @click="handleAction"
-        :disabled="(!canSend && !isGenerating) || isError"
-        variant="primary"
-        :icon="buttonIcon"
-        :icon-size="24"
+        icon="cpu"
+        class="group relative p-2"
+        :class="
+          options.reasoning
+            ? 'bg-indigo-800/30 text-indigo-400 hover:bg-indigo-700/30'
+            : 'text-neutral-400 hover:bg-neutral-700'
+        "
+        @click="options.reasoning = !options.reasoning"
       />
+
+      <div class="relative flex items-center gap-2">
+        <ModelSelector />
+        <BaseButton
+          @click="handleAction"
+          :disabled="(!canSend && !isGenerating) || isError"
+          variant="primary"
+          :icon="buttonIcon"
+          :icon-size="24"
+        />
+      </div>
     </div>
   </div>
 </template>

@@ -146,7 +146,7 @@ onClickOutside(containerRef, save)
 
     <!-- Assistant Message -->
     <div v-else class="flex max-w-full min-w-0 flex-col">
-      <span class="mb-1 font-bold uppercase">{{ sender }}</span>
+      <span class="mb-1 font-bold uppercase">SAGPT</span>
       <feather-icons v-if="isLoading" :spin="true" name="loader" />
       <div
         class="prose prose-neutral prose-invert prose-headings:text-neutral-200 prose-p:text-neutral-200 prose-strong:text-neutral-200 prose-em:text-neutral-200 prose-a:text-neutral-200 prose-code:text-neutral-200 prose-pre:text-neutral-200 prose-blockquote:text-neutral-200 prose-ul:text-neutral-200 prose-ol:text-neutral-200 prose-li:text-neutral-200 prose-hr:text-neutral-200 prose-table:text-neutral-200 prose-th:text-neutral-200 prose-td:text-neutral-200 prose-del:text-neutral-200 prose-img:text-neutral-200 prose-img:max-w-full prose-a:break-all max-w-full min-w-0 break-words text-neutral-200"
