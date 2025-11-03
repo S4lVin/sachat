@@ -84,7 +84,7 @@ const toggleMenu = () => (showMenu.value = !showMenu.value)
       variant="ghost"
       icon="more-vertical"
       :icon-size="24"
-      display="hidden group-hover:inline-flex"
+      display="flex sm:hidden sm:group-hover:inline-flex"
     />
 
     <!-- Context Menu -->
