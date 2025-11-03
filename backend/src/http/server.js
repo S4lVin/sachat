@@ -16,6 +16,7 @@ import {
 import { NotFoundError } from '../errors.js'
 
 export const server = express()
+server.set('trust proxy', 1)
 
 // Middlewares
 server.use(rateLimiter)
