@@ -51,7 +51,7 @@ watch(
     <span class="text-neutral-200">{{ selectedModel.label }}</span>
   </BaseButton>
   <ContextMenu
-    class="absolute right-12 bottom-full mb-1 flex w-88 flex-col gap-1"
+    class="absolute right-12 bottom-full mb-1 min-w-64 flex flex-col gap-1"
     v-model="showModelSelector"
   >
     <div
@@ -62,7 +62,7 @@ watch(
       :key="i"
     >
       {{ model.label }}
-      <p class="-mt-2 text-left text-sm text-neutral-400">{{ model.description }}</p>
+      <p class="-mt-2 text-left text-sm sm:text-nowrap text-neutral-400">{{ model.description }}</p>
     </div>
   </ContextMenu>
 </template>
