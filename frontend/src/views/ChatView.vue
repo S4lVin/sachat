@@ -84,7 +84,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex w-screen text-neutral-200 h-[calc(var(--real-vh,1vh)*100)]">
+  <div class="flex w-screen text-neutral-200 h-[100dvh]">
     <!-- Sidebar -->
     <ChatSidebar />
 
