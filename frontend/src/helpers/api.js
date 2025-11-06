@@ -15,19 +15,21 @@ export class ApiError extends Error {
   }
 }
 
-const getHeaders = (accessToken, extraHeaders = {}) => ({
-  'Content-Type': 'application/json',
+const getHeaders = (accessToken, extraHeaders = {}, formData) => ({
+  ...(formData ? {} : { 'Content-Type': 'application/json' }),
   ...(extraHeaders || {}),
   ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
 })
 
 const buildFetchOptions = (accessToken, options = {}) => {
   const { method = 'GET', body, signal, headers } = options
+  const isFormData = body instanceof FormData
+
   return {
     method,
     signal,
-    headers: getHeaders(accessToken, headers),
-    body: body !== undefined ? JSON.stringify(body) : undefined,
+    headers: getHeaders(accessToken, headers, isFormData),
+    body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
   }
 }
 

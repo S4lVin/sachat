@@ -14,7 +14,7 @@ const { chats, chatById, currentChatId, skipNextLoad } = storeToRefs(chatStore)
 const { messages, activeMessages, activeGeneration, messagesByParent } = storeToRefs(messageStore)
 
 // Constants
-const BOTTOM_THRESHOLD = 80 // Quanto vicino al fondo consideriamo "in fondo" (in px)
+const BOTTOM_THRESHOLD = 100 // Quanto vicino al fondo consideriamo "in fondo" (in px)
 
 // State
 const scrollerRef = ref(null)

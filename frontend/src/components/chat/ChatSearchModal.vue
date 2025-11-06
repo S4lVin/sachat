@@ -26,7 +26,7 @@ const selectChat = (chatId) => {
 </script>
 
 <template>
-  <BaseModal @close="$emit('close')" class="flex h-96 w-160 flex-col">
+  <BaseModal @close="$emit('close')" class="flex h-96 w-160 flex-col border border-neutral-700">
     <!-- Header -->
     <div class="flex items-center justify-center p-2">
       <input v-model="input" placeholder="Cerca chat..." class="w-full p-2 focus:outline-none" />

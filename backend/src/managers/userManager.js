@@ -7,15 +7,15 @@ const isNotFoundError = (err) => err?.code === 'P2025'
 const isConflictError = (err) => err?.code === 'P2002'
 
 export const userManager = {
-  find: async ({ id }) => {
+  find: async ({ userId }) => {
     return await db.user.findUnique({
-      where: { id },
+      where: { id: userId },
     })
   },
 
-  findSafe: async ({ id }) => {
+  findSafe: async ({ userId }) => {
     const user = await db.user.findUnique({
-      where: { id },
+      where: { id: userId },
     })
     if (!user) return null
 
@@ -23,9 +23,9 @@ export const userManager = {
     return safeUser
   },
 
-  getApiKey: async ({ id }) => {
+  getApiKey: async ({ userId }) => {
     const user = await db.user.findUnique({
-      where: { id },
+      where: { id: userId },
       select: { settings: true, role: true },
     })
     if (!user) return null
@@ -37,9 +37,9 @@ export const userManager = {
     return user.settings.apiKey
   },
 
-  getSettings: async ({ id }) => {
+  getSettings: async ({ userId }) => {
     const user = await db.user.findUnique({
-      where: { id },
+      where: { id: userId },
       select: { settings: true },
     })
     if (!user) return null
@@ -64,10 +64,10 @@ export const userManager = {
     }
   },
 
-  update: async ({ id, name, role, settings, refreshToken }) => {
+  update: async ({ userId, name, role, settings, refreshToken }) => {
     try {
       return await db.user.update({
-        where: { id },
+        where: { id: userId },
         data: { name, role, settings, refreshToken },
       })
     } catch (err) {
@@ -76,9 +76,9 @@ export const userManager = {
     }
   },
 
-  delete: async ({ id }) => {
+  delete: async ({ userId }) => {
     try {
-      await db.user.delete({ where: { id } })
+      await db.user.delete({ where: { id: userId } })
     } catch (err) {
       if (isNotFoundError(err)) throw UserNotFound()
       throw err

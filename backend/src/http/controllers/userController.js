@@ -3,7 +3,7 @@ import { userManager } from '../../managers/index.js'
 export const userController = {
   get: async (req, res) => {
     const user = await userManager.findSafe({
-      id: req.userId,
+      userId: req.userId,
     })
     res.json({ user })
   },
@@ -12,7 +12,7 @@ export const userController = {
     const { name, settings } = req.body
 
     const user = await userManager.update({
-      id: req.userId,
+      userId: req.userId,
       name,
       settings,
     })
@@ -21,7 +21,7 @@ export const userController = {
 
   delete: async (req, res) => {
     await userManager.delete({
-      id: req.userId,
+      userId: req.userId,
     })
     res.status(204).end()
   },

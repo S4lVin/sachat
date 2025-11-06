@@ -27,7 +27,7 @@ export const authActions = {
 
   async refresh({ refreshToken }) {
     const payload = jwtService.verifyRefreshToken(refreshToken)
-    const user = await userManager.find({ id: payload.userId })
+    const user = await userManager.find({ userId: payload.userId })
     if (!user) throw InvalidRefreshToken()
 
     const validRefreshToken = await hashService.verify(refreshToken, user.refreshToken)
@@ -37,7 +37,7 @@ export const authActions = {
   },
 
   async logout({ userId }) {
-    await userManager.update({ id: userId, refreshToken: null })
+    await userManager.update({ userId, refreshToken: null })
   },
 
   async issueAuthTokens(user) {
@@ -46,7 +46,7 @@ export const authActions = {
     const refreshToken = jwtService.signRefreshToken(payload)
 
     const hashedRefreshToken = await hashService.hash(refreshToken)
-    await userManager.update({ id: user.id, refreshToken: hashedRefreshToken })
+    await userManager.update({ userId: user.id, refreshToken: hashedRefreshToken })
     return { accessToken, refreshToken }
   },
 }

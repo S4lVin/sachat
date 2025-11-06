@@ -29,7 +29,7 @@ onClickOutside(sidebar, () => {
     class="absolute top-2 left-2 z-10 sm:hidden"
     @click="collapsed = !collapsed"
     icon="chevron-right"
-    icon-size="24"
+    :icon-size="24"
   />
   <aside
     class="absolute z-10 flex h-full flex-col border-r border-neutral-700 bg-neutral-800 shadow-lg/25 sm:relative sm:z-5"

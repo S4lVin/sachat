@@ -13,7 +13,7 @@ export const chatController = {
     const { title } = req.body
 
     const chat = await chatManager.update({
-      id: Number(chatId),
+      chatId: Number(chatId),
       userId: req.userId,
       title,
     })
@@ -24,7 +24,7 @@ export const chatController = {
     const { chatId } = req.params
 
     await chatManager.delete({
-      id: Number(chatId),
+      chatId: Number(chatId),
       userId: req.userId,
     })
     res.status(204).end()

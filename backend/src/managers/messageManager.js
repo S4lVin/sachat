@@ -14,17 +14,17 @@ export const messageManager = {
     })
   },
 
-  find: async ({ id, userId }) => {
+  find: async ({ messageId, userId }) => {
     return await db.message.findUnique({
-      where: { id, chat: { userId } },
+      where: { id: messageId, chat: { userId } },
     })
   },
 
   // TODO: IMPROVE EFFICIENCY (currently N queries)
-  getMessageChain: async ({ id, userId }) => {
+  getMessageChain: async ({ messageId, userId }) => {
     const messageChain = []
     let message = await db.message.findUnique({
-      where: { id, chat: { userId } },
+      where: { id: messageId, chat: { userId } },
     })
 
     while (message) {
@@ -38,9 +38,9 @@ export const messageManager = {
     return messageChain
   },
 
-  update: async ({ id, status, content }) => {
+  update: async ({ messageId, status, content }) => {
     await db.message.update({
-      where: { id },
+      where: { id: messageId },
       data: { status, content },
     })
   },
@@ -56,9 +56,9 @@ export const messageManager = {
     }
   },
 
-  delete: async ({ id }) => {
+  delete: async ({ messageId }) => {
     await db.message.delete({
-      where: { id },
+      where: { id: messageId },
     })
   },
 }

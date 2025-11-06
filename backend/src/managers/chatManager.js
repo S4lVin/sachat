@@ -13,16 +13,16 @@ export const chatManager = {
     })
   },
 
-  find: async ({ id, userId }) => {
+  find: async ({ chatId, userId }) => {
     return await db.chat.findUnique({
-      where: { id, userId },
+      where: { id: chatId, userId },
     })
   },
 
-  findOrCreate: async ({ id, userId }) => {
-    if (id) {
+  findOrCreate: async ({ chatId, userId }) => {
+    if (chatId) {
       const chat = await db.chat.findUnique({
-        where: { id, userId },
+        where: { id: chatId, userId },
       })
       if (chat) return { chat, created: false }
     }
@@ -36,10 +36,10 @@ export const chatManager = {
     return { chat, created: true }
   },
 
-  update: async ({ id, userId, title }) => {
+  update: async ({ chatId, userId, title }) => {
     try {
       return await db.chat.update({
-        where: { id, userId },
+        where: { id: chatId, userId },
         data: { title },
       })
     } catch (err) {
@@ -48,10 +48,10 @@ export const chatManager = {
     }
   },
 
-  delete: async ({ id, userId }) => {
+  delete: async ({ chatId, userId }) => {
     try {
       await db.chat.delete({
-        where: { id, userId },
+        where: { id: chatId, userId },
       })
     } catch (err) {
       if (isNotFoundError(err)) throw ChatNotFound()

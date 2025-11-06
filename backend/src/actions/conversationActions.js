@@ -24,13 +24,13 @@ const streamResponse = async ({ apiKey, messages, messageId, session, options, s
     }
 
     await messageManager.update({
-      id: messageId,
+      messageId,
       content: session.content,
       status: 'success',
     })
   } catch (err) {
     await messageManager.update({
-      id: messageId,
+      messageId,
       content: err.message,
       status: 'failed',
     })
@@ -61,11 +61,11 @@ export const conversationActions = {
   },
 
   send: async function ({ parentId, chatId, userId, content, options }) {
-    const { chat, created } = await chatManager.findOrCreate({ id: chatId, userId })
+    const { chat, created } = await chatManager.findOrCreate({ chatId, userId })
 
     let parentMessage
     if (parentId) {
-      parentMessage = await messageManager.find({ id: parentId, userId })
+      parentMessage = await messageManager.find({ messageId: parentId, userId })
       if (parentMessage && parentMessage.sender !== 'assistant') throw InvalidMessageSender()
     }
 
@@ -82,29 +82,29 @@ export const conversationActions = {
   },
 
   regenerate: async function ({ messageId, userId, options }) {
-    const assistantMessage = await messageManager.find({ id: messageId, userId })
+    const assistantMessage = await messageManager.find({ messageId, userId })
     if (!assistantMessage) throw MessageNotFound()
     if (assistantMessage.sender !== 'assistant') throw InvalidMessageSender()
 
     if (assistantMessage.status === 'failed') {
-      await messageManager.delete({ id: messageId })
+      await messageManager.delete({ messageId })
     }
 
-    const userMessage = await messageManager.find({ id: assistantMessage.parentId, userId })
+    const userMessage = await messageManager.find({ messageId: assistantMessage.parentId, userId })
     return await this.createAssistantReply({ userMessage, userId, options })
   },
 
   cancel: async function ({ messageId, userId }) {
-    const message = await messageManager.find({ id: messageId, userId })
+    const message = await messageManager.find({ messageId, userId })
     if (!message) throw MessageNotFound()
 
     activeGenerations.delete(messageId)
   },
 
   createAssistantReply: async function ({ userMessage, userId, options }) {
-    const apiKey = await userManager.getApiKey({ id: userId })
-    const settings = await userManager.getSettings({ id: userId })
-    const messages = await messageManager.getMessageChain({ id: userMessage.id, userId })
+    const apiKey = await userManager.getApiKey({ userId })
+    const settings = await userManager.getSettings({ userId })
+    const messages = await messageManager.getMessageChain({ messageId: userMessage.id, userId })
 
     const assistantMessage = await messageManager.create({
       parentId: userMessage.id,
