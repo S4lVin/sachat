@@ -41,7 +41,7 @@ export const aiService = {
   initializeResponse: async function ({ apiKey, input, options, settings }) {
     const { default_reasoning, default_model, system_prompt, max_messages } = this.config
     const client = new OpenAI({ apiKey: apiKey ?? '' })
-    const effort = options?.reasoning || default_reasoning
+    const effort = options?.reasoning ? 'high' : default_reasoning
     const model = options?.model ?? default_model
     const systemPrompt = system_prompt
 
